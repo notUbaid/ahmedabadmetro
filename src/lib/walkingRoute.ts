@@ -57,12 +57,8 @@ export const fetchWalkingRoute = async (
     let orsUrl: string;
     
     if (apiKey) {
-      // Send API key to proxy, proxy will use it if available
-      console.log('Using API proxy with client API key');
       orsUrl = `/api/walking-route?startLng=${userLng}&startLat=${userLat}&endLng=${station.coordinates[1]}&endLat=${station.coordinates[0]}&apiKey=${encodeURIComponent(apiKey)}`;
     } else {
-      // No client API key, rely on server-side key
-      console.log('Using API proxy with server-side API key');
       orsUrl = `/api/walking-route?startLng=${userLng}&startLat=${userLat}&endLng=${station.coordinates[1]}&endLat=${station.coordinates[0]}`;
     }
     
@@ -95,12 +91,6 @@ export const fetchWalkingRoute = async (
       }
     });
     
-    console.log('Walking route fetched successfully:', {
-      distance: summary.distance,
-      duration: summary.duration,
-      points: simplifiedCoords.length
-    });
-    
     return {
       station,
       distance: summary.distance, // meters
@@ -119,22 +109,12 @@ export const findNearestByWalking = async (
 ): Promise<WalkingRoute | null> => {
   const closestStations = findClosestStations(lat, lng, 3);
   
-  console.log('Finding nearest station by walking from:', { lat, lng });
-  console.log('Closest stations by distance:', closestStations.map(s => ({ id: s.id, name: s.name })));
-  
   try {
     const routePromises = closestStations.map(station => 
       fetchWalkingRoute(lat, lng, station)
     );
     
     const routes = await Promise.all(routePromises);
-    console.log('Walking routes fetched:', routes.map(r => r ? { 
-      station: r.station.name, 
-      distance: r.distance, 
-      duration: r.duration,
-      geometryPoints: r.geometry.length 
-    } : null));
-    
     const validRoutes = routes.filter((r): r is WalkingRoute => r !== null);
     
     if (validRoutes.length === 0) {
@@ -145,12 +125,6 @@ export const findNearestByWalking = async (
     
     // Sort by walking duration and return the shortest
     validRoutes.sort((a, b) => a.duration - b.duration);
-    console.log('Selected best route:', { 
-      station: validRoutes[0].station.name, 
-      distance: validRoutes[0].distance,
-      duration: validRoutes[0].duration,
-      geometryPoints: validRoutes[0].geometry.length
-    });
     return validRoutes[0];
   } catch (error) {
     console.error('Walking route API failed, using fallback:', error);

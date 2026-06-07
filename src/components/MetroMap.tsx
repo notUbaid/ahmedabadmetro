@@ -110,26 +110,24 @@ export const MetroMap = () => {
     }
 
     if (sharedOrig && sharedDest && depMinsStr) {
-      const depMins = parseInt(depMinsStr);
-      import('@/lib/routePlanner').then(({ planRouteWithDeparture }) => {
-        const route = planRouteWithDeparture(sharedOrig, sharedDest, depMins);
-        if (route) {
-          const segments = route.steps
-            .filter(s => !!s.trainId)
-            .map(s => ({
-              trainId: s.trainId!,
-              stations: s.allStations || []
-            }));
+      const depMins = parseInt(depMinsStr, 10);
+      const route = planRouteWithDeparture(sharedOrig, sharedDest, depMins);
+      if (route) {
+        const segments = route.steps
+          .filter(s => !!s.trainId)
+          .map(s => ({
+            trainId: s.trainId!,
+            stations: s.allStations || []
+          }));
 
-          setFriendsJourneyData({
-            origin: sharedOrig,
-            dest: sharedDest,
-            depMins,
-            segments
-          });
-          setIsFriendsViewerOpen(true);
-        }
-      });
+        setFriendsJourneyData({
+          origin: sharedOrig,
+          dest: sharedDest,
+          depMins,
+          segments
+        });
+        setIsFriendsViewerOpen(true);
+      }
     }
 
     if (joinTrainId || (sharedOrig && sharedDest && depMinsStr)) {
@@ -1134,7 +1132,7 @@ export const MetroMap = () => {
           }
         },
         (error) => {
-          console.log('Geolocation error:', error);
+          console.error('Geolocation error:', error);
           // Fit to all stations if location denied
           const allCoords = Object.values(stations).map(s => s.coordinates);
           if (allCoords.length > 0) {

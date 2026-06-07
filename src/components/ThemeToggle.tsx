@@ -7,11 +7,20 @@ export const ThemeToggle = () => {
   useEffect(() => {
     const root = document.documentElement;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const stored = localStorage.getItem('theme');
-    
+    let stored: string | null = null;
+
+    try {
+      stored = localStorage.getItem('theme');
+    } catch {
+      stored = null;
+    }
+
     if (stored === 'dark' || (!stored && prefersDark)) {
       root.classList.add('dark');
       setIsDark(true);
+    } else {
+      root.classList.remove('dark');
+      setIsDark(false);
     }
   }, []);
 
@@ -21,10 +30,18 @@ export const ThemeToggle = () => {
     
     if (newIsDark) {
       root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      try {
+        localStorage.setItem('theme', 'dark');
+      } catch {
+        // Ignore storage failures.
+      }
     } else {
       root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      try {
+        localStorage.setItem('theme', 'light');
+      } catch {
+        // Ignore storage failures.
+      }
     }
     
     setIsDark(newIsDark);

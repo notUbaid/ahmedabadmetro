@@ -7,11 +7,11 @@ export const OfflineIndicator = () => {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
+    let offlineTimeout: number | undefined;
     const handleOnline = () => {
       setIsOnline(true);
-      // Show "back online" briefly
       setShowBanner(true);
-      setTimeout(() => setShowBanner(false), 3000);
+      offlineTimeout = window.setTimeout(() => setShowBanner(false), 3000);
     };
     
     const handleOffline = () => {
@@ -22,7 +22,6 @@ export const OfflineIndicator = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Show initially if offline
     if (!navigator.onLine) {
       setShowBanner(true);
     }
@@ -30,6 +29,9 @@ export const OfflineIndicator = () => {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      if (offlineTimeout !== undefined) {
+        window.clearTimeout(offlineTimeout);
+      }
     };
   }, []);
 

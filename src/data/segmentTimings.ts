@@ -261,20 +261,4 @@ export const REVERSE_CORRIDOR_TIMINGS = {
   })(),
 };
 
-// Debug helper
-export const debugPrintTiming = (name: string, timing: LineTimingData) => {
-  console.log(`\n=== ${name} ===`);
-  timing.stations.forEach((station, i) => {
-    console.log(`${station}: +${timing.arrivalMinutes[i]} min`);
-  });
-};
 
-// Verify against official timetable
-export const verifyTimings = () => {
-  console.log('=== VERIFICATION ===');
-  console.log('Blue (Line 1): Thaltej → Vastral:', LINE_TIMINGS.blue.arrivalMinutes[17], 'min (expected: 45)');
-  console.log('Red (Line 2): APMC → OHC:', LINE_TIMINGS.red.arrivalMinutes[LINE_TIMINGS.red.stations.indexOf('old_high_court')], 'min (expected: 14)');
-  console.log('Red (Line 2): APMC → Motera:', LINE_TIMINGS.red.arrivalMinutes[LINE_TIMINGS.red.stations.indexOf('motera_stadium')], 'min (expected: 32)');
-  console.log('Corridor: APMC → GNLU:', CORRIDOR_TIMINGS.apmcToGnlu.arrivalMinutes[CORRIDOR_TIMINGS.apmcToGnlu.stations.indexOf('gnlu')], 'min (expected: 53)');
-  console.log('Corridor: APMC → GIFT:', CORRIDOR_TIMINGS.apmcToGift.arrivalMinutes[CORRIDOR_TIMINGS.apmcToGift.stations.indexOf('gift_city')], 'min (expected: 61)');
-};

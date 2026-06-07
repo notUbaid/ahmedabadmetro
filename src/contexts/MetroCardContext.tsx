@@ -8,14 +8,27 @@ interface MetroCardContextType {
 
 const MetroCardContext = createContext<MetroCardContextType | undefined>(undefined);
 
+const readMetroCardFromStorage = (): boolean => {
+  try {
+    return localStorage.getItem('hasMetroCard') === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const writeMetroCardToStorage = (value: boolean): void => {
+  try {
+    localStorage.setItem('hasMetroCard', value.toString());
+  } catch {
+    // Ignore storage failures in restricted browsers.
+  }
+};
+
 export const MetroCardProvider = ({ children }: { children: ReactNode }) => {
-  const [hasMetroCard, setHasMetroCard] = useState(() => {
-    const stored = localStorage.getItem('hasMetroCard');
-    return stored === 'true';
-  });
+  const [hasMetroCard, setHasMetroCard] = useState(() => readMetroCardFromStorage());
 
   useEffect(() => {
-    localStorage.setItem('hasMetroCard', hasMetroCard.toString());
+    writeMetroCardToStorage(hasMetroCard);
   }, [hasMetroCard]);
 
   const getDiscountedFare = (fare: number): number => {
