@@ -681,7 +681,7 @@ const buildTimeAwareRoute = (
 const buildBusRoute = (
   originId: string,
   destId: string,
-  gnluArrivalMinutes: number
+  startTimeMinutes: number
 ): PlannedRoute | null => {
   const origin = stations[originId];
   const destination = stations[destId];
@@ -693,11 +693,11 @@ const buildBusRoute = (
   const pathToGnlu = findShortestPath(originId, 'gnlu');
   if (!pathToGnlu) return null;
 
-  const routeToGnlu = buildTimeAwareRoute(pathToGnlu, gnluArrivalMinutes);
+  const routeToGnlu = buildTimeAwareRoute(pathToGnlu, startTimeMinutes);
   if (!routeToGnlu) return null;
 
   // Calculate arrival at GNLU - use the route's arrival time
-  const arrivalAtGnlu = routeToGnlu.arrivalMinutes ?? gnluArrivalMinutes;
+  const arrivalAtGnlu = routeToGnlu.arrivalMinutes ?? startTimeMinutes;
 
   // Determine bus time
   const busTime = destId === 'pdpu' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
@@ -821,7 +821,15 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   const currentMinutes = getCurrentTimeMinutes();
   const departures = getAvailableDepartures(originId, destinationId);
 
-  if (departures.length === 0) return null;
+  const isPurpleDestination = destinationId === 'pdpu' || destinationId === 'gift_city';
+
+  if (departures.length === 0) {
+    if (isPurpleDestination && originId !== 'gnlu') {
+      const busRoute = buildBusRoute(originId, destinationId, currentMinutes);
+      if (busRoute) return busRoute;
+    }
+    return null;
+  }
 
   // We allow a small 2-minute "sprint" grace if a train is leaving right now
   const GRACE_PERIOD = 2;
@@ -854,7 +862,6 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   if (!route) return null;
 
   // Special handling for PDPU and GIFT City: suggest bus even if a direct train exists but is infrequent
-  const isPurpleDestination = destinationId === 'pdpu' || destinationId === 'gift_city';
   if (isPurpleDestination && originId !== 'gnlu') {
     // Check wait time at GNLU (even if direct, metro to PDPU/GIFT is often just a feeder)
     const gnluStepIdx = route.steps.findIndex(s => s.station.id === 'gnlu');
@@ -862,7 +869,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
       const gnluStep = route.steps[gnluStepIdx];
       // If the train arrives late or has a long wait/transfer feel, suggest bus
       // The user specifically asked for bus choice for PDPU.
-      const busRoute = buildBusRoute(originId, destinationId, route.arrivalMinutes ?? 0);
+      const busRoute = buildBusRoute(originId, destinationId, currentMinutes);
 
       // Suggest bus if metro arrival is more than 5 mins later than bus arrival OR if it's the specific PDPU request
       // We increased the buffer to 10 mins to prioritize the bus feeder as requested.
