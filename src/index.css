@@ -190,3 +190,27 @@ All colors MUST be HSL.
 .station-marker-rect.underground {
   border-style: dashed;
 }
+
+/* Mobile Safe Areas & Optimization */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-p-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  .safe-m-bottom {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-p-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+}
+
+/* Prevent pull-to-refresh and rubber-banding on the main app wrapper */
+body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure bottom sheets don't have visual glitches on iOS */
+.bottom-sheet-container {
+  padding-bottom: env(safe-area-inset-bottom);
+}

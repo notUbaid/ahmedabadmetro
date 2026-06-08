@@ -70,7 +70,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
 
     return (
         <div className={cn(
-            "fixed inset-x-0 bottom-0 bg-background/95 backdrop-blur-md border-t border-border shadow-2xl transition-all duration-300 transform rounded-t-3xl overflow-hidden z-[1005]",
+            "fixed inset-x-0 bottom-0 bg-background/95 backdrop-blur-md border-t border-border shadow-2xl transition-all duration-300 transform rounded-t-3xl overflow-hidden z-[1005] safe-p-bottom",
             isOpen ? "translate-y-0" : "translate-y-full"
         )}>
             {/* Header */}

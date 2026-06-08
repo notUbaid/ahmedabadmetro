@@ -177,9 +177,9 @@ export const LiveTrainTrackingDialog = ({
   const destStation = stations[schedule.stations[schedule.stations.length - 1]];
 
   return (
-    <div className="fixed inset-0 z-[2100] flex items-end md:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[2100] flex items-end md:items-center justify-center md:p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="bg-background rounded-2xl shadow-2xl border border-border w-full md:max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:zoom-in-95 duration-200"
+        className="bg-background rounded-t-2xl md:rounded-2xl shadow-2xl border border-border w-full md:max-w-2xl h-[95vh] md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:zoom-in-95 duration-200 safe-p-bottom"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

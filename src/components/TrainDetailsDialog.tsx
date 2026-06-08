@@ -69,9 +69,9 @@ export const TrainDetailsDialog = ({
   const hasStarted = trainCurrentTime >= 0;
 
   return (
-    <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
+    <div className="fixed inset-0 z-[2100] flex items-end sm:items-center justify-center sm:p-4 bg-black/40 backdrop-blur-sm overflow-hidden" onClick={onClose}>
       <div 
-        className="bg-background rounded-2xl shadow-2xl border border-border max-w-2xl w-full my-4 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl border border-border max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 sm:zoom-in-95 duration-200 safe-p-bottom"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -97,7 +97,7 @@ export const TrainDetailsDialog = ({
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {/* Current Time Display */}
           <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
             <div className="flex items-center justify-between">
