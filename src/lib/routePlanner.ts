@@ -107,13 +107,21 @@ const calculateFare = (originId: string, destId: string, stationCount: number): 
   // Fallback distance-based fare for other lines (Green, Purple) or multi-line journeys
   // Derived from user requirements and Blue/Red dynamics: 
   // 0-2 stations: 5, 3-7: 10, 8-10: 15, 11-14: 20, 15-22: 25, 23-26: 30, 27-30: 35, 31+: 40
-  if (stationCount <= 2) return 5;
-  if (stationCount <= 7) return 10;
+  // 0-3 stops: 5
+  if (stationCount <= 3) return 5;
+  // 4-6 stops: 10
+  if (stationCount <= 6) return 10;
+  // 7-10 stops: 15
   if (stationCount <= 10) return 15;
-  if (stationCount <= 14) return 20;
-  if (stationCount <= 22) return 25;
-  if (stationCount <= 26) return 30;
+  // 11-15 stops: 20
+  if (stationCount <= 15) return 20;
+  // 16-20 stops: 25
+  if (stationCount <= 20) return 25;
+  // 21-25 stops: 30
+  if (stationCount <= 25) return 30;
+  // 26-30 stops: 35
   if (stationCount <= 30) return 35;
+  // 31 or more stops: 40
   return 40;
 };
 
@@ -1593,7 +1601,7 @@ export const findCommonTrainRoute = (
         const schedStart = parseTimeToMinutes(currentSchedule.startTime);
         const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
         
-        if (legFromIdx >= 0 && legToIdx > legFromIdx) {
+        if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
           legs.push({
             schedule: currentSchedule,
             fromId: legFromId,
