@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock } from 'lucide-react';
+import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
@@ -497,6 +497,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
             }}
             onFocus={handleFocus}
             placeholder="Search stations, places, landmarks..."
+            enterKeyHint="search"
             className="flex-1 px-3 py-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {isLoading && <Loader2 className="w-4 h-4 text-muted-foreground mr-2 animate-spin" />}
@@ -533,7 +534,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         )}
 
         {/* Results dropdown */}
-        {showResults && results.length > 0 && (
+        {showResults && (results.length > 0 || isLoading) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden max-h-80 overflow-y-auto">
             {results.map((result) => (
               <button
@@ -560,12 +561,34 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
                 </div>
               </button>
             ))}
+
+            {/* Skeleton Loading State */}
+            {isLoading && (
+              <div className="p-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-start gap-3 px-2 py-3 border-b border-border/50 last:border-0">
+                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                    <div className="flex-1 space-y-2 py-1">
+                      <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
+        {/* Empty State */}
         {showResults && query.length >= 2 && results.length === 0 && !isLoading && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border p-4 text-center">
-            <p className="text-sm text-muted-foreground">No results found</p>
+          <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border p-8 text-center flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <SearchX className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">No places found</p>
+              <p className="text-xs text-muted-foreground mt-1">Try searching for a different landmark or area.</p>
+            </div>
           </div>
         )}
       </div>
