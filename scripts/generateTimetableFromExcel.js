@@ -77,7 +77,8 @@ function mapStationNameToId(stationName) {
 
   const id = stationNameToId.get(key);
   if (!id) {
-    throw new Error(`Unknown station name in Excel: "${stationName}" (normalized: "${key}")`);
+    console.warn(`Unknown station name in Excel: "${stationName}" (normalized: "${key}")`);
+    return null;
   }
   return id;
 }
@@ -106,7 +107,12 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
     const stationOrder = Number(r.Station_Order);
     const stationName = r.Station_Name;
     const arrival = normalizeTimeToHHMM(r.Arrival_Time);
-    const departure = normalizeTimeToHHMM(r.Departure_Time);
+    let departure = normalizeTimeToHHMM(r.Departure_Time);
+    
+    // Terminal stations often have 'TERMINUS' or missing departure time.
+    if (!departure && r.Departure_Time === 'TERMINUS') {
+      departure = arrival;
+    }
 
     if (!stationName || !arrival || !departure || !Number.isFinite(stationOrder)) {
       // Some rows may be blank headers - skip.
