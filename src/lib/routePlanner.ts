@@ -1006,27 +1006,29 @@ export const getAvailableDepartures = (originId: string, destId: string): {
     });
   }
 
-  // Ensure strictly sorted by departure time
-  results.sort((a, b) => a.departureMinutes - b.departureMinutes);
+  // Sort by departure time DESCENDING (latest first) to apply backwards domination filter
+  results.sort((a, b) => b.departureMinutes - a.departureMinutes);
 
-  // Deduplicate by departureMinutes (if multiple ways exist for same minute, keep the one with earliest arrival; tie-breaker: fewer interchanges)
-  const deduped = new Map<number, typeof results[number]>();
+  const pruned: typeof results = [];
+  let bestArrival = Infinity;
+
   for (const r of results) {
-    const existing = deduped.get(r.departureMinutes);
-    if (!existing) {
-      deduped.set(r.departureMinutes, r);
-      continue;
-    }
-    if (r.arrivalMinutes < existing.arrivalMinutes) {
-      deduped.set(r.departureMinutes, r);
-      continue;
-    }
-    if (r.arrivalMinutes === existing.arrivalMinutes && r.interchangeCount < existing.interchangeCount) {
-      deduped.set(r.departureMinutes, r);
+    if (r.arrivalMinutes < bestArrival) {
+      pruned.push(r);
+      bestArrival = r.arrivalMinutes;
+    } else if (r.arrivalMinutes === bestArrival && r.interchangeCount < pruned[pruned.length - 1].interchangeCount) {
+      // If it arrives at the exact same time but has FEWER interchanges, we might prefer it,
+      // but usually an earlier departure with fewer interchanges means it's a slower direct train.
+      // However, typically a later departure is strictly better. So we discard earlier departures
+      // unless we want to offer the user a slower direct train instead of a faster interchange train.
+      // For now, if you leave earlier and arrive at the same time, it's dominated.
+      // We strictly discard it.
     }
   }
 
-  return Array.from(deduped.values()).sort((a, b) => a.departureMinutes - b.departureMinutes);
+  // Reverse back to chronological order (earliest first)
+  pruned.reverse();
+  return pruned;
 };
 
 type PrevEdge = {

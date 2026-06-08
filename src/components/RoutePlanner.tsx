@@ -843,101 +843,41 @@ export const RoutePlanner = ({
                 </div>
               </div>
 
-              {/* Departure and arrival time dropdowns */}
+              {/* Available Departures (Modern Chips) */}
               {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && !internalIsCoordinating && (
-                <div className="flex items-center gap-3 mb-3 text-sm flex-wrap">
-                  {/* Depart dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setShowDepartDropdown(!showDepartDropdown);
-                        setShowArriveDropdown(false);
-                      }}
-                      className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <span className="text-muted-foreground">Depart:</span>
-                      <span className="font-bold text-primary">{route.departureTime}</span>
-                      <ChevronDown className="w-3 h-3 text-primary" />
-                    </button>
-                    {showDepartDropdown && (
-                      <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50 min-w-[200px]">
-                        {uniqueDepartureTimes.map((dep) => (
-                          <button
-                            key={dep.departureTime}
-                            onClick={() => handleSelectDeparture(dep.departureTime)}
-                            className={cn(
-                              "w-full px-3 py-2.5 text-left text-sm hover:bg-muted transition-colors flex flex-col gap-0.5",
-                              route.departureTime === dep.departureTime && "bg-primary/10"
-                            )}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-bold text-base">{dep.departureTime}</span>
-                              <span className="text-xs text-muted-foreground font-medium">
-                                → {dep.arrivalTime}
-                              </span>
-                            </div>
-                            <div className={cn(
-                              "text-[10px] uppercase font-bold tracking-wider",
-                              dep.interchangeCount === 0
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-amber-600 dark:text-amber-400"
-                            )}>
-                              {dep.interchangeCount === 0
-                                ? "✨ Direct"
-                                : `🔄 ${dep.interchangeCount} Interchange${dep.interchangeCount > 1 ? 's' : ''}`}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-
-                  {/* Arrive dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setShowArriveDropdown(!showArriveDropdown);
-                        setShowDepartDropdown(false);
-                      }}
-                      className="flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <span className="text-muted-foreground">Arrive:</span>
-                      <span className="font-bold text-green-700 dark:text-green-400">{route.arrivalTime}</span>
-                      <ChevronDown className="w-3 h-3 text-green-700 dark:text-green-400" />
-                    </button>
-                    {showArriveDropdown && (
-                      <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50 min-w-[200px]">
-                        {uniqueArrivalTimes.map((dep) => (
-                          <button
-                            key={dep.arrivalTime}
-                            onClick={() => handleSelectArrival(dep.arrivalTime)}
-                            className={cn(
-                              "w-full px-3 py-2.5 text-left text-sm hover:bg-muted transition-colors flex flex-col gap-0.5",
-                              route.arrivalTime === dep.arrivalTime && "bg-green-100 dark:bg-green-900/30"
-                            )}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-bold text-base text-green-700 dark:text-green-400">{dep.arrivalTime}</span>
-                              <span className="text-xs text-muted-foreground font-medium">
-                                ← {dep.departureTime}
-                              </span>
-                            </div>
-                            <div className={cn(
-                              "text-[10px] uppercase font-bold tracking-wider",
-                              dep.interchangeCount === 0
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-amber-600 dark:text-amber-400"
-                            )}>
-                              {dep.interchangeCount === 0
-                                ? "✨ Direct"
-                                : `🔄 ${dep.interchangeCount} Interchange${dep.interchangeCount > 1 ? 's' : ''}`}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Available Trains</p>
+                  <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+                    {uniqueDepartureTimes.map((dep, idx) => {
+                      const isSelected = route.departureTime === dep.departureTime;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleSelectDeparture(dep.departureTime)}
+                          className={cn(
+                            "flex-shrink-0 flex flex-col items-center justify-center min-w-[90px] p-2.5 rounded-2xl border transition-all",
+                            isSelected 
+                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-[1.02]" 
+                              : "bg-background border-border hover:border-primary/50 hover:bg-muted/50"
+                          )}
+                        >
+                          <span className="font-black text-lg leading-none mb-1">{dep.departureTime}</span>
+                          <span className={cn("text-[9px] uppercase tracking-wider font-bold mb-1.5", isSelected ? "text-primary-foreground/90" : "text-muted-foreground")}>
+                            Arr {dep.arrivalTime}
+                          </span>
+                          <div className={cn(
+                            "text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full", 
+                            isSelected 
+                              ? "bg-primary-foreground/20 text-primary-foreground" 
+                              : dep.interchangeCount === 0 
+                                ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
+                                : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                          )}>
+                            {dep.interchangeCount === 0 ? "Direct" : `${dep.interchangeCount} Change`}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
