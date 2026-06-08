@@ -399,7 +399,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   };
 
   return (
-    <div ref={containerRef} className="fixed top-4 left-4 right-4 z-[1001] max-w-md mx-auto pointer-events-none">
+    <div ref={containerRef} className="fixed top-4 left-4 right-4 z-[1001] max-w-md mx-auto pointer-events-none safe-m-top">
       <div className="relative pointer-events-auto">
         <div className="flex items-center bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
           <Search className="w-5 h-5 text-muted-foreground ml-3 flex-shrink-0" />

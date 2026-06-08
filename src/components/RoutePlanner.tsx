@@ -509,7 +509,7 @@ export const RoutePlanner = ({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md max-h-[90vh] bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative w-full max-w-md max-h-[90vh] bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col safe-p-bottom">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -523,6 +523,19 @@ export const RoutePlanner = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Late Night Alert */}
+        {new Date().getHours() >= 22 || new Date().getHours() < 6 ? (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-start gap-3">
+            <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Outside Operating Hours</p>
+              <p className="text-xs text-amber-600/90 dark:text-amber-500/90 mt-0.5">
+                Metro trains operate between 6:20 AM and 10:00 PM. Routes shown now are estimated for tomorrow morning.
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Coordination Status */}
         {internalIsCoordinating && (
@@ -919,6 +932,37 @@ export const RoutePlanner = ({
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-primary" />
                   <span className="font-semibold">{route.totalTime} min</span>
+                </div>
+
+                {route.routeConfidence && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        'text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider',
+                        route.routeConfidence === 'timetable'
+                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                          : route.routeConfidence === 'mixed'
+                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                            : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
+                      )}
+                    >
+                      {route.routeConfidence === 'timetable'
+                        ? 'Official Timetable'
+                        : route.routeConfidence === 'mixed'
+                          ? 'Timetable + Estimates'
+                          : 'Estimates'
+                      }
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-xs text-muted-foreground w-full bg-muted/50 p-2 rounded border border-border mt-1">
+                  <p className="font-medium text-foreground mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Note: Planning & visuals are approximate</p>
+                  {route.routeConfidence === 'timetable'
+                    ? 'Times shown are computed from the official timetable, but real-world delays may occur.'
+                    : route.routeConfidence === 'mixed'
+                      ? 'Part of this route uses official timetable data; the rest uses standard travel estimates.'
+                      : 'This route uses standard travel estimates. Real-world times may vary.'}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Train className="w-4 h-4 text-primary" />

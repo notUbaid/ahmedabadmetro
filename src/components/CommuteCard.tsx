@@ -1,8 +1,9 @@
+import { useState, useEffect, useMemo } from 'react';
 import { X, Train, Clock, Users, Navigation, ArrowRight } from 'lucide-react';
 import { Station, LINE_COLORS } from '@/data/metroData';
-import { getUpcomingTrains, getCurrentHeadway } from '@/data/timetable';
+import { getUpcomingTrains, getCurrentHeadway, trainSchedules } from '@/data/timetable';
 import { getSimpleCrowdLevel } from '@/lib/crowding';
-import { useState, useEffect } from 'react';
+import { planRouteWithDeparture } from '@/lib/routePlanner';
 
 interface CommuteCardProps {
   fromStation: Station;
@@ -28,15 +29,28 @@ export const CommuteCard = ({
 
   const upcomingTrains = getUpcomingTrains(fromStation.id, 10);
   
-  const trainsToDestination = upcomingTrains.filter(train => {
-    const destLower = train.destination.toLowerCase().replace(/\s+/g, '_');
-    const toStationLower = toStation.id.toLowerCase();
-    const toStationName = toStation.name.toLowerCase().replace(/\s+/g, '_');
-    return destLower.includes(toStationLower) || 
-           destLower.includes(toStationName) ||
-           toStationLower.includes(destLower) ||
-           toStationName.includes(destLower.replace(/_/g, ' '));
-  }).slice(0, 3);
+  // Memoize the target station for the first leg of the commute
+  const firstTargetStationId = useMemo(() => {
+    if (!fromStation || !toStation) return null;
+    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+    const route = planRouteWithDeparture(fromStation.id, toStation.id, nowMins);
+    if (!route || route.steps.length < 2) return null;
+    
+    // Find the first travel step which represents the destination of the first train boarded
+    const travelStep = route.steps.find(s => s.type === 'travel');
+    return travelStep?.station?.id || toStation.id;
+  }, [fromStation, toStation]);
+
+  const trainsToDestination = useMemo(() => {
+    if (!fromStation || !firstTargetStationId) return [];
+    return upcomingTrains.filter(train => {
+      const schedule = trainSchedules.find(s => s.id === train.trainId);
+      if (!schedule) return false;
+      const fromIdx = schedule.stations.indexOf(fromStation.id);
+      const targetIdx = schedule.stations.indexOf(firstTargetStationId);
+      return fromIdx !== -1 && targetIdx !== -1 && targetIdx > fromIdx;
+    }).slice(0, 3);
+  }, [upcomingTrains, fromStation, firstTargetStationId]);
 
   const getLiveMinutesAway = (arrivalTime: string): number => {
     const [arrH, arrM] = arrivalTime.split(':').map(Number);
@@ -122,7 +136,7 @@ export const CommuteCard = ({
             </div>
           ) : (
             <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-              No direct trains right now
+              No upcoming trains right now
             </div>
           )}
 

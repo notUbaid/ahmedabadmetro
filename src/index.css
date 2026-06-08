@@ -104,6 +104,21 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+  .safe-p-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-p-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-m-top {
+    margin-top: env(safe-area-inset-top);
+  }
+  .safe-m-bottom {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* Leaflet map styles */
 .leaflet-container {
   font-family: inherit;

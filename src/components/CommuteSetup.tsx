@@ -21,6 +21,8 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const [workSearch, setWorkSearch] = useState('');
   const [showHomeDropdown, setShowHomeDropdown] = useState(false);
   const [showWorkDropdown, setShowWorkDropdown] = useState(false);
+  const [homeSelectedIndex, setHomeSelectedIndex] = useState(-1);
+  const [workSelectedIndex, setWorkSelectedIndex] = useState(-1);
   
   const existingSettings = getCommuteSettings();
   const organizedStations = useMemo(() => getOrganizedStations(), []);
@@ -42,12 +44,20 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
     ).slice(0, 8);
   }, [allStations, homeSearch]);
 
+  useEffect(() => {
+    setHomeSelectedIndex(-1);
+  }, [homeSearch]);
+
   const filteredWorkStations = useMemo(() => {
     if (!workSearch) return [];
     return allStations.filter(s => 
       s.name.toLowerCase().includes(workSearch.toLowerCase())
     ).slice(0, 8);
   }, [allStations, workSearch]);
+
+  useEffect(() => {
+    setWorkSelectedIndex(-1);
+  }, [workSearch]);
 
   const handleSave = () => {
     if (homeStation && workStation && homeStation !== workStation) {
@@ -80,6 +90,40 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
     setWorkStation(stationId);
     setWorkSearch(stations[stationId]?.name || '');
     setShowWorkDropdown(false);
+  };
+
+  const handleHomeKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHomeSelectedIndex(prev => (prev < filteredHomeStations.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHomeSelectedIndex(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (homeSelectedIndex >= 0 && filteredHomeStations[homeSelectedIndex]) {
+        selectHome(filteredHomeStations[homeSelectedIndex].id);
+      } else if (filteredHomeStations.length > 0) {
+        selectHome(filteredHomeStations[0].id);
+      }
+    }
+  };
+
+  const handleWorkKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setWorkSelectedIndex(prev => (prev < filteredWorkStations.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setWorkSelectedIndex(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (workSelectedIndex >= 0 && filteredWorkStations[workSelectedIndex]) {
+        selectWork(filteredWorkStations[workSelectedIndex].id);
+      } else if (filteredWorkStations.length > 0) {
+        selectWork(filteredWorkStations[0].id);
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -123,17 +167,20 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                   }}
                   onFocus={() => setShowHomeDropdown(true)}
                   onBlur={() => setTimeout(() => setShowHomeDropdown(false), 200)}
+                  onKeyDown={handleHomeKeyDown}
                   className="flex-1 bg-transparent outline-none text-sm"
                 />
               </div>
               {showHomeDropdown && homeSearch && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
                   {filteredHomeStations.length > 0 ? (
-                    filteredHomeStations.map(s => (
+                    filteredHomeStations.map((s, index) => (
                       <button
                         key={s.id}
                         onMouseDown={() => selectHome(s.id)}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                        className={`w-full px-3 py-2 text-left text-sm transition-colors flex items-center gap-2 ${
+                          index === homeSelectedIndex ? 'bg-primary/20' : 'hover:bg-muted'
+                        }`}
                       >
                         <Train className="w-3 h-3 text-muted-foreground" />
                         <span>{s.name}</span>
@@ -169,17 +216,20 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                   }}
                   onFocus={() => setShowWorkDropdown(true)}
                   onBlur={() => setTimeout(() => setShowWorkDropdown(false), 200)}
+                  onKeyDown={handleWorkKeyDown}
                   className="flex-1 bg-transparent outline-none text-sm"
                 />
               </div>
               {showWorkDropdown && workSearch && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
                   {filteredWorkStations.length > 0 ? (
-                    filteredWorkStations.map(s => (
+                    filteredWorkStations.map((s, index) => (
                       <button
                         key={s.id}
                         onMouseDown={() => selectWork(s.id)}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                        className={`w-full px-3 py-2 text-left text-sm transition-colors flex items-center gap-2 ${
+                          index === workSelectedIndex ? 'bg-primary/20' : 'hover:bg-muted'
+                        }`}
                       >
                         <Train className="w-3 h-3 text-muted-foreground" />
                         <span>{s.name}</span>
@@ -208,6 +258,12 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
               <p className="text-sm font-medium">
                 {stations[existingSettings.homeStation]?.name} ↔ {stations[existingSettings.workStation]?.name}
               </p>
+            </div>
+          )}
+
+          {homeStation && workStation && homeStation === workStation && (
+            <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20 text-red-600 text-xs">
+              Home and work stations cannot be the same.
             </div>
           )}
 

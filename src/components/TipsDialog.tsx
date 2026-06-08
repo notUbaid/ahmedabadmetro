@@ -4,6 +4,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Lightbulb, Clock, CreditCard, Users, MapPin, Train, Info } from "lucide-react";
 
 interface TipsDialogProps {
@@ -111,55 +117,86 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                         Passenger Guide
                     </DialogTitle>
                 </DialogHeader>
-                <div className="flex-1 overflow-y-auto p-6">
-                    <div className="space-y-6">
-                        <div className="space-y-4">
-                            <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Network Info</h2>
-                            {networkInfo.map((item, index) => (
-                                <div key={index} className="flex gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <item.icon className="w-4 h-4 text-primary" />
+                <div className="flex-1 overflow-y-auto p-2 sm:p-6">
+                    <Accordion type="single" collapsible className="w-full space-y-4">
+                        <AccordionItem value="network" className="border rounded-lg bg-card px-4 py-1 data-[state=open]:shadow-sm transition-all">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                        <MapPin className="w-5 h-5" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="font-semibold text-primary text-sm">{item.title}</h3>
-                                        <p className="text-sm text-muted-foreground leading-relaxed">
-                                            {item.content}
+                                    <span className="font-semibold text-base">Network Information</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-2 pb-4 space-y-4">
+                                {networkInfo.map((item, index) => (
+                                    <div key={index} className="flex gap-3">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center mt-0.5">
+                                            <item.icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h3 className="font-semibold text-foreground text-sm">{item.title}</h3>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                                {item.content}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="tips" className="border rounded-lg bg-card px-4 py-1 data-[state=open]:shadow-sm transition-all">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                        <Lightbulb className="w-5 h-5" />
+                                    </div>
+                                    <span className="font-semibold text-base">Pro Travel Tips</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-2 pb-4 grid grid-cols-1 gap-4">
+                                {tips.map((tip, index) => (
+                                    <div key={index} className="bg-muted/40 p-3 rounded-lg space-y-1.5 border border-border/50">
+                                        <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                            {tip.title}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground leading-relaxed pl-3.5">
+                                            {tip.content}
                                         </p>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </AccordionContent>
+                        </AccordionItem>
 
-                        <div className="border-t pt-6 space-y-4">
-                            <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Travel Tips</h2>
-                            {tips.map((tip, index) => (
-                                <div key={index} className="space-y-1">
-                                    <h3 className="font-semibold text-primary text-sm">{tip.title}</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed">
-                                        {tip.content}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="border-t pt-6 space-y-4">
-                            <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Practical Info</h2>
-                            {practicalInfo.map((item, index) => (
-                                <div key={index} className="flex gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <item.icon className="w-4 h-4 text-primary" />
+                        <AccordionItem value="practical" className="border rounded-lg bg-card px-4 py-1 data-[state=open]:shadow-sm transition-all">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-md bg-green-500/10 text-green-600 dark:text-green-400">
+                                        <CreditCard className="w-5 h-5" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="font-semibold text-primary text-sm">{item.title}</h3>
-                                        <p className="text-sm text-muted-foreground leading-relaxed">
-                                            {item.content}
-                                        </p>
-                                    </div>
+                                    <span className="font-semibold text-base">Practical Advice</span>
                                 </div>
-                            ))}
-                        </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-2 pb-4 space-y-4">
+                                {practicalInfo.map((item, index) => (
+                                    <div key={index} className="flex gap-3">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center mt-0.5">
+                                            <item.icon className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h3 className="font-semibold text-foreground text-sm">{item.title}</h3>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                                {item.content}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
 
-                        <div className="border-t pt-6">
+                    <div className="mt-6">
                             <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-4 border border-orange-200 dark:border-orange-900">
                                 <h3 className="font-semibold text-orange-700 dark:text-orange-400 text-sm flex items-center gap-2">
                                     <Train className="w-4 h-4" />
@@ -169,7 +206,6 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                                     Tap any orange train icon on the map to see its details and share your journey with friends so they can track you in real-time.
                                 </p>
                             </div>
-                        </div>
                     </div>
                 </div>
             </DialogContent>

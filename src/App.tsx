@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
+import { WelcomeOverlay } from "@/components/WelcomeOverlay";
+
+import { Train } from "lucide-react";
 
 // Lazy load pages for better initial load
 const Index = lazy(() => import("./pages/Index"));
@@ -14,9 +17,11 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Loading fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm text-muted-foreground">Loading...</p>
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 animate-pulse">
+        <Train className="w-8 h-8 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
+      </div>
+      <p className="text-sm font-medium text-muted-foreground animate-pulse">Starting Metro...</p>
     </div>
   </div>
 );
@@ -36,6 +41,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <MetroCardProvider>
       <TooltipProvider>
+        <WelcomeOverlay />
         <OfflineIndicator />
         <Toaster />
         <Sonner />

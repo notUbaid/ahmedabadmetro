@@ -1,5 +1,6 @@
 import { X, Route, Share2, ArrowRight, Train, Clock, MapPin, Check, Users } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
@@ -43,6 +44,7 @@ export const MetroMap = () => {
   // Cache route geometry plus precomputed distances to avoid per-frame recomputation
   const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(new Map());
 
+  const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [nearestStation, setNearestStation] = useState<Station | null>(null);
@@ -1132,7 +1134,15 @@ export const MetroMap = () => {
           }
         },
         (error) => {
-          console.error('Geolocation error:', error);
+          console.warn('Geolocation disabled or failed:', error.message);
+          
+          if (error.code === error.PERMISSION_DENIED) {
+            toast({
+              title: 'Location Services Disabled',
+              description: 'We cannot show your live location on the map. You can still use the app normally.',
+            });
+          }
+
           // Fit to all stations if location denied
           const allCoords = Object.values(stations).map(s => s.coordinates);
           if (allCoords.length > 0) {
@@ -1158,7 +1168,7 @@ export const MetroMap = () => {
         mapRef.current = null;
       }
     };
-  }, [handleLocationUpdate, updateNearestStation]);
+  }, [handleLocationUpdate, updateNearestStation, toast]);
 
   const handleClosePanel = () => {
     setSelectedStation(null);

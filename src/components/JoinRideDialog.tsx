@@ -115,8 +115,8 @@ export const JoinRideDialog = ({
                 </button>
 
                 <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-full bg-${sharedTrain.line}-100 dark:bg-${sharedTrain.line}-900/30`}>
-                        <Train className="w-6 h-6" style={{ color: LINE_COLORS[sharedTrain.line] }} />
+                    <div className={`p-3 rounded-full`} style={{ backgroundColor: `${LINE_COLORS[sharedTrain.line as keyof typeof LINE_COLORS]}20` }}>
+                    <Train className="w-6 h-6" style={{ color: LINE_COLORS[sharedTrain.line as keyof typeof LINE_COLORS] }} />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold">Join Shared Ride</h2>

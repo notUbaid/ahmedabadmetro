@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowLeftRight } from 'lucide-react';
+import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowLeftRight, Download } from 'lucide-react';
 import { TipsDialog } from './TipsDialog';
 import { CommuteSetup } from './CommuteSetup';
 import { useMetroCard } from '@/contexts/MetroCardContext';
 import { getCommuteSettings } from '@/lib/commuteStorage';
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 interface SideMenuProps {
   onOpenRoutePlanner: () => void;
@@ -14,6 +23,8 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const [isTipsOpen, setIsTipsOpen] = useState(false);
   const [isCommuteOpen, setIsCommuteOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
   const { hasMetroCard, setHasMetroCard } = useMetroCard();
   const commuteSettings = getCommuteSettings();
 
@@ -26,7 +37,30 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       root.classList.add('dark');
       setIsDark(true);
     }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      const event = e as BeforeInstallPromptEvent;
+      event.preventDefault();
+      setDeferredPrompt(event);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   const toggleTheme = () => {
     const root = document.documentElement;
@@ -102,6 +136,14 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       description: 'Travel tips',
       disabled: false
     },
+    ...(isInstallable ? [{
+      icon: Download,
+      label: 'Install App',
+      onClick: handleInstallClick,
+      description: 'Add to home screen',
+      customIconColor: 'text-blue-600 dark:text-blue-400',
+      customBgColor: 'bg-blue-500/15'
+    }] : []),
   ];
 
   return (
@@ -109,7 +151,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 right-4 z-[1001] p-3 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto"
+        className="fixed top-4 right-4 z-[1001] p-3 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -169,18 +211,23 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            made with ❤️ by{' '}
-            <a
-              href="https://www.linkedin.com/in/notubaid/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium"
-            >
-              Ubaid
-            </a>
-          </p>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background safe-p-bottom">
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-xs text-muted-foreground font-medium">
+              v1.2.0 • Timetable updated June 2026
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              made with ❤️ by{' '}
+              <a
+                href="https://www.linkedin.com/in/notubaid/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors font-medium"
+              >
+                Ubaid
+              </a>
+            </p>
+          </div>
         </div>
       </div>
 

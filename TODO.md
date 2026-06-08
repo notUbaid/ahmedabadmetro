@@ -1,9 +1,10 @@
-# TODO - bugfix & coordination polish
+# TODO (Ahmedabad Metro Route Planner)
 
-- [x] Fix `findCommonTrainRoute` timestamp/leg reconstruction so coordinated routes carry correct departure/arrival times.
-- [x] Fix `buildBusRoute` to replace the correct alight step at GNLU (safe insertion).
-- [x] Improve `calculateJourneyProgress` travel-step boundary logic to reduce jumps.
-- [x] Adjust coordination baseTime heuristic in `RoutePlanner` component (`friendDepMins - 60` removal/clamping).
+## Phase 1 — Correctness + Trust (approved)
+- [ ] Add `routeConfidence`/`hasTimetableSource` to `PlannedRoute` and display badge in `RoutePlanner`.
+- [ ] Fix interchange `waitTime` for routes produced by `planRouteWithDeparture` so it reflects reconstructed leg timings.
+- [ ] Make Purple bus substitution in `buildBusRoute` more robust (swap modality at the correct GNLU boundary).
+- [ ] Add microcopy: timetable-based planning + train visuals are approximate.
+- [ ] Build and sanity test: route planning, departure/arrival dropdowns, interchange steps, Purple bus.
 
-- [ ] Run typecheck/lint/build if available.
 

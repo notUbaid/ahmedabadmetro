@@ -31,6 +31,12 @@ export interface PlannedRoute {
   arrivalMinutes?: number;
   isDirect?: boolean;
   hasBusSegment?: boolean;
+
+  // Trust/confidence for UI
+  // - timetable: schedule matched for all legs (no estimated fallback)
+  // - estimated: at least one leg fell back to estimated timings
+  // - mixed: some legs matched, some estimated
+  routeConfidence?: 'timetable' | 'estimated' | 'mixed';
 }
 
 // Define station order for each line (terminal to terminal)
@@ -504,6 +510,8 @@ const buildTimeAwareRoute = (
   const steps: RouteStep[] = [];
   let totalStationsCount = 0;
   let interchangeCount = 0;
+  let hasTimetable = false;
+  let hasEstimated = false;
   let currentTimeMinutes = startTimeMinutes;
   let firstDepartureTime: string | undefined;
   let firstDepartureMinutes: number | undefined;
@@ -519,6 +527,7 @@ const buildTimeAwareRoute = (
 
     if (!nextTrain) {
       // No train found, fall back to estimated times using LINE_STATIONS
+      hasEstimated = true;
       const stationsBetween = getStationsBetween(seg.line, seg.from, seg.to);
       const stationCount = Math.max(1, stationsBetween.length + 1);
       const fromIdx = getStationIndex(seg.line, seg.from);
@@ -549,6 +558,7 @@ const buildTimeAwareRoute = (
       // Estimate time
       currentTimeMinutes += stationCount * 2.5;
     } else {
+      hasTimetable = true;
       // Use the actual schedule to get stations between
       const stationsBetween = getStationsBetweenFromSchedule(nextTrain.schedule, seg.from, seg.to);
       const stationCount = stationsBetween.length + 1;
@@ -603,25 +613,29 @@ const buildTimeAwareRoute = (
     if (i < segments.length - 1) {
       const nextSeg = segments[i + 1];
 
-      // Find next connecting train - don't force line to allow corridor trains
-      const connectingTrain = findNextTrain(nextSeg.from, currentTimeMinutes, nextSeg.to);
+      // Find next connecting train - allowing MIN_TRANSFER_TIME for walking between platforms
+      const connectingTrain = findNextTrain(nextSeg.from, currentTimeMinutes + MIN_TRANSFER_TIME, nextSeg.to);
 
       let waitTime = 5; // Default
       let nextTrainTime: string | undefined;
       let nextDirection = '';
       let nextDisplayLine = nextSeg.line as keyof typeof LINE_COLORS;
 
+      // Compute interchange times/direction/line based on the actual connecting train when possible.
       if (connectingTrain) {
-        waitTime = connectingTrain.departureMinutes - currentTimeMinutes;
+        // connectingTrain departs at `connectingTrain.departureMinutes` (from nextSeg.from)
+        // and we currently are at the arrival time of the previous segment at `currentTimeMinutes`.
+        waitTime = Math.max(0, connectingTrain.departureMinutes - currentTimeMinutes);
         nextTrainTime = formatMinutesToTime(connectingTrain.departureMinutes);
-        currentTimeMinutes = connectingTrain.departureMinutes;
-
-        // Get direction from connecting train's final station
-        const finalStation = connectingTrain.schedule.stations[connectingTrain.schedule.stations.length - 1];
-        const finalStationName = stations[finalStation]?.name || finalStation.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        nextDirection = `towards ${finalStationName}`;
+        nextDirection = (() => {
+          const finalStation = connectingTrain.schedule.stations[connectingTrain.schedule.stations.length - 1];
+          const finalStationName = stations[finalStation]?.name || finalStation.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          return `towards ${finalStationName}`;
+        })();
         nextDisplayLine = connectingTrain.schedule.line as keyof typeof LINE_COLORS;
+        currentTimeMinutes = connectingTrain.departureMinutes;
       } else {
+        // Estimated fallback: keep waitTime default.
         const nextFromIdx = getStationIndex(nextSeg.line, nextSeg.from);
         const nextToIdx = getStationIndex(nextSeg.line, nextSeg.to);
         nextDirection = getDirection(nextSeg.line, nextFromIdx, nextToIdx);
@@ -673,7 +687,8 @@ const buildTimeAwareRoute = (
     departureTime: firstDepartureTime ?? formatMinutesToTime(journeyStartMinutes),
     arrivalTime: lastArrivalTime,
     departureMinutes: firstDepartureMinutes ?? journeyStartMinutes,
-    arrivalMinutes: currentTimeMinutes
+    arrivalMinutes: currentTimeMinutes,
+    routeConfidence: (hasTimetable && hasEstimated) ? 'mixed' : (hasEstimated ? 'estimated' : 'timetable')
   };
 };
 
@@ -713,11 +728,14 @@ const buildBusRoute = (
 
   if (alightIdx === -1) return null;
 
-  stepsWithBus[alightIdx] = {
+  // Remove the alight step and everything after it (though it should be the last step anyway)
+  stepsWithBus.splice(alightIdx);
+
+  stepsWithBus.push({
     type: 'bus',
     station: gnluStation,
     busDestination: busDestName
-  };
+  });
 
   // Add alight at destination
   stepsWithBus.push({
@@ -727,6 +745,8 @@ const buildBusRoute = (
 
   const totalTime = routeToGnlu.totalTime + busTime;
   const busArrivalMinutes = arrivalAtGnlu + busTime;
+
+  const routeConfidence = routeToGnlu.routeConfidence ?? 'timetable';
 
   return {
     origin,
@@ -740,7 +760,8 @@ const buildBusRoute = (
     arrivalTime: formatMinutesToTime(busArrivalMinutes),
     departureMinutes: routeToGnlu.departureMinutes,
     arrivalMinutes: busArrivalMinutes,
-    hasBusSegment: true
+    hasBusSegment: true,
+    routeConfidence
   };
 };
 
@@ -807,7 +828,8 @@ const buildDirectRoute = (
     arrivalTime: directTrain.arrivalTime,
     departureMinutes: directTrain.departureMinutes,
     arrivalMinutes: directTrain.arrivalMinutes,
-    isDirect: true
+    isDirect: true,
+    routeConfidence: 'timetable'
   };
 };
 
@@ -1128,6 +1150,8 @@ const buildRouteFromLegs = (
 
   const lastArrivalMinutes = mergedLegs[mergedLegs.length - 1].arriveMinutes;
 
+  const routeConfidence: PlannedRoute['routeConfidence'] = 'timetable';
+
   return {
     origin,
     destination,
@@ -1141,6 +1165,7 @@ const buildRouteFromLegs = (
     departureMinutes,
     arrivalMinutes: lastArrivalMinutes,
     isDirect: legs.length === 1,
+    routeConfidence,
   };
 };
 

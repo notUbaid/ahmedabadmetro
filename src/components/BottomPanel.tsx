@@ -152,7 +152,7 @@ export const BottomPanel = ({
       </button>
 
       {/* Panel container */}
-      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl shadow-2xl border-t border-border pointer-events-auto">
+      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl shadow-2xl border-t border-border pointer-events-auto safe-p-bottom">
         {/* Always visible header - clickable to expand/collapse */}
         <div
           className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
