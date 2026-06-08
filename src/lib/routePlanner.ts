@@ -1084,13 +1084,17 @@ const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: num
 };
 
 const getStationsSlice = (schedule: TrainSchedule, fromIdx: number, toIdx: number) => {
-  if (fromIdx <= toIdx) return schedule.stations.slice(fromIdx, toIdx + 1);
-  return schedule.stations.slice(toIdx, fromIdx + 1).reverse();
+  const slice = fromIdx <= toIdx 
+    ? schedule.stations.slice(fromIdx, toIdx + 1)
+    : schedule.stations.slice(toIdx, fromIdx + 1).reverse();
+  return slice.filter((station, i) => i === 0 || station !== slice[i - 1]);
 };
 
 const getBetweenStationsSlice = (schedule: TrainSchedule, fromIdx: number, toIdx: number) => {
-  if (fromIdx <= toIdx) return schedule.stations.slice(fromIdx + 1, toIdx);
-  return schedule.stations.slice(toIdx + 1, fromIdx).reverse();
+  const slice = fromIdx <= toIdx 
+    ? schedule.stations.slice(fromIdx + 1, toIdx)
+    : schedule.stations.slice(toIdx + 1, fromIdx).reverse();
+  return slice.filter((station, i) => i === 0 || station !== slice[i - 1]);
 };
 
 const buildRouteFromLegs = (
@@ -1149,7 +1153,7 @@ const buildRouteFromLegs = (
 
     const betweenIds = getBetweenStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx);
     const betweenStations = betweenIds.map(id => stations[id]).filter(Boolean);
-    const stationCount = Math.abs(leg.toIdx - leg.fromIdx);
+    const stationCount = betweenIds.length + 1;
 
     steps.push({
       type: 'travel',
@@ -1567,12 +1571,17 @@ export const findCommonTrainRoute = (
       continue;
     }
     
-    // Find the earliest possible departure from User 2's origin to this interchange station
+    // Find the latest possible departure from User 2's origin to this interchange station
+    // that arrives before the shared train departs
     const departures = getAvailableDepartures(userOriginId, candidate.stationId);
-    const possibleDepartures = departures.filter(d => d.departureMinutes >= currentTimeMins);
+    const possibleDepartures = departures.filter(d => 
+      d.departureMinutes >= currentTimeMins && 
+      d.arrivalMinutes + MIN_TRANSFER_TIME <= candidate.trainArrivalMin
+    );
     if (possibleDepartures.length === 0) continue;
     
-    possibleDepartures.sort((a, b) => a.arrivalMinutes - b.arrivalMinutes);
+    // Sort by departure time descending to minimize waiting time at interchange
+    possibleDepartures.sort((a, b) => b.departureMinutes - a.departureMinutes);
     const bestDeparture = possibleDepartures[0];
     
     const routeToInterchange = planRouteWithDeparture(userOriginId, candidate.stationId, bestDeparture.departureMinutes);
