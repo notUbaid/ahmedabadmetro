@@ -163,6 +163,8 @@ export const getCrowdLevel = (
   const destStationId = stationList[stationList.length - 1];
   
   const ohcIndex = stationList.indexOf('old_high_court');
+  const progress = stationIndex / Math.max(1, stationList.length - 1);
+  const stationsRemaining = stationList.length - 1 - stationIndex;
 
   if (serviceType === 'corridor') {
     // Northbound (APMC to Gandhinagar)
@@ -170,7 +172,6 @@ export const getCrowdLevel = (
       if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
         // APMC -> OHC: Starts Low, grows to Moderate
         level = stationIndex > 2 ? 'moderate' : 'low';
-        // Add peak modifier
         if (isPeak && level === 'moderate') level = 'heavy';
       } else {
         // At or after OHC: Massive influx to Gandhinagar
@@ -183,34 +184,48 @@ export const getCrowdLevel = (
         // Gandhinagar -> OHC: Moderate/Heavy crowd going to city
         level = isPeak ? 'heavy' : 'moderate';
       } else {
-        // After OHC to APMC: Emptying out drastically
-        level = 'low';
+        // After OHC to APMC
+        const paldiIndex = stationList.indexOf('paldi');
+        if (paldiIndex !== -1 && stationIndex >= paldiIndex) {
+          level = 'low'; // Paldi to APMC is mostly empty
+        } else {
+          level = isPeak ? 'moderate' : 'low';
+        }
       }
     } else {
       // Fallback for corridor
       level = isPeak ? 'heavy' : 'moderate';
     }
   } 
-  else if (serviceType === 'red_local') {
-    // APMC <-> Koteshwar generally has lower ridership
-    level = isPeak ? 'moderate' : 'low';
-    // Very empty at extreme ends
-    if (stationIndex < 2 || stationIndex > stationList.length - 3) level = 'low';
-  }
   else if (serviceType === 'blue_line') {
     // Thaltej <-> Vastral
     // Bell curve: full in middle (city center), empty at ends
-    const progress = stationIndex / (stationList.length - 1);
     if (progress < 0.2 || progress > 0.8) {
       level = 'low';
-    } else if (progress >= 0.4 && progress <= 0.6) {
+    } else if (progress >= 0.3 && progress <= 0.7) {
       level = isPeak ? 'heavy' : 'moderate';
     } else {
       level = 'moderate';
     }
   }
-  else if (serviceType === 'green_local' || serviceType === 'purple_line') {
-     level = isPeak ? 'moderate' : 'low';
+  else {
+    // Red local, Green local, Purple line
+    level = isPeak ? 'moderate' : 'low';
+  }
+
+  // Universal terminal rules:
+  // 1. Trains nearing their final destination empty out
+  if (stationsRemaining <= 2) {
+    level = 'low';
+  } else if (stationsRemaining <= 4 && level === 'heavy') {
+    level = 'moderate';
+  }
+  
+  // 2. Trains just starting are relatively empty
+  if (stationIndex <= 1) {
+    level = 'low';
+  } else if (stationIndex <= 3 && level === 'heavy') {
+    level = 'moderate';
   }
 
   // Weekends generally have lower crowds for commuter routes
