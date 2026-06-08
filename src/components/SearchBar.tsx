@@ -179,21 +179,16 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 // Nominatim fallback search
 const searchNominatim = async (query: string): Promise<SearchResult[]> => {
   try {
+    const q = query.toLowerCase().includes('ahmedabad') ? query : `${query} Ahmedabad`;
     const params = new URLSearchParams({
-      q: `${query} Ahmedabad`,
+      q,
       format: 'jsonv2',
       addressdetails: '1',
       limit: '5'
     });
 
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?${params}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'AhmedabadMetroApp/1.0'
-        }
-      }
+      `https://nominatim.openstreetmap.org/search?${params}`
     );
 
     if (!response.ok) {
