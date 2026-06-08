@@ -712,32 +712,46 @@ const buildBusRoute = (
 
   if (!origin || !destination || !gnluStation) return null;
 
-  // First, build route from origin to GNLU
-  const pathToGnlu = findShortestPath(originId, 'gnlu');
-  if (!pathToGnlu) return null;
+  let stepsWithBus: RouteStep[] = [];
+  let arrivalAtGnlu = startTimeMinutes;
+  let totalFare = 0;
+  let totalStations = 0;
+  let interchangeCount = 0;
+  let departureTime = formatMinutesToTime(startTimeMinutes);
+  let departureMinutes = startTimeMinutes;
+  let totalTime = 0;
+  let routeConfidence: 'timetable' | 'mixed' | 'estimates' = 'timetable';
 
-  const routeToGnlu = buildTimeAwareRoute(pathToGnlu, startTimeMinutes);
-  if (!routeToGnlu) return null;
+  if (originId !== 'gnlu') {
+    // First, build route from origin to GNLU
+    const pathToGnlu = findShortestPath(originId, 'gnlu');
+    if (!pathToGnlu) return null;
 
-  // Calculate arrival at GNLU - use the route's arrival time
-  const arrivalAtGnlu = routeToGnlu.arrivalMinutes ?? startTimeMinutes;
+    const routeToGnlu = buildTimeAwareRoute(pathToGnlu, startTimeMinutes);
+    if (!routeToGnlu) return null;
+
+    arrivalAtGnlu = routeToGnlu.arrivalMinutes ?? startTimeMinutes;
+    totalFare = routeToGnlu.fare;
+    totalStations = routeToGnlu.totalStations;
+    interchangeCount = routeToGnlu.interchangeCount;
+    departureTime = routeToGnlu.departureTime;
+    departureMinutes = routeToGnlu.departureMinutes;
+    totalTime = routeToGnlu.totalTime;
+    routeConfidence = routeToGnlu.routeConfidence ?? 'timetable';
+    
+    stepsWithBus = [...routeToGnlu.steps];
+
+    const alightIdx = stepsWithBus.findIndex(
+      (s) => s.type === 'alight' && s.station?.id === 'gnlu'
+    );
+
+    if (alightIdx === -1) return null;
+    stepsWithBus.splice(alightIdx);
+  }
 
   // Determine bus time
   const busTime = destId === 'pdpu' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
   const busDestName = destId === 'pdpu' ? 'PDPU' : 'GIFT City';
-
-  // Replace the correct alight step at GNLU with a bus step.
-  // This is safer than assuming the last step is always "alight at GNLU".
-  const stepsWithBus = [...routeToGnlu.steps];
-
-  const alightIdx = stepsWithBus.findIndex(
-    (s) => s.type === 'alight' && s.station?.id === 'gnlu'
-  );
-
-  if (alightIdx === -1) return null;
-
-  // Remove the alight step and everything after it (though it should be the last step anyway)
-  stepsWithBus.splice(alightIdx);
 
   stepsWithBus.push({
     type: 'bus',
@@ -751,22 +765,20 @@ const buildBusRoute = (
     station: destination
   });
 
-  const totalTime = routeToGnlu.totalTime + busTime;
+  totalTime += busTime;
   const busArrivalMinutes = arrivalAtGnlu + busTime;
-
-  const routeConfidence = routeToGnlu.routeConfidence ?? 'timetable';
 
   return {
     origin,
     destination,
     steps: stepsWithBus,
-    totalStations: routeToGnlu.totalStations,
+    totalStations: totalStations,
     totalTime,
-    interchangeCount: routeToGnlu.interchangeCount,
-    fare: routeToGnlu.fare,
-    departureTime: routeToGnlu.departureTime,
+    interchangeCount: interchangeCount,
+    fare: totalFare,
+    departureTime: departureTime,
     arrivalTime: formatMinutesToTime(busArrivalMinutes),
-    departureMinutes: routeToGnlu.departureMinutes,
+    departureMinutes: departureMinutes,
     arrivalMinutes: busArrivalMinutes,
     hasBusSegment: true,
     routeConfidence

@@ -75,8 +75,14 @@ export const BottomPanel = ({
     const [h, m] = arrivalTime.split(':').map(Number);
     const arrivalMinutes = h * 60 + m;
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+    
+    let minutesAway = arrivalMinutes - currentMinutes;
+    if (minutesAway < -12 * 60) {
+      minutesAway += 24 * 60;
+    }
+    
     const secondsIntoMinute = currentTime.getSeconds();
-    return Math.max(0, arrivalMinutes - currentMinutes - (secondsIntoMinute > 30 ? 1 : 0));
+    return Math.max(0, minutesAway - (secondsIntoMinute > 30 ? 1 : 0));
   };
 
 

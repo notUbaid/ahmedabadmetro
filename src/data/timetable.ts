@@ -136,7 +136,12 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
     const startMinutes = toMinutes(schedule.startTime);
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
 
-    const minutesAway = arrivalMinutes - currentMinutes;
+    let minutesAway = arrivalMinutes - currentMinutes;
+    if (minutesAway < -12 * 60) {
+      // Midnight boundary: e.g. arrival is 00:10 (10), current is 23:50 (1430) -> minutesAway = -1420
+      minutesAway += 24 * 60;
+    }
+
     if (minutesAway >= 0 && minutesAway <= 120) {
       const arrivalHour = Math.floor(arrivalMinutes / 60) % 24;
       const arrivalMin = Math.floor(arrivalMinutes % 60);
