@@ -42,7 +42,40 @@ interface SearchResult {
   lng: number;
   type: 'station' | 'place' | 'landmark' | 'address';
   importance?: number;
+  nearestStationId?: string;
+  nearestStationName?: string;
+  nearestStationDist?: number;
 }
+
+// Distance helper
+const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
+// Find nearest station
+const findNearestStation = (lat: number, lng: number) => {
+  let nearestId = '';
+  let nearestName = '';
+  let minDistance = Infinity;
+  
+  Object.values(stations).forEach(station => {
+    const dist = getDistance(lat, lng, station.coordinates[0], station.coordinates[1]);
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearestId = station.id;
+      nearestName = station.name;
+    }
+  });
+  
+  return { id: nearestId, name: nearestName, distance: minDistance };
+};
 
 interface SearchBarProps {
   onLocationSelect: (lat: number, lng: number, name: string) => void;
@@ -120,14 +153,21 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
       const layerScore = layer === 'venue' ? 10 : layer === 'locality' ? 8 : layer === 'neighbourhood' ? 6 : 4;
       const importance = Math.round(confidence * 10 + layerScore);
 
+      const lat = f.geometry?.coordinates[1] || 0;
+      const lng = f.geometry?.coordinates[0] || 0;
+      const nearest = type !== 'station' ? findNearestStation(lat, lng) : null;
+
       return {
         id: `pelias_${i}_${props.id || ''}`,
         name,
         description,
-        lat: f.geometry?.coordinates[1] || 0,
-        lng: f.geometry?.coordinates[0] || 0,
+        lat,
+        lng,
         type,
-        importance
+        importance,
+        nearestStationId: nearest?.id,
+        nearestStationName: nearest?.name,
+        nearestStationDist: nearest?.distance
       };
     });
   } catch (error) {
@@ -170,14 +210,21 @@ const searchNominatim = async (query: string): Promise<SearchResult[]> => {
       const parts = [address.suburb, address.city_district, address.city].filter(Boolean);
       const description = parts.length > 0 ? parts.join(', ') : 'Ahmedabad';
 
+      const lat = item.lat ? parseFloat(item.lat) : 0;
+      const lng = item.lon ? parseFloat(item.lon) : 0;
+      const nearest = findNearestStation(lat, lng);
+
       return {
         id: `nominatim_${i}_${item.osm_id || ''}`,
         name,
         description,
-        lat: item.lat ? parseFloat(item.lat) : 0,
-        lng: item.lon ? parseFloat(item.lon) : 0,
+        lat,
+        lng,
         type: 'place' as const,
-        importance: Math.round(((item.importance || 0.3) as number) * 10)
+        importance: Math.round(((item.importance || 0.3) as number) * 10),
+        nearestStationId: nearest.id,
+        nearestStationName: nearest.name,
+        nearestStationDist: nearest.distance
       };
     });
   } catch (error) {
@@ -468,6 +515,11 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{result.description}</p>
+                  {result.nearestStationName && (
+                    <p className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1.5 bg-primary/5 w-max px-1.5 py-0.5 rounded border border-primary/10">
+                      <Train className="w-3 h-3" /> Nearest Metro: {result.nearestStationName} ({(result.nearestStationDist || 0).toFixed(1)} km)
+                    </p>
+                  )}
                 </div>
               </button>
             ))}
