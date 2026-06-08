@@ -42,8 +42,8 @@ export const APMC_TO_OHC: SectionTiming = {
 
 // Old High Court → Koteshwar Road (Red Line north - now ends at Koteshwar Road)
 export const OHC_TO_KOTESHWAR: SectionTiming = {
-  stations: ['old_high_court', 'usmanpura', 'vijay_nagar', 'vadaj', 'ranip', 'sabarmati_railway_station', 'aec', 'sabarmati', 'motera_stadium', 'koteshwar_road'],
-  totalMinutes: 21, // Added 2 minutes for the missing station
+  stations: ['old_high_court', 'usmanpura', 'vijay_nagar', 'vadaj', 'ranip', 'aec', 'sabarmati', 'motera_stadium', 'koteshwar_road'],
+  totalMinutes: 19, // Removed the station, went back to 19 min
   travelPerSegmentSec: 0,
   cumulativeMinutes: [],
 };
