@@ -128,70 +128,6 @@ export const getServiceType = (
  * @param progressRatio - 0.0 (start of route) to 1.0 (end of route)
  * @param isInbound - true if heading towards city center (gets more crowded), false if outbound (gets less crowded)
  */
-const applyDynamicModifier = (
-  baseLevel: CrowdLevel,
-  progressRatio: number,
-  isInbound: boolean
-): CrowdLevel => {
-  // Inbound morning trains get more crowded as they approach city center
-  // Outbound evening trains get more crowded as they leave city center
-  
-  const effectiveProgress = isInbound ? progressRatio : (1 - progressRatio);
-  
-  // Early in journey (0-30%): one level lower
-  // Middle of journey (30-70%): base level
-  // Late in journey (70-100%): one level higher
-  
-  if (effectiveProgress < 0.3) {
-    // One level lower
-    if (baseLevel === 'heavy') return 'moderate';
-    if (baseLevel === 'moderate') return 'low';
-    return 'low';
-  } else if (effectiveProgress > 0.7) {
-    // One level higher (but cap at heavy)
-    if (baseLevel === 'low') return 'moderate';
-    if (baseLevel === 'moderate') return 'heavy';
-    return 'heavy';
-  }
-  
-  return baseLevel;
-};
-
-/**
- * Determine if a train is heading inbound (towards city center) or outbound
- * City center stations: Old High Court, Shahpur, Gheekanta, Kalupur
- */
-const CITY_CENTER_STATIONS = ['old_high_court', 'shahpur', 'gheekanta', 'kalupur', 'gandhigram'];
-
-export const isInboundTrain = (
-  originStationId: string,
-  destinationStationId: string,
-  stationList: string[]
-): boolean => {
-  // Check if destination is closer to city center than origin
-  const originIdx = stationList.indexOf(originStationId);
-  const destIdx = stationList.indexOf(destinationStationId);
-  
-  // Find city center stations in the route
-  let originDistToCenter = Infinity;
-  let destDistToCenter = Infinity;
-  
-  for (const centerStation of CITY_CENTER_STATIONS) {
-    const centerIdx = stationList.indexOf(centerStation);
-    if (centerIdx !== -1) {
-      if (originIdx !== -1) {
-        originDistToCenter = Math.min(originDistToCenter, Math.abs(originIdx - centerIdx));
-      }
-      if (destIdx !== -1) {
-        destDistToCenter = Math.min(destDistToCenter, Math.abs(destIdx - centerIdx));
-      }
-    }
-  }
-  
-  // If destination is closer to center, it's inbound
-  return destDistToCenter < originDistToCenter;
-};
-
 /**
  * Main function to get crowd level for a specific train/station
  */
@@ -213,28 +149,73 @@ export const getCrowdLevel = (
   // Get service type
   const serviceType = getServiceType(line, trainId);
   
-  // Get base crowd level
-  let level = getBaseLevel(serviceType, isPeak, isWeekendDay);
-  
-  // Apply dynamic modifier if we have position info
-  if (options?.stationIndex !== undefined && options?.totalStations !== undefined && options.totalStations > 1) {
-    const progressRatio = options.stationIndex / (options.totalStations - 1);
-    
-    // Determine inbound/outbound
-    let isInbound = true; // Default assumption
-    if (options.stationList && options.originStationId && options.destinationStationId) {
-      isInbound = isInboundTrain(options.originStationId, options.destinationStationId, options.stationList);
-    }
-    
-    // Morning peak: inbound trains get more crowded approaching center
-    // Evening peak: outbound trains get more crowded leaving center
-    const hour = now.getHours();
-    const isMorningPeak = hour >= 8 && hour < 11;
-    const effectiveInbound = isMorningPeak ? isInbound : !isInbound;
-    
-    level = applyDynamicModifier(level, progressRatio, effectiveInbound);
+  let level: CrowdLevel = 'low';
+
+  // If no detailed route info, fallback to simple base levels
+  if (!options || options.stationIndex === undefined || !options.stationList) {
+    if (serviceType === 'corridor') return formatCrowdLevel(isPeak ? 'heavy' : 'moderate');
+    if (serviceType === 'blue_line') return formatCrowdLevel(isPeak ? 'heavy' : 'moderate');
+    return formatCrowdLevel(isPeak ? 'moderate' : 'low');
   }
+
+  const { stationIndex, stationList } = options;
+  const originStationId = stationList[0];
+  const destStationId = stationList[stationList.length - 1];
   
+  const ohcIndex = stationList.indexOf('old_high_court');
+
+  if (serviceType === 'corridor') {
+    // Northbound (APMC to Gandhinagar)
+    if (originStationId === 'apmc') {
+      if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
+        // APMC -> OHC: Starts Low, grows to Moderate
+        level = stationIndex > 2 ? 'moderate' : 'low';
+        // Add peak modifier
+        if (isPeak && level === 'moderate') level = 'heavy';
+      } else {
+        // At or after OHC: Massive influx to Gandhinagar
+        level = isPeak ? 'heavy' : 'moderate';
+      }
+    } 
+    // Southbound (Gandhinagar to APMC)
+    else if (destStationId === 'apmc') {
+      if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
+        // Gandhinagar -> OHC: Moderate/Heavy crowd going to city
+        level = isPeak ? 'heavy' : 'moderate';
+      } else {
+        // After OHC to APMC: Emptying out drastically
+        level = 'low';
+      }
+    } else {
+      // Fallback for corridor
+      level = isPeak ? 'heavy' : 'moderate';
+    }
+  } 
+  else if (serviceType === 'red_local') {
+    // APMC <-> Koteshwar generally has lower ridership
+    level = isPeak ? 'moderate' : 'low';
+    // Very empty at extreme ends
+    if (stationIndex < 2 || stationIndex > stationList.length - 3) level = 'low';
+  }
+  else if (serviceType === 'blue_line') {
+    // Thaltej <-> Vastral
+    // Bell curve: full in middle (city center), empty at ends
+    const progress = stationIndex / (stationList.length - 1);
+    if (progress < 0.2 || progress > 0.8) {
+      level = 'low';
+    } else if (progress >= 0.4 && progress <= 0.6) {
+      level = isPeak ? 'heavy' : 'moderate';
+    } else {
+      level = 'moderate';
+    }
+  }
+  else if (serviceType === 'green_local' || serviceType === 'purple_line') {
+     level = isPeak ? 'moderate' : 'low';
+  }
+
+  // Weekends generally have lower crowds for commuter routes
+  if (isWeekendDay && level === 'heavy') level = 'moderate';
+
   return formatCrowdLevel(level);
 };
 
