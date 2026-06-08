@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
-  CircleDot, Circle, Bus, Share2, Check
+  CircleDot, Circle, Bus, Share2, Check, Info
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
@@ -573,7 +573,7 @@ export const RoutePlanner = ({
               <div className="px-4 pb-3">
                 <div className="bg-muted/50 rounded-xl p-3 border border-border flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <Check className="w-4 h-4 text-muted-foreground" />
+                    <Info className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium italic leading-tight">
                     No overlapping trains found for this specific route. You can still plan your journey manually!
