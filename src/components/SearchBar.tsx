@@ -278,6 +278,12 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         station.name.toLowerCase().includes(normalizedQuery)
       ).sort((a, b) => (b.importance || 0) - (a.importance || 0));
 
+      // Show instant results for metro stations while APIs load
+      if (matchingStations.length > 0) {
+        setResults(matchingStations.slice(0, 5));
+        setShowResults(true);
+      }
+
       // Search Pelias API
       const peliasResults = await searchPelias(searchQuery);
 
