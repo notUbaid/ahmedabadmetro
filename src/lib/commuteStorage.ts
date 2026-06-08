@@ -36,24 +36,10 @@ export const clearCommuteSettings = (): void => {
 };
 
 export const incrementDismissCount = (direction: 'homeToWork' | 'workToHome'): void => {
-  const settings = getCommuteSettings();
-  if (settings) {
-    if (direction === 'homeToWork') {
-      settings.homeToWorkDismissCount++;
-    } else {
-      settings.workToHomeDismissCount++;
-    }
-    saveCommuteSettings(settings);
-  }
+  // Intentionally left blank. We no longer limit dismissals.
 };
 
 export const shouldShowCommuteCard = (direction: 'homeToWork' | 'workToHome'): boolean => {
   const settings = getCommuteSettings();
-  if (!settings) return false;
-  
-  const count = direction === 'homeToWork' 
-    ? settings.homeToWorkDismissCount 
-    : settings.workToHomeDismissCount;
-  
-  return count < 3;
+  return !!settings;
 };

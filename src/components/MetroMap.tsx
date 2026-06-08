@@ -144,40 +144,44 @@ export const MetroMap = () => {
     const settings = getCommuteSettings();
     if (!settings) return;
 
-    const nearestStations = findClosestStations(lat, lng, 3);
-    const nearestIds = nearestStations.map(s => s.id);
+    const homeStation = stations[settings.homeStation];
+    const workStation = stations[settings.workStation];
+    if (!homeStation || !workStation) return;
 
-    // Check if near home station -> show card for home to work
-    if (nearestIds.includes(settings.homeStation) && shouldShowCommuteCard('homeToWork')) {
-      const homeStation = stations[settings.homeStation];
-      const workStation = stations[settings.workStation];
-      if (homeStation && workStation) {
+    const userLoc = L.latLng(lat, lng);
+    const homeLoc = L.latLng(homeStation.coordinates[0], homeStation.coordinates[1]);
+    const workLoc = L.latLng(workStation.coordinates[0], workStation.coordinates[1]);
+
+    const distToHome = userLoc.distanceTo(homeLoc);
+    const distToWork = userLoc.distanceTo(workLoc);
+
+    const nearestStations = findClosestStations(lat, lng, 1);
+    const nearestId = nearestStations.length > 0 ? nearestStations[0].id : null;
+
+    // Trigger threshold: 15 km (allows 3-4km distance as requested)
+    const MAX_COMMUTE_TRIGGER_DIST = 15000; 
+
+    if (distToHome < distToWork && distToHome < MAX_COMMUTE_TRIGGER_DIST) {
+      if (shouldShowCommuteCard('homeToWork')) {
         commuteCardShownRef.current = true;
         setCommuteCard({
           show: true,
           direction: 'homeToWork',
           fromStation: homeStation,
           toStation: workStation,
-          walkingTime: nearestIds[0] === settings.homeStation ? walkingTime : null
+          walkingTime: nearestId === settings.homeStation ? walkingTime : null
         });
-        return;
       }
-    }
-
-    // Check if near work station -> show card for work to home
-    if (nearestIds.includes(settings.workStation) && shouldShowCommuteCard('workToHome')) {
-      const homeStation = stations[settings.homeStation];
-      const workStation = stations[settings.workStation];
-      if (homeStation && workStation) {
+    } else if (distToWork < distToHome && distToWork < MAX_COMMUTE_TRIGGER_DIST) {
+      if (shouldShowCommuteCard('workToHome')) {
         commuteCardShownRef.current = true;
         setCommuteCard({
           show: true,
           direction: 'workToHome',
           fromStation: workStation,
           toStation: homeStation,
-          walkingTime: nearestIds[0] === settings.workStation ? walkingTime : null
+          walkingTime: nearestId === settings.workStation ? walkingTime : null
         });
-        return;
       }
     }
   }, []);
