@@ -584,7 +584,7 @@ const buildTimeAwareRoute = (
       const fromIdx = nextTrain.schedule.stations.indexOf(seg.from);
       const toIdx = nextTrain.schedule.stations.indexOf(seg.to);
       const allStationsInSegment = fromIdx !== -1 && toIdx !== -1 && toIdx > fromIdx
-        ? nextTrain.schedule.stations.slice(fromIdx, toIdx + 1)
+        ? nextTrain.schedule.stations.slice(fromIdx, toIdx + 1).filter((st, i, arr) => i === 0 || st !== arr[i - 1])
         : [seg.from, seg.to];
 
       if (i === 0) {

@@ -1,4 +1,5 @@
 import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTriangle, Users, ChevronUp, ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
 import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
 import { getSimpleCrowdLevel } from '@/lib/crowding';
@@ -81,7 +82,7 @@ export const BottomPanel = ({
 
   const handleLocate = () => {
     if (!('geolocation' in navigator)) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Geolocation is not supported by your browser');
       return;
     }
 
@@ -96,7 +97,9 @@ export const BottomPanel = ({
         console.error('Geolocation error:', error);
         setIsLocating(false);
         if (error.code === error.PERMISSION_DENIED) {
-          alert('Location access denied. Please enable location permissions.');
+          toast.error('Location access denied. Please enable location permissions.');
+        } else {
+          toast.error('Failed to get your location. Please try again.');
         }
       },
       { enableHighAccuracy: true, timeout: 10000 }
