@@ -124,17 +124,13 @@ export const RoutePlanner = ({
     try {
       if (!origin || !destination || origin === destination) return null;
 
-      // Use coordination route if active and trains are provided
       if (internalIsCoordinating && sharedSegments && sharedSegments.length > 0) {
-        const now = new Date();
-        const currentMins = now.getHours() * 60 + now.getMinutes();
+        // Find route relative to friend's departure, giving user up to 120 minutes of travel time
         const baseTime = friendDepMins !== undefined
-          ? Math.max(currentMins, friendDepMins - 5) // keep within a small catch window for smoother coordination
-          : (selectedDepartureIdx !== null && availableDepartures[selectedDepartureIdx])
-            ? availableDepartures[selectedDepartureIdx].departureMinutes
-            : currentMins;
+          ? Math.max(0, friendDepMins - 120)
+          : 0;
         const coordinated = findCommonTrainRoute(sharedSegments, origin, destination, baseTime);
-        if (coordinated) return coordinated;
+        return coordinated;
       }
 
       if (selectedDepartureIdx !== null && availableDepartures[selectedDepartureIdx]) {
@@ -530,7 +526,9 @@ export const RoutePlanner = ({
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Route className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-lg">Plan Your Journey</h2>
+            <h2 className="font-semibold text-lg">
+              {internalIsCoordinating ? "Coordinate with Friend" : "Plan Your Journey"}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -592,7 +590,7 @@ export const RoutePlanner = ({
                     <Info className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium italic leading-tight">
-                    No overlapping trains found for this specific route. You can still plan your journey manually!
+                    You cannot reach the shared train in time from this origin. Try a closer station.
                   </p>
                 </div>
               </div>
@@ -846,7 +844,7 @@ export const RoutePlanner = ({
               </div>
 
               {/* Departure and arrival time dropdowns */}
-              {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && (
+              {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && !internalIsCoordinating && (
                 <div className="flex items-center gap-3 mb-3 text-sm flex-wrap">
                   {/* Depart dropdown */}
                   <div className="relative">

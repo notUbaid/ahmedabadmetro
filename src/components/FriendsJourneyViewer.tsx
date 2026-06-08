@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Route, Share2, ArrowRight, Train, Clock, MapPin, Check } from 'lucide-react';
 import { stations } from '@/data/metroData';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
@@ -28,8 +28,10 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
     const [destSearch, setDestSearch] = useState('');
     const [showDestDropdown, setShowDestDropdown] = useState(false);
 
-    const stationOptions = getStationOptions();
-    const filteredStations = destSearch ? stationOptions.filter(s => s.name.toLowerCase().includes(destSearch.toLowerCase())) : stationOptions;
+    const stationOptions = useMemo(() => getStationOptions(), []);
+    const filteredStations = useMemo(() => {
+        return destSearch ? stationOptions.filter(s => s.name.toLowerCase().includes(destSearch.toLowerCase())) : stationOptions;
+    }, [destSearch, stationOptions]);
 
     useEffect(() => {
         if (!data || !isOpen) return;
