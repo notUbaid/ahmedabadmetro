@@ -324,6 +324,44 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
+      // GeoJSON Offline Fallback (If APIs found absolutely nothing)
+      if (peliasResults.length === 0 && nominatimResults.length === 0) {
+        try {
+          const { localPlaces } = await import('../data/localPlaces');
+          const localMatches = localPlaces.filter((place: { n: string, t: string, c: number[] }) => 
+            place.n.toLowerCase().includes(normalizedQuery)
+          ).slice(0, 5);
+          
+          for (const [i, place] of localMatches.entries()) {
+            const nearest = findNearestStation(place.c[0], place.c[1]);
+            
+            const formattedType = place.t.replace(/_/g, ' ');
+            const description = formattedType.charAt(0).toUpperCase() + formattedType.slice(1);
+            
+            const localResult: SearchResult = {
+              id: `offline_${i}_${place.n.replace(/\s+/g, '')}`,
+              name: place.n,
+              description: `Local ${description}`,
+              lat: place.c[0],
+              lng: place.c[1],
+              type: 'place',
+              importance: 40,
+              nearestStationId: nearest?.id,
+              nearestStationName: nearest?.name,
+              nearestStationDist: nearest?.distance
+            };
+            
+            const key = `${localResult.name.toLowerCase()}|${localResult.type}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              mergedResults.push(localResult);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to load offline fallback data", e);
+        }
+      }
+
       // Sort non-station results by importance
       const stations = mergedResults.filter(r => r.type === 'station');
       const others = mergedResults.filter(r => r.type !== 'station')
