@@ -8,9 +8,9 @@
   Note: This is a dev/build-time script. It does not run in the browser.
 */
 
-const fs = require('fs');
-const path = require('path');
-const xlsx = require('xlsx');
+import fs from 'fs';
+import path from 'path';
+import xlsx from 'xlsx';
 
 const PROJECT_ROOT = process.cwd();
 const EXCEL_PATH = path.join(PROJECT_ROOT, 'attached_assets', 'Ahmedabad_Metro_Master_Database_V2.xlsx');
@@ -58,8 +58,22 @@ async function loadStationMap() {
   );
 }
 
+const ALIASES = {
+  'jivraj': 'jivraj park',
+  'sector-24': 'sector 24',
+  'sector-16': 'sector 16',
+  'rayson': 'raysan',
+  'pdeu': 'pdpu',
+  'sabarmati railway station': 'sabarmati railway station',
+  'cheekanta': 'gheekanta',
+  'kalupur railway station': 'kalupur',
+  'robari colony': 'rabari colony',
+  'nirant cross road': 'nirant cross roads'
+};
+
 function mapStationNameToId(stationName) {
-  const key = String(stationName).toLowerCase().trim();
+  const rawKey = String(stationName).toLowerCase().trim();
+  const key = ALIASES[rawKey] || rawKey;
 
   const id = stationNameToId.get(key);
   if (!id) {
