@@ -169,15 +169,31 @@ export const RoutePlanner = ({
           const seg = sharedSegments.find(s => s.trainId === step.trainId);
           if (seg) {
             if (step.type === 'travel') {
-              // For travel step, check previous station (boarding/alighting point)
-              const prevStation = idx > 0 ? route.steps[idx - 1].station : route.origin;
-
-              // Only add if ALSO in the shared segment's station list
-              if (prevStation?.id && seg.stations.includes(prevStation.id) && !sharedStations.includes(prevStation.id)) {
-                sharedStations.push(prevStation.id);
-              }
-              if (step.station?.id && seg.stations.includes(step.station.id) && !sharedStations.includes(step.station.id)) {
-                sharedStations.push(step.station.id);
+              // For travel step, check all stations in the segment (boarding, intermediate, alighting)
+              if (step.allStations) {
+                step.allStations.forEach(stationId => {
+                  if (seg.stations.includes(stationId) && !sharedStations.includes(stationId)) {
+                    sharedStations.push(stationId);
+                  }
+                });
+              } else {
+                // Fallback if allStations is somehow missing
+                const prevStation = idx > 0 ? route.steps[idx - 1].station : route.origin;
+                if (prevStation?.id && seg.stations.includes(prevStation.id) && !sharedStations.includes(prevStation.id)) {
+                  sharedStations.push(prevStation.id);
+                }
+                
+                if (step.stations) {
+                  step.stations.forEach(stationId => {
+                    if (seg.stations.includes(stationId) && !sharedStations.includes(stationId)) {
+                      sharedStations.push(stationId);
+                    }
+                  });
+                }
+                
+                if (step.station?.id && seg.stations.includes(step.station.id) && !sharedStations.includes(step.station.id)) {
+                  sharedStations.push(step.station.id);
+                }
               }
             } else if (step.type === 'interchange') {
               // For interchange, check if this station is in the shared segment
