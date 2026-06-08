@@ -1609,8 +1609,8 @@ export const findCommonTrainRoute = (
   // Priority: Earliest arrival at interchange, then maximum shared stops
   viableOptions.sort((a, b) => {
     // First priority: minimum travel time for user to reach the interchange
-    const travelTimeA = a.arrivalAtInterchange - currentTimeMins;
-    const travelTimeB = b.arrivalAtInterchange - currentTimeMins;
+    const travelTimeA = a.routeToInterchange ? a.routeToInterchange.totalTime : 0;
+    const travelTimeB = b.routeToInterchange ? b.routeToInterchange.totalTime : 0;
     
     // If travel times are significantly different (e.g., > 5 mins), pick the closer one
     if (Math.abs(travelTimeA - travelTimeB) > 5) {
