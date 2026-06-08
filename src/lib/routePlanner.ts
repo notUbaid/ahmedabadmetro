@@ -855,13 +855,15 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 
   // We allow a small 2-minute "sprint" grace if a train is leaving right now
   const GRACE_PERIOD = 2;
-  const possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
+  let possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
 
   if (possible.length === 0) {
-    // If no more departures today, try showing the first one of the day for tomorrow/next-day context
-    // or return the absolute best for today if user is just exploring.
-    // For now, let's just return null to be clear that service has ended.
-    return null;
+    // If no more departures today, show the first available departure for tomorrow morning (starts at 6:20 AM = 380 mins)
+    possible = departures.filter(d => d.departureMinutes >= 380);
+    
+    if (possible.length === 0) {
+      return null;
+    }
   }
 
   // Find the absolute best departure:
