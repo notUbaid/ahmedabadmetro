@@ -158,50 +158,17 @@ export const RoutePlanner = ({
 
       if (commonTrains.length === 0) return null;
 
-      // Find the sequence of stations where user is on a shared train AND at a shared station
+      // Find the strict intersection of stations where the user is on the shared train AND the friend is too
       const sharedStations: string[] = [];
-      route.steps.forEach((step, idx) => {
+      route.steps.forEach((step) => {
         if (step.trainId) {
           const seg = sharedSegments.find(s => s.trainId === step.trainId);
-          if (seg) {
-            if (step.type === 'travel') {
-              // For travel step, check all stations in the segment (boarding, intermediate, alighting)
-              if (step.allStations) {
-                step.allStations.forEach(stationId => {
-                  if (seg.stations.includes(stationId) && !sharedStations.includes(stationId)) {
-                    sharedStations.push(stationId);
-                  }
-                });
-              } else {
-                // Fallback if allStations is somehow missing
-                const prevStation = idx > 0 ? route.steps[idx - 1].station : route.origin;
-                if (prevStation?.id && seg.stations.includes(prevStation.id) && !sharedStations.includes(prevStation.id)) {
-                  sharedStations.push(prevStation.id);
-                }
-                
-                if (step.stations) {
-                  step.stations.forEach(stationId => {
-                    if (seg.stations.includes(stationId) && !sharedStations.includes(stationId)) {
-                      sharedStations.push(stationId);
-                    }
-                  });
-                }
-                
-                if (step.station?.id && seg.stations.includes(step.station.id) && !sharedStations.includes(step.station.id)) {
-                  sharedStations.push(step.station.id);
-                }
+          if (seg && step.allStations) {
+            step.allStations.forEach(stationId => {
+              if (seg.stations.includes(stationId) && !sharedStations.includes(stationId)) {
+                sharedStations.push(stationId);
               }
-            } else if (step.type === 'interchange') {
-              // For interchange, check if this station is in the shared segment
-              if (step.station?.id && seg.stations.includes(step.station.id) && !sharedStations.includes(step.station.id)) {
-                sharedStations.push(step.station.id);
-              }
-            } else if (step.type === 'board') {
-              // For board step, check if the boarding station is in shared segment
-              if (step.station?.id && seg.stations.includes(step.station.id) && !sharedStations.includes(step.station.id)) {
-                sharedStations.push(step.station.id);
-              }
-            }
+            });
           }
         }
       });
@@ -568,7 +535,7 @@ export const RoutePlanner = ({
             </div>
             {overlapInfo ? (
               <div className="px-4 pb-3">
-                <div className="bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-primary/20 shadow-sm flex items-center gap-3">
+                <div className="bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-primary/20 shadow-sm flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Train className="w-5 h-5 text-primary" />
                   </div>
@@ -582,6 +549,17 @@ export const RoutePlanner = ({
                     <span className="text-[9px] font-black bg-green-500 text-white px-2 py-1 rounded-md uppercase">Synced</span>
                   </div>
                 </div>
+                {route && route.departureTime && (
+                  <div className="bg-primary/5 rounded-lg p-2.5 border border-primary/10 flex items-start gap-2 animate-pulse">
+                    <Clock className="w-4 h-4 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">
+                        Depart {route.origin.name} at exactly <span className="text-primary font-black bg-primary/10 px-1 py-0.5 rounded">{route.departureTime}</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">To reach the interchange station on time</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="px-4 pb-3">

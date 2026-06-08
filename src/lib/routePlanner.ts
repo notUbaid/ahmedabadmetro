@@ -953,6 +953,16 @@ export const getOrganizedStations = (): {
   return { interchanges, byLine };
 };
 
+// Module-level cache to prevent running 150x Dijkstra loops repeatedly for the same route
+const departureCache = new Map<string, {
+  departureTime: string;
+  arrivalTime: string;
+  departureMinutes: number;
+  arrivalMinutes: number;
+  isDirect: boolean;
+  interchangeCount: number;
+}[]>();
+
 // Get all available departure times for a route from origin to destination
 export const getAvailableDepartures = (originId: string, destId: string): {
   departureTime: string;
@@ -962,6 +972,11 @@ export const getAvailableDepartures = (originId: string, destId: string): {
   isDirect: boolean;
   interchangeCount: number;
 }[] => {
+  const cacheKey = `${originId}-${destId}`;
+  if (departureCache.has(cacheKey)) {
+    return departureCache.get(cacheKey)!;
+  }
+
   // Collect all unique departure minutes at origin (from all schedules)
   const departureMinutesSet = new Set<number>();
 
@@ -1029,6 +1044,8 @@ export const getAvailableDepartures = (originId: string, destId: string): {
 
   // Reverse back to chronological order (earliest first)
   pruned.reverse();
+  
+  departureCache.set(cacheKey, pruned);
   return pruned;
 };
 
@@ -1056,6 +1073,16 @@ const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: num
     }
   }
   return matches;
+};
+
+const getStationsSlice = (schedule: TrainSchedule, fromIdx: number, toIdx: number) => {
+  if (fromIdx <= toIdx) return schedule.stations.slice(fromIdx, toIdx + 1);
+  return schedule.stations.slice(toIdx, fromIdx + 1).reverse();
+};
+
+const getBetweenStationsSlice = (schedule: TrainSchedule, fromIdx: number, toIdx: number) => {
+  if (fromIdx <= toIdx) return schedule.stations.slice(fromIdx + 1, toIdx);
+  return schedule.stations.slice(toIdx + 1, fromIdx).reverse();
 };
 
 const buildRouteFromLegs = (
@@ -1106,15 +1133,15 @@ const buildRouteFromLegs = (
     trainTime: formatMinutesToTime(firstLeg.departMinutes),
     isDirect: mergedLegs.length === 1,
     trainId: firstSchedule.id,
-    allStations: firstSchedule.stations.slice(firstLeg.fromIdx, firstLeg.toIdx + 1)
+    allStations: getStationsSlice(firstSchedule, firstLeg.fromIdx, firstLeg.toIdx)
   });
 
   for (let i = 0; i < mergedLegs.length; i++) {
     const leg = mergedLegs[i];
 
-    const betweenIds = leg.schedule.stations.slice(leg.fromIdx + 1, leg.toIdx);
+    const betweenIds = getBetweenStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx);
     const betweenStations = betweenIds.map(id => stations[id]).filter(Boolean);
-    const stationCount = leg.toIdx - leg.fromIdx;
+    const stationCount = Math.abs(leg.toIdx - leg.fromIdx);
 
     steps.push({
       type: 'travel',
@@ -1124,7 +1151,7 @@ const buildRouteFromLegs = (
       stations: betweenStations,
       isDirect: mergedLegs.length === 1,
       trainId: leg.schedule.id,
-      allStations: leg.schedule.stations.slice(leg.fromIdx, leg.toIdx + 1)
+      allStations: getStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx)
     });
 
     totalStationsCount += stationCount;
@@ -1144,7 +1171,7 @@ const buildRouteFromLegs = (
         waitTime,
         trainTime: formatMinutesToTime(nextLeg.departMinutes),
         trainId: nextLeg.schedule.id,
-        allStations: nextLeg.schedule.stations.slice(nextLeg.fromIdx, nextLeg.toIdx + 1)
+        allStations: getStationsSlice(nextLeg.schedule, nextLeg.fromIdx, nextLeg.toIdx)
       });
 
       interchangeCount++;
@@ -1490,9 +1517,18 @@ export const findCommonTrainRoute = (
   if (viableOptions.length === 0) return null;
   
   // STEP 6: Select the best option
-  // Priority: Maximum shared stops with User 1, then earliest arrival
+  // Priority: Earliest arrival at interchange, then maximum shared stops
   viableOptions.sort((a, b) => {
-    // First priority: more shared stops with User 1
+    // First priority: minimum travel time for user to reach the interchange
+    const travelTimeA = a.arrivalAtInterchange - currentTimeMins;
+    const travelTimeB = b.arrivalAtInterchange - currentTimeMins;
+    
+    // If travel times are significantly different (e.g., > 15 mins), pick the closer one
+    if (Math.abs(travelTimeA - travelTimeB) > 15) {
+      return travelTimeA - travelTimeB;
+    }
+    
+    // Otherwise, prefer more shared stops
     if (b.candidate.sharedStopsWithUser1 !== a.candidate.sharedStopsWithUser1) {
       return b.candidate.sharedStopsWithUser1 - a.candidate.sharedStopsWithUser1;
     }
@@ -1615,7 +1651,7 @@ export const findCommonTrainRoute = (
           const schedStart = parseTimeToMinutes(currentSchedule.startTime);
           const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
           
-          if (legFromIdx >= 0 && legToIdx > legFromIdx) {
+          if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
             legs.push({
               schedule: currentSchedule,
               fromId: legFromId,
