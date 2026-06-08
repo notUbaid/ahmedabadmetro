@@ -71,12 +71,12 @@ export const TrainDetailsDialog = ({
   return (
     <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
       <div 
-        className="bg-background rounded-2xl shadow-2xl border border-border max-w-2xl w-full my-4 animate-in zoom-in-95 duration-200"
+        className="bg-background rounded-2xl shadow-2xl border border-border max-w-2xl w-full my-4 overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div 
-          className="p-4 text-white sticky top-0"
+          className="p-4 text-white sticky top-0 z-10"
           style={{ backgroundColor: LINE_COLORS[line as keyof typeof LINE_COLORS] }}
         >
           <div className="flex items-center justify-between">
@@ -157,7 +157,7 @@ export const TrainDetailsDialog = ({
                         )}
                         {isPassed && !isCurrent && (
                           <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-white" />
+                            <div className="w-2 h-2 rounded-full bg-background" />
                           </div>
                         )}
                         {!isPassed && !isCurrent && (

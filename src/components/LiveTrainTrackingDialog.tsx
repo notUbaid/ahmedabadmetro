@@ -179,7 +179,7 @@ export const LiveTrainTrackingDialog = ({
   return (
     <div className="fixed inset-0 z-[2100] flex items-end md:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="bg-background rounded-2xl shadow-2xl border border-border w-full md:max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-5 md:zoom-in-95 duration-200"
+        className="bg-background rounded-2xl shadow-2xl border border-border w-full md:max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
