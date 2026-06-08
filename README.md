@@ -12,43 +12,70 @@
     <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/Shadcn%2FUI-Latest-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Shadcn UI" /></a>
     <img src="https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA Ready" />
   </p>
-
-  *Ahmedabad Metro Connect is a blazing fast, completely offline-capable Progressive Web App (PWA) designed to revolutionize how you navigate the city. Engineered with real-world heuristics, advanced pathfinding, and beautiful glassmorphism UI.*
 </div>
-
-<br />
-
-> [!TIP]
-> **Try it on your phone!** Add to Home Screen to install it as a native-feeling app that works 100% offline in underground tunnels!
-
-## ✨ Signature Features
-
-### 🧠 Hyper-Intelligent Route Pathfinding
-- **Dijkstra-Powered Engine**: Under the hood runs a highly optimized shortest-path algorithm navigating a massive timetable dataset across all lines (Red, Blue, Purple, Green).
-- **Time-Aware Routing**: It doesn't just tell you the stops; it computes the *exact minute* you will arrive based on real-time train schedules.
-
-### 👥 "Sync with Friend" (Co-Commuting)
-- **Intercept & Ride**: Enter your friend's journey details, and the engine will calculate the absolute best station for you to intercept their train. 
-- **Time Synchronization**: Tells you the exact minute you must depart your origin to catch their specific train car at the interchange.
-- **Smart Heuristics**: Prioritizes minimizing your personal travel time while maximizing the number of stops you get to ride together!
-
-### 📊 Real-World Dynamic Crowding AI
-- Tracks crowd density not just statically, but **dynamically** as the train progresses through its route.
-- Custom logic for the massive **Old High Court** interchange spikes, bell-curve blue-line loading, and realistic terminal drop-offs.
-- Know exactly if you'll get a seat before you even enter the station.
-
-### 📱 True Offline PWA Experience
-- Packaged with **Workbox Service Workers** to cache the entire schedule matrix.
-- Whether you're in an underground tunnel with zero network or out of data, the app functions flawlessly.
-
-### 🎨 State-of-the-Art UX/UI
-- Built on **Tailwind CSS** & **Shadcn UI**.
-- Fully responsive, mobile-first design with smooth micro-interactions, dark/light mode, and frosted glass components.
-- Integrated **Leaflet Maps** for beautiful, interactive transit map visualization.
 
 ---
 
-## 🚀 Quick Start Guide
+## 🌟 What is Ahmedabad Metro Connect?
+Ahmedabad Metro Connect is a blazing-fast, strictly typed, and entirely offline-capable Progressive Web App (PWA) built specifically for the residents, daily commuters, and tourists of Ahmedabad and Gandhinagar. 
+
+Unlike generic transit apps that give basic static estimates, this app acts as a **hyper-intelligent transit engine**. It processes the official minute-by-minute train timetable, maps dynamic fare brackets, understands underground network loss, and orchestrates co-commuting logistics (syncing your ride with a friend's) all entirely within your browser.
+
+## 🎯 Who is this for?
+- **The Daily Commuter:** Who needs to know *exactly* when to leave their house to catch the 08:14 AM train and exactly what their commute will cost with a Smart Card discount.
+- **Friends & Groups:** Who want to travel together but live on different ends of the city. The app calculates the exact mathematical intercept point for your trains.
+- **Tourists & Newcomers:** Who don't know the stations but know the landmarks. Our global search engine maps any hospital, mall, or monument to the nearest metro station.
+- **Underground Riders:** Who frequently lose internet access while riding. Since it's a PWA, the entire engine works 100% offline.
+
+---
+
+## ✨ Features Breakdown
+
+### 🤝 "Travel Together" (Co-Commute Synchronization)
+Ever tried coordinating a metro ride with a friend starting from a different station? It usually involves guesswork and missed trains. 
+- **The Solution:** Your friend shares their trip link. You click it. The app instantly calculates the **perfect intercept station** based on your current location. 
+- **Precision Timing:** It doesn't just tell you where to meet; it tells you exactly what time you need to board *your* train so that you step onto the interchange platform at the exact minute their train arrives.
+
+### 🧠 Hyper-Intelligent Route Pathfinding
+- **Dijkstra-Powered Engine:** Under the hood runs a highly optimized shortest-path algorithm navigating a massive timetable dataset across all lines (Red, Blue, Purple, Green).
+- **Bus Network Integration:** Seamlessly integrates the GNLU to GIFT City/PDPU connecting bus routes into the metro algorithm.
+
+### 🔍 Universal Search with Offline Fallback
+- **Global Reach:** Type in *"Alpha One Mall"* or *"Apollo Hospital"*. The app uses the Pelias and Nominatim global geocoding APIs to find the exact coordinates, then uses the Haversine formula to instantly map it to the nearest Metro Station.
+- **The "Tunnel-Proof" Fallback:** If you have zero internet, the app dynamically lazy-loads a highly compressed offline database of over 3,500 local Ahmedabad landmarks, guaranteeing search functionality deep underground.
+
+### 💵 Exact Fare Matrix & Metro Card Logistics
+- Uses the official, exact `32x32` multidimensional matrix for inter-line and intra-line fare calculations. 
+- Toggle the "Metro Card" switch in the UI to instantly apply the official 10% Smart Card discount across all your routing results.
+
+### 📊 Real-World Dynamic Crowding AI
+- Tracks crowd density not just statically, but **dynamically** as the train progresses through its route.
+- Custom logic accounts for the massive Old High Court interchange spikes, bell-curve blue-line loading, and realistic terminal drop-offs. Know exactly if you'll get a seat before you swipe your card.
+
+### 📱 True Offline PWA Experience
+- Packaged with **Workbox Service Workers** to cache the entire application shell, interactive maps, and timetable matrices.
+- Add it to your iOS or Android home screen for a completely native, app-like experience devoid of browser borders or tap-highlight flashes.
+
+---
+
+## 📖 How to Use the App (Daily Commute Scenario)
+
+**1. Finding Your Route:**
+Open the app. You don't need to know station names—just type your destination (e.g., "Gujarat University"). The search engine will instantly locate it and inform you that "Commerce Six Road" is your nearest station.
+
+**2. Planning the Departure:**
+Click "Plan Journey". Instead of just showing you a line on a map, the app gives you a dropdown of the actual, real-world train departures for the next hour. Select the 09:15 AM train.
+
+**3. Navigating the Ride:**
+The route breaks down your trip step-by-step. 
+*"Board the Blue Line towards Vastral Gam at 09:15 AM. Ride 4 stations. Alight at Old High Court at 09:26 AM. Wait 4 minutes. Board the Red Line towards APMC at 09:30 AM."* 
+
+**4. Sharing with a Friend:**
+Meeting someone on the way? Click "Share this Ride" at the bottom of your route. Send the copied link to your friend. When they open it, the app will ask for their location and tell them exactly when to leave to intercept your specific train car!
+
+---
+
+## 🚀 Quick Start & Setup
 
 Want to run this beast locally? It takes less than a minute.
 
@@ -71,7 +98,7 @@ npm install
 npm run dev
 ```
 
-Your app will be live at `http://localhost:5173`.
+Your app will be live at `http://localhost:5000`.
 
 ---
 
@@ -86,19 +113,9 @@ This project was built with a no-compromise approach to modern web development:
 | **Build Tool** | Vite 5 | Lightning fast HMR and optimized production bundling. |
 | **Styling** | Tailwind CSS | Utility-first styling for rapid UI development. |
 | **Components** | Shadcn UI | Accessible, unstyled, and highly customizable radix components. |
-| **Icons** | Lucide React | Beautiful, consistent, and crisp vector icons. |
 | **Routing** | React Router | Seamless client-side navigation. |
 | **Maps** | Leaflet | Interactive, high-performance web mapping. |
 | **Offline/PWA** | Vite PWA | Automated service worker generation and asset caching. |
-
----
-
-## 🧠 Deep Dive: The Timetable Engine
-
-The core of the app isn't just a static JSON file—it's a multi-layered matrix of:
-- **`TrainSchedules`**: Over 200+ distinct train runs per day, mapped down to the minute.
-- **In-Memory Caching**: A custom module-level caching layer ensures that calculating identical routes doesn't re-trigger heavy algorithmic operations, keeping the UI at 60fps at all times.
-- **Directional Normalization**: Handles both forward and backward rail arrays cleanly so route extractions never drop connecting legs.
 
 ---
 
