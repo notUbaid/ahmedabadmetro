@@ -1428,6 +1428,8 @@ export const findCommonTrainRoute = (
     }
   }
   
+  console.log("Candidates generated:", candidates.length, candidates);
+  
   if (candidates.length === 0) return null;
   
   // STEP 5: For each candidate, check if User 2 can reach it in time
@@ -1455,8 +1457,15 @@ export const findCommonTrainRoute = (
       continue;
     }
     
-    // Find a route from User 2's origin to this interchange station
-    const routeToInterchange = planRouteWithDeparture(userOriginId, candidate.stationId, currentTimeMins);
+    // Find the earliest possible departure from User 2's origin to this interchange station
+    const departures = getAvailableDepartures(userOriginId, candidate.stationId);
+    const possibleDepartures = departures.filter(d => d.departureMinutes >= currentTimeMins);
+    if (possibleDepartures.length === 0) continue;
+    
+    possibleDepartures.sort((a, b) => a.arrivalMinutes - b.arrivalMinutes);
+    const bestDeparture = possibleDepartures[0];
+    
+    const routeToInterchange = planRouteWithDeparture(userOriginId, candidate.stationId, bestDeparture.departureMinutes);
     
     if (routeToInterchange) {
       const arrivalAtInterchange = routeToInterchange.arrivalMinutes;
@@ -1472,6 +1481,8 @@ export const findCommonTrainRoute = (
       }
     }
   }
+  
+  console.log("Viable options:", viableOptions.length, viableOptions);
   
   if (viableOptions.length === 0) return null;
   
