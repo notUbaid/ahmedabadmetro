@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { X, Home, Briefcase, Train, ArrowLeftRight, Trash2 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { getOrganizedStations } from '@/lib/routePlanner';
