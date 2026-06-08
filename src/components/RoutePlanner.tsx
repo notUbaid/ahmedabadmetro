@@ -539,13 +539,13 @@ export const RoutePlanner = ({
         </div>
 
         {/* Late Night Alert */}
-        {new Date().getHours() >= 22 || new Date().getHours() < 6 ? (
+        {new Date().getHours() >= 23 || new Date().getHours() < 6 ? (
           <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-start gap-3">
             <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Outside Operating Hours</p>
               <p className="text-xs text-amber-600/90 dark:text-amber-500/90 mt-0.5">
-                Metro trains operate between 6:20 AM and 10:00 PM. Routes shown now are estimated for tomorrow morning.
+                Service hours are 6:20 AM - 11:00 PM (Ahmedabad) and 6:20 AM - 10:00 PM (Gandhinagar). Routes shown now are estimated for tomorrow morning.
               </p>
             </div>
           </div>
