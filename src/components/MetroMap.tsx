@@ -158,8 +158,8 @@ export const MetroMap = () => {
     const nearestStations = findClosestStations(lat, lng, 1);
     const nearestId = nearestStations.length > 0 ? nearestStations[0].id : null;
 
-    // Trigger threshold: 15 km (allows 3-4km distance as requested)
-    const MAX_COMMUTE_TRIGGER_DIST = 15000; 
+    // Trigger threshold: 5 km (allows 3-4km distance as requested)
+    const MAX_COMMUTE_TRIGGER_DIST = 5000;  
 
     if (distToHome < distToWork && distToHome < MAX_COMMUTE_TRIGGER_DIST) {
       if (shouldShowCommuteCard('homeToWork')) {
