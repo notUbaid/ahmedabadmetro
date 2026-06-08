@@ -180,12 +180,10 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 const searchNominatim = async (query: string): Promise<SearchResult[]> => {
   try {
     const params = new URLSearchParams({
-      q: `${query}, Ahmedabad, Gujarat, India`,
-      format: 'json',
+      q: `${query} Ahmedabad`,
+      format: 'jsonv2',
       addressdetails: '1',
-      limit: '5',
-      viewbox: '72.35,22.85,72.85,23.25',
-      bounded: '1'
+      limit: '5'
     });
 
     const response = await fetch(
