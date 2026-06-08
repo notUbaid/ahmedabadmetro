@@ -912,6 +912,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 // Get all stations as options for selection
 export const getStationOptions = (): { id: string; name: string; lines: string[]; isInterchange?: boolean }[] => {
   return Object.values(stations)
+    .filter(s => !s.isWIP)
     .map(s => ({ id: s.id, name: s.name, lines: s.lines, isInterchange: s.isInterchange }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
@@ -921,7 +922,7 @@ export const getOrganizedStations = (): {
   interchanges: { id: string; name: string; lines: string[] }[];
   byLine: { line: string; lineName: string; stations: { id: string; name: string; lines: string[] }[] }[];
 } => {
-  const allStations = Object.values(stations);
+  const allStations = Object.values(stations).filter(s => !s.isWIP);
   
   // Get interchange stations
   const interchanges = allStations
