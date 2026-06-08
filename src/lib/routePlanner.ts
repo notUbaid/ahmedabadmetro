@@ -1374,6 +1374,78 @@ export interface SharedSegment {
  * 6. Build the complete route: User 2's connecting journey + shared train segment
  */
 
+const extractLegsFromRoute = (route: PlannedRoute): {
+  schedule: TrainSchedule;
+  fromId: string;
+  toId: string;
+  fromIdx: number;
+  toIdx: number;
+  departMinutes: number;
+  arriveMinutes: number;
+}[] => {
+  const extractedLegs: any[] = [];
+  let legFromId: string = '';
+  let legFromIdx: number = -1;
+  let legDepartMin: number = 0;
+  let currentSchedule: TrainSchedule | null = null;
+  
+  for (const step of route.steps) {
+    if (step.type === 'board' && step.trainId && step.station) {
+      currentSchedule = trainSchedules.find(s => s.id === step.trainId) || null;
+      if (currentSchedule) {
+        legFromId = step.station.id;
+        legFromIdx = currentSchedule.stations.indexOf(legFromId);
+        const schedStart = parseTimeToMinutes(currentSchedule.startTime);
+        legDepartMin = schedStart + (legFromIdx >= 0 ? currentSchedule.stationTimes[legFromIdx] : 0);
+      }
+    } else if (step.type === 'interchange' && step.station && currentSchedule) {
+      const legToId = step.station.id;
+      const legToIdx = currentSchedule.stations.indexOf(legToId);
+      const schedStart = parseTimeToMinutes(currentSchedule.startTime);
+      const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
+      
+      if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
+        extractedLegs.push({
+          schedule: currentSchedule,
+          fromId: legFromId,
+          toId: legToId,
+          fromIdx: legFromIdx,
+          toIdx: legToIdx,
+          departMinutes: legDepartMin,
+          arriveMinutes: legArriveMin
+        });
+      }
+      
+      currentSchedule = trainSchedules.find(s => s.id === step.trainId) || null;
+      if (currentSchedule) {
+        legFromId = step.station.id;
+        legFromIdx = currentSchedule.stations.indexOf(legFromId);
+        const newSchedStart = parseTimeToMinutes(currentSchedule.startTime);
+        legDepartMin = newSchedStart + (legFromIdx >= 0 ? currentSchedule.stationTimes[legFromIdx] : 0);
+      }
+    } else if (step.type === 'alight' && step.station && currentSchedule) {
+      const legToId = step.station.id;
+      const legToIdx = currentSchedule.stations.indexOf(legToId);
+      const schedStart = parseTimeToMinutes(currentSchedule.startTime);
+      const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
+      
+      if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
+        extractedLegs.push({
+          schedule: currentSchedule,
+          fromId: legFromId,
+          toId: legToId,
+          fromIdx: legFromIdx,
+          toIdx: legToIdx,
+          departMinutes: legDepartMin,
+          arriveMinutes: legArriveMin
+        });
+      }
+      currentSchedule = null;
+    }
+  }
+  return extractedLegs;
+};
+
 export const findCommonTrainRoute = (
   sharedSegments: SharedSegment[],
   userOriginId: string,
@@ -1531,8 +1603,8 @@ export const findCommonTrainRoute = (
     const travelTimeA = a.arrivalAtInterchange - currentTimeMins;
     const travelTimeB = b.arrivalAtInterchange - currentTimeMins;
     
-    // If travel times are significantly different (e.g., > 15 mins), pick the closer one
-    if (Math.abs(travelTimeA - travelTimeB) > 15) {
+    // If travel times are significantly different (e.g., > 5 mins), pick the closer one
+    if (Math.abs(travelTimeA - travelTimeB) > 5) {
       return travelTimeA - travelTimeB;
     }
     
@@ -1578,45 +1650,7 @@ export const findCommonTrainRoute = (
   
   // Add the connecting journey legs (if any)
   if (bestRouteToInterchange) {
-    // Extract legs from the route to interchange
-    let lastTrainId: string | null = null;
-    let legFromId: string = userOriginId;
-    let legFromIdx: number = -1;
-    let legDepartMin: number = 0;
-    let currentSchedule: TrainSchedule | null = null;
-    
-    for (const step of bestRouteToInterchange.steps) {
-      if (step.type === 'board' && step.trainId) {
-        lastTrainId = step.trainId;
-        currentSchedule = trainSchedules.find(s => s.id === step.trainId) || null;
-        if (currentSchedule && step.station) {
-          legFromId = step.station.id;
-          legFromIdx = currentSchedule.stations.indexOf(legFromId);
-          const schedStart = parseTimeToMinutes(currentSchedule.startTime);
-          legDepartMin = schedStart + (legFromIdx >= 0 ? currentSchedule.stationTimes[legFromIdx] : 0);
-        }
-      } else if (step.type === 'alight' && step.station && currentSchedule && lastTrainId) {
-        const legToId = step.station.id;
-        const legToIdx = currentSchedule.stations.indexOf(legToId);
-        const schedStart = parseTimeToMinutes(currentSchedule.startTime);
-        const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
-        
-        if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
-          legs.push({
-            schedule: currentSchedule,
-            fromId: legFromId,
-            toId: legToId,
-            fromIdx: legFromIdx,
-            toIdx: legToIdx,
-            departMinutes: legDepartMin,
-            arriveMinutes: legArriveMin
-          });
-        }
-        
-        lastTrainId = null;
-        currentSchedule = null;
-      }
-    }
+    legs.push(...extractLegsFromRoute(bestRouteToInterchange));
   }
   
   // Add the shared train leg
@@ -1636,45 +1670,7 @@ export const findCommonTrainRoute = (
     const continueRoute = planRouteWithDeparture(alightStationId, userDestId, arriveAtAlight + MIN_TRANSFER_TIME);
     
     if (continueRoute) {
-      // Extract legs from the continuation route
-      let lastTrainId: string | null = null;
-      let legFromId: string = alightStationId;
-      let legFromIdx: number = -1;
-      let legDepartMin: number = 0;
-      let currentSchedule: TrainSchedule | null = null;
-      
-      for (const step of continueRoute.steps) {
-        if (step.type === 'board' && step.trainId) {
-          lastTrainId = step.trainId;
-          currentSchedule = trainSchedules.find(s => s.id === step.trainId) || null;
-          if (currentSchedule && step.station) {
-            legFromId = step.station.id;
-            legFromIdx = currentSchedule.stations.indexOf(legFromId);
-            const schedStart = parseTimeToMinutes(currentSchedule.startTime);
-            legDepartMin = schedStart + (legFromIdx >= 0 ? currentSchedule.stationTimes[legFromIdx] : 0);
-          }
-        } else if (step.type === 'alight' && step.station && currentSchedule && lastTrainId) {
-          const legToId = step.station.id;
-          const legToIdx = currentSchedule.stations.indexOf(legToId);
-          const schedStart = parseTimeToMinutes(currentSchedule.startTime);
-          const legArriveMin = schedStart + (legToIdx >= 0 ? currentSchedule.stationTimes[legToIdx] : 0);
-          
-          if (legFromIdx >= 0 && legToIdx >= 0 && legToIdx !== legFromIdx) {
-            legs.push({
-              schedule: currentSchedule,
-              fromId: legFromId,
-              toId: legToId,
-              fromIdx: legFromIdx,
-              toIdx: legToIdx,
-              departMinutes: legDepartMin,
-              arriveMinutes: legArriveMin
-            });
-          }
-          
-          lastTrainId = null;
-          currentSchedule = null;
-        }
-      }
+      legs.push(...extractLegsFromRoute(continueRoute));
     }
   }
   
