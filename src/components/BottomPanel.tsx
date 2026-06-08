@@ -285,7 +285,7 @@ export const BottomPanel = ({
                             />
                             <div className="min-w-0">
                               <div className="text-sm font-semibold truncate">{train.destination}</div>
-                              <div className="text-xs text-muted-foreground">{train.line.toUpperCase()} • {train.direction}</div>
+                              <div className="text-xs text-muted-foreground">{train.direction}</div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">
