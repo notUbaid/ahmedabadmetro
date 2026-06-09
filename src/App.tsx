@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
 import { WelcomeOverlay } from "@/components/WelcomeOverlay";
+import { Analytics } from "@vercel/analytics/react";
 
 import { Train } from "lucide-react";
 
@@ -54,6 +55,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        <Analytics />
       </TooltipProvider>
     </MetroCardProvider>
   </QueryClientProvider>
