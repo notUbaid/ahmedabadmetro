@@ -540,15 +540,17 @@ export const MetroMap = () => {
 
               lat = geometry[i][0] + (geometry[i + 1][0] - geometry[i][0]) * segProgress;
               lng = geometry[i][1] + (geometry[i + 1][1] - geometry[i][1]) * segProgress;
-            } else if (fromStation && toStation) {
+            } else {
               // Geometry unreliable; fallback to straight line
               lat = fromStation.coordinates[0] + (toStation.coordinates[0] - fromStation.coordinates[0]) * pos.progress;
               lng = fromStation.coordinates[1] + (toStation.coordinates[1] - fromStation.coordinates[1]) * pos.progress;
+              pos._isGeometryUnreliable = true; // Flag for bearing calculation
             }
           } else if (fromStation && toStation) {
             // Fallback to straight line between stations
             lat = fromStation.coordinates[0] + (toStation.coordinates[0] - fromStation.coordinates[0]) * pos.progress;
             lng = fromStation.coordinates[1] + (toStation.coordinates[1] - fromStation.coordinates[1]) * pos.progress;
+            pos._isGeometryUnreliable = true;
           }
         }
 
@@ -561,7 +563,9 @@ export const MetroMap = () => {
         const segKey = `${pos.fromStationId}-${pos.toStationId}`;
         const revKey = `${pos.toStationId}-${pos.fromStationId}`;
         const bearingEntry = routeSegmentsRef.current.get(segKey) || routeSegmentsRef.current.get(revKey);
-        if (bearingEntry && bearingEntry.geometry.length >= 2) {
+        
+        // If geometry is missing or unreliable (e.g. disconnected station), fallback to straight line bearing
+        if (bearingEntry && bearingEntry.geometry.length >= 2 && !(pos as any)._isGeometryUnreliable) {
           const geomForBearing = bearingEntry.geometry;
           const dists = bearingEntry.dists;
           const totalDist = bearingEntry.totalDist;
