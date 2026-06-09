@@ -26,7 +26,7 @@ export const stations: Record<string, Station> = {
   gurukul_road: { id: 'gurukul_road', name: 'Gurukul Road', nameGu: 'ગુરુકુલ રોડ', coordinates: [23.0458829, 72.5348734], lines: ['blue'] },
   gujarat_university: { id: 'gujarat_university', name: 'Gujarat University', nameGu: 'ગુજરાત યુનિવર્સિટી', coordinates: [23.0448477, 72.5435296], lines: ['blue'] },
   commerce_six_road: { id: 'commerce_six_road', name: 'Commerce Six Road', nameGu: 'કોમર્સ છ રસ્તા', coordinates: [23.0407013, 72.552973], lines: ['blue'] },
-  stadium: { id: 'stadium', name: 'Stadium', nameGu: 'સ્ટેડિયમ', coordinates: [23.0398414, 72.5616768], lines: ['blue'] },
+  stadium: { id: 'stadium', name: 'S P Stadium', nameGu: 'સ્ટેડિયમ', coordinates: [23.0398414, 72.5616768], lines: ['blue'] },
   old_high_court: { id: 'old_high_court', name: 'Old High Court', nameGu: 'જૂની હાઇ કોર્ટ', coordinates: [23.0372892, 72.5672065], lines: ['blue', 'red'], isInterchange: true },
   shahpur: { id: 'shahpur', name: 'Shahpur', nameGu: 'શાહપુર', coordinates: [23.0392105, 72.5810327], lines: ['blue'], isUnderground: true },
   gheekanta: { id: 'gheekanta', name: 'Gheekanta', nameGu: 'ઘીકાંટા', coordinates: [23.028794, 72.5867752], lines: ['blue'], isUnderground: true },
