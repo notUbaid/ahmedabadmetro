@@ -149,10 +149,19 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
       const arrivalMin = Math.floor(arrivalMinutes % 60);
 
       const destinationId = schedule.stations[schedule.stations.length - 1];
+      
+      let directionStr = '';
+      if (schedule.line === 'blue') {
+        directionStr = schedule.direction === 'forward' ? 'Eastbound' : 'Westbound';
+      } else if (schedule.line === 'red') {
+        directionStr = schedule.direction === 'forward' ? 'Northbound' : 'Southbound';
+      } else {
+        directionStr = `towards ${formatStationName(destinationId)}`;
+      }
 
       upcoming.push({
         arrivalTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
-        direction: schedule.direction === 'forward' ? `towards ${schedule.stations[schedule.stations.length - 1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : `towards ${schedule.stations[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+        direction: directionStr,
         line: schedule.line,
         minutesAway: Math.round(minutesAway),
         destination: formatStationName(destinationId),
