@@ -5,11 +5,11 @@ import "./index.css";
 
 // Register service worker for offline support
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  registerSW({
+  const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
       if (confirm('New version available! Reload to update?')) {
-        window.location.reload();
+        updateSW(true);
       }
     },
     onRegisterError(error) {
