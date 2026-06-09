@@ -107,11 +107,22 @@ const buildLineCache = (lineStationsList, features) => {
       for (let j = i + 1; j < nodes.length; j++) {
         if (adj[j].length === 1) { 
           const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-          if (dist < MAX_GAP) {
+          if (dist < 0.005) {
             adj[i].push(j);
             adj[j].push(i);
           }
         }
+      }
+    }
+  }
+
+  // Connect parallel tracks
+  for (let i = lineStationsList.length; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+      if (dist < 0.0005) {
+        adj[i].push(j);
+        adj[j].push(i);
       }
     }
   }

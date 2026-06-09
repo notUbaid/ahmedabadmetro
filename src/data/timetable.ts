@@ -26,7 +26,25 @@ export const lineStations: Record<'blue' | 'red' | 'green' | 'purple', string[]>
   blue: trainSchedules.find(s => s.line === 'blue')?.stations || LINE_TIMINGS.blue.stations,
   red: trainSchedules.find(s => s.line === 'red')?.stations || LINE_TIMINGS.red.stations,
   green: trainSchedules.find(s => s.line === 'green')?.stations || LINE_TIMINGS.green.stations,
-  purple: LINE_TIMINGS.purple.stations,
+  purple: trainSchedules.find(s => s.line === 'purple')?.stations || LINE_TIMINGS.purple.stations,
+};
+
+// Get all unique adjacent station pairs across all train schedules.
+// This is needed because through-running trains (e.g. purple/green going
+// through red line corridor) use station pairs not in a single line's cache.
+export const getAllAdjacentStationPairs = (): [string, string][] => {
+  const seen = new Set<string>();
+  const pairs: [string, string][] = [];
+  for (const schedule of trainSchedules) {
+    for (let i = 0; i < schedule.stations.length - 1; i++) {
+      const key = `${schedule.stations[i]}-${schedule.stations[i + 1]}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        pairs.push([schedule.stations[i], schedule.stations[i + 1]]);
+      }
+    }
+  }
+  return pairs;
 };
 
 // Line metadata (kept for UI)
@@ -119,6 +137,8 @@ const formatStationName = (stationId: string): string => {
 export const getUpcomingTrains = (stationId: string, limit = 3) => {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const dayOfWeek = now.getDay();
+  const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   const upcoming: {
     arrivalTime: string;
@@ -131,6 +151,8 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
   }[] = [];
 
   for (const schedule of trainSchedules) {
+    // Filter by day type — don't show Sunday/Saturday trains on weekdays
+    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
     if (stationIndex === schedule.stations.length - 1) continue;

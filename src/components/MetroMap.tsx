@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, trainSchedules, lineStations } from '@/data/timetable';
+import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
@@ -1125,6 +1125,142 @@ export const MetroMap = () => {
         buildLineCache(lineStations.red, red);
         buildLineCache(lineStations.green, green);
         buildLineCache(lineStations.purple, purple);
+
+        // Fill in missing station pairs from through-running train schedules.
+        // Through-running trains (e.g. purple APMC→GIFT) traverse station pairs
+        // that aren't in any single line's cache. Build those using all features.
+        const allPairs = getAllAdjacentStationPairs();
+        const allFeatures = [...blue, ...red, ...green, ...purple];
+        const missingPairs = allPairs.filter(([s1, s2]) =>
+          !routeSegmentsRef.current.has(`${s1}-${s2}`) &&
+          !routeSegmentsRef.current.has(`${s2}-${s1}`)
+        );
+        if (missingPairs.length > 0) {
+          // Build a single Dijkstra graph from ALL features to resolve missing pairs
+          const missingStationIds = new Set<string>();
+          missingPairs.forEach(([s1, s2]) => { missingStationIds.add(s1); missingStationIds.add(s2); });
+          const missingStationsList = [...missingStationIds];
+
+          const nodes: [number, number][] = [];
+          const adj: number[][] = [];
+
+          // Add station nodes
+          const stationNodeMap = new Map<string, number>();
+          missingStationsList.forEach(id => {
+            const st = stations[id];
+            if (!st) return;
+            stationNodeMap.set(id, nodes.length);
+            nodes.push([st.coordinates[0], st.coordinates[1]]);
+            adj.push([]);
+          });
+
+          // Add all GeoJSON track nodes
+          allFeatures.forEach(f => {
+            if (f.geometry.type !== 'LineString') return;
+            const coords = (f.geometry as GeoJSON.LineString).coordinates as [number, number][];
+            const startIdx = nodes.length;
+            coords.forEach(c => {
+              nodes.push([c[1], c[0]]);
+              adj.push([]);
+            });
+            for (let i = 0; i < coords.length - 1; i++) {
+              adj[startIdx + i].push(startIdx + i + 1);
+              adj[startIdx + i + 1].push(startIdx + i);
+            }
+          });
+
+          // Connect stations to nearest track nodes
+          for (const [id, nodeIdx] of stationNodeMap) {
+            let closestNode = -1;
+            let minDist = 0.05;
+            for (let j = missingStationsList.length; j < nodes.length; j++) {
+              const dist = Math.sqrt(Math.pow(nodes[nodeIdx][0] - nodes[j][0], 2) + Math.pow(nodes[nodeIdx][1] - nodes[j][1], 2));
+              if (dist < minDist) {
+                minDist = dist;
+                closestNode = j;
+              }
+            }
+            if (closestNode !== -1) {
+              adj[nodeIdx].push(closestNode);
+              adj[closestNode].push(nodeIdx);
+            }
+          }
+
+          // Connect close track nodes (parallel tracks)
+          for (let i = missingStationsList.length; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+              if (dist < 0.0005) {
+                adj[i].push(j);
+                adj[j].push(i);
+              }
+            }
+          }
+
+          // Connect fragmented endpoints
+          for (let i = missingStationsList.length; i < nodes.length; i++) {
+            if (adj[i].length === 1) {
+              for (let j = i + 1; j < nodes.length; j++) {
+                if (adj[j].length === 1) {
+                  const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+                  if (dist < 0.005) {
+                    adj[i].push(j);
+                    adj[j].push(i);
+                  }
+                }
+              }
+            }
+          }
+
+          // Run Dijkstra for each missing pair
+          for (const [s1, s2] of missingPairs) {
+            const startNode = stationNodeMap.get(s1);
+            const endNode = stationNodeMap.get(s2);
+            if (startNode === undefined || endNode === undefined) continue;
+
+            const dist = new Float32Array(nodes.length).fill(Infinity);
+            const prev = new Int32Array(nodes.length).fill(-1);
+            const visited = new Uint8Array(nodes.length);
+            dist[startNode] = 0;
+
+            for (let step = 0; step < nodes.length; step++) {
+              let u = -1;
+              let minD = Infinity;
+              for (let v = 0; v < nodes.length; v++) {
+                if (!visited[v] && dist[v] < minD) { minD = dist[v]; u = v; }
+              }
+              if (u === -1 || u === endNode) break;
+              visited[u] = 1;
+              for (const v of adj[u]) {
+                if (visited[v]) continue;
+                const dx = nodes[u][0] - nodes[v][0];
+                const dy = nodes[u][1] - nodes[v][1];
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if (dist[u] + d < dist[v]) { dist[v] = dist[u] + d; prev[v] = u; }
+              }
+            }
+
+            if (prev[endNode] !== -1) {
+              const path: [number, number][] = [];
+              let curr = endNode;
+              while (curr !== -1) { path.push(nodes[curr]); curr = prev[curr]; }
+              path.reverse();
+
+              const dists: number[] = [0];
+              let totalDist = 0;
+              for (let k = 0; k < path.length - 1; k++) {
+                const d = Math.sqrt(Math.pow(path[k+1][0]-path[k][0],2) + Math.pow(path[k+1][1]-path[k][1],2));
+                totalDist += d;
+                dists.push(totalDist);
+              }
+
+              routeSegmentsRef.current.set(`${s1}-${s2}`, { geometry: path, dists, totalDist });
+              const revPath = [...path].reverse();
+              const revDists = [...dists].map(d => totalDist - d).reverse();
+              routeSegmentsRef.current.set(`${s2}-${s1}`, { geometry: revPath, dists: revDists, totalDist });
+            }
+          }
+        }
 
       })
       .catch(err => console.error('Failed to load metro routes:', err));
