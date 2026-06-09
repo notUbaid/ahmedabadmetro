@@ -133,6 +133,37 @@ const formatStationName = (stationId: string): string => {
   return stationId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
+const getTrainLineAtStation = (schedule: TrainSchedule, stationId: string): 'blue' | 'red' | 'green' | 'purple' | undefined => {
+  const station = stations[stationId];
+  if (!station) return undefined;
+
+  const stationIndex = schedule.stations.indexOf(stationId);
+  if (stationIndex === -1) return undefined;
+
+  if (station.lines.length === 1) {
+    return station.lines[0] as 'blue' | 'red' | 'green' | 'purple';
+  }
+
+  const nextStationId = schedule.stations[stationIndex + 1];
+  const prevStationId = stationIndex > 0 ? schedule.stations[stationIndex - 1] : undefined;
+
+  if (nextStationId) {
+    const candidate = station.lines.find(line => stations[nextStationId]?.lines.includes(line));
+    if (candidate) return candidate as 'blue' | 'red' | 'green' | 'purple';
+  }
+
+  if (prevStationId) {
+    const candidate = station.lines.find(line => stations[prevStationId]?.lines.includes(line));
+    if (candidate) return candidate as 'blue' | 'red' | 'green' | 'purple';
+  }
+
+  if (station.lines.includes(schedule.line)) {
+    return schedule.line;
+  }
+
+  return station.lines[0] as 'blue' | 'red' | 'green' | 'purple';
+};
+
 // Returns trains arriving within next 120 minutes for stationIndex visualization
 export const getUpcomingTrains = (stationId: string, limit = 3) => {
   const now = new Date();
@@ -171,11 +202,12 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
       const arrivalMin = Math.floor(arrivalMinutes % 60);
 
       const destinationId = schedule.stations[schedule.stations.length - 1];
+      const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
       
       let directionStr = '';
-      if (schedule.line === 'blue') {
+      if (currentLine === 'blue') {
         directionStr = schedule.direction === 'forward' ? 'Eastbound' : 'Westbound';
-      } else if (schedule.line === 'red') {
+      } else if (currentLine === 'red') {
         directionStr = schedule.direction === 'forward' ? 'Northbound' : 'Southbound';
       } else {
         directionStr = `towards ${formatStationName(destinationId)}`;
@@ -184,7 +216,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
       upcoming.push({
         arrivalTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
         direction: directionStr,
-        line: schedule.line,
+        line: currentLine,
         minutesAway: Math.round(minutesAway),
         destination: formatStationName(destinationId),
         trainId: schedule.id,
@@ -211,11 +243,12 @@ export const getAllTrainsForStation = (stationId: string) => {
     const arrivalMin = Math.floor(arrivalMinutes % 60);
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
+    const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
 
     trains.push({
       time: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
       destination: formatStationName(destinationId),
-      line: schedule.line,
+      line: currentLine,
       minutes: arrivalMinutes,
     });
   }
@@ -237,10 +270,11 @@ export const getLastTrainWarnings = (stationId: string) => {
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
+    const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
     const existing = destinationLastTrains.get(destinationId);
 
     if (!existing || arrivalMinutes > existing.arrivalMinutes) {
-      destinationLastTrains.set(destinationId, { line: schedule.line, arrivalMinutes });
+      destinationLastTrains.set(destinationId, { line: currentLine, arrivalMinutes });
     }
   }
 
