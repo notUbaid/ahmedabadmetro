@@ -123,8 +123,9 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
     // Skip spreadsheet blanks/unmapped rows.
     if (!mappedStationId) continue;
 
-    if (!groups.has(trainId)) groups.set(trainId, []);
-    groups.get(trainId).push({
+    const groupKey = `${trainId}_${day}`;
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push({
       day,
       trainId,
       route: r.Route || '',
@@ -139,11 +140,11 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
     });
   }
 
-  const trainIds = [...groups.keys()];
+  const groupKeys = [...groups.keys()];
   const schedules = [];
 
-  for (const trainId of trainIds) {
-    const items = groups.get(trainId);
+  for (const key of groupKeys) {
+    const items = groups.get(key);
     items.sort((a, b) => a.stationOrder - b.stationOrder);
 
     // Determine start time: departure time of first station row
@@ -158,9 +159,10 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
     const derived = dirTransform({ sheetName, row: items[0], route: items[0].route, rawDirection: items[0].rawDirection });
 
     schedules.push({
-      id: trainId,
+      id: key, // Use the unique group key (trainId_day)
       line: derived.line,
       direction: derived.direction,
+      dayType: items[0].day,
       startTime,
       stations: stationsArr,
       stationTimes: arrivalMinutes,

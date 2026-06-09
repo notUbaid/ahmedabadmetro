@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, trainSchedules } from '@/data/timetable';
+import { getCurrentTrainPositions, trainSchedules, lineStations } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
@@ -824,69 +824,112 @@ export const MetroMap = () => {
         const koteshwarLat = stations.koteshwar_road?.coordinates?.[0] ?? 23.1031114;
         const EPS = 0.0003;
 
-        // Helper to extract geometry between two stations from a line feature
-        const cacheRouteSegments = (lineFeature: GeoJSON.Feature, lineName: string) => {
-          if (lineFeature.geometry.type !== 'LineString') return;
-          const coords = (lineFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
-          // Swap GeoJSON lng/lat to Leaflet lat/lng
-          const path = coords.map(c => [c[1], c[0]] as [number, number]);
+        // Robust helper to find continuous path between stations using all line features
+        const buildLineCache = (lineStationsList: string[], features: GeoJSON.Feature[]) => {
+          if (!lineStationsList || lineStationsList.length < 2) return;
+          
+          const nodes: [number, number][] = [];
+          const adj: number[][] = [];
 
-          // Find all stations on this line
-          const lineStationsList = Object.values(stations).filter(s =>
-            s.lines.some(l => lineName.toLowerCase().includes(l))
-          );
+          // 1. Add all station coordinates as nodes
+          const stationNodes = lineStationsList.map(id => {
+            const st = stations[id];
+            nodes.push([st.coordinates[0], st.coordinates[1]]);
+            adj.push([]);
+            return nodes.length - 1;
+          });
 
-          // Sort these stations by finding their closest point on the path
-          const stationsOnPath = lineStationsList.map(s => {
-            let minDist = Infinity;
-            let idx = -1;
-            for (let i = 0; i < path.length; i++) {
-              const d = Math.pow(path[i][0] - s.coordinates[0], 2) + Math.pow(path[i][1] - s.coordinates[1], 2);
-              if (d < minDist) {
-                minDist = d;
-                idx = i;
+          // 2. Add all GeoJSON points and connect adjacent ones
+          features.forEach(f => {
+            if (f.geometry.type !== 'LineString') return;
+            const coords = (f.geometry as GeoJSON.LineString).coordinates as [number, number][];
+            const startIdx = nodes.length;
+            coords.forEach(c => {
+              nodes.push([c[1], c[0]]); // GeoJSON is [lng, lat], Leaflet is [lat, lng]
+              adj.push([]);
+            });
+            for (let i = 0; i < coords.length - 1; i++) {
+              adj[startIdx + i].push(startIdx + i + 1);
+              adj[startIdx + i + 1].push(startIdx + i);
+            }
+          });
+
+          // 3. Connect disjoint features and stations to the path if they are very close (< ~300m)
+          const MAX_GAP = 0.003;
+          for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              const dx = nodes[i][0] - nodes[j][0];
+              const dy = nodes[i][1] - nodes[j][1];
+              if (Math.abs(dx) < MAX_GAP && Math.abs(dy) < MAX_GAP) {
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < MAX_GAP) {
+                  adj[i].push(j);
+                  adj[j].push(i);
+                }
               }
             }
-            return { id: s.id, idx, dist: minDist };
-          }).sort((a, b) => a.idx - b.idx);
+          }
 
-          // Cache segments between adjacent pairs (both directions)
-          for (let i = 0; i < stationsOnPath.length - 1; i++) {
-            const s1 = stationsOnPath[i];
-            const s2 = stationsOnPath[i + 1];
+          // 4. Find shortest path between each adjacent station pair
+          for (let i = 0; i < lineStationsList.length - 1; i++) {
+            const startNode = i;
+            const endNode = i + 1;
+            const s1 = lineStationsList[i];
+            const s2 = lineStationsList[i + 1];
 
-            // Skip if indices are invalid or same
-            if (s1.idx < 0 || s2.idx < 0 || s1.idx >= s2.idx) continue;
+            const dist = new Float32Array(nodes.length).fill(Infinity);
+            const prev = new Int32Array(nodes.length).fill(-1);
+            const visited = new Uint8Array(nodes.length);
+            dist[startNode] = 0;
 
-            // Get slice of path
-            const segment = path.slice(s1.idx, s2.idx + 1);
+            for (let step = 0; step < nodes.length; step++) {
+              let u = -1;
+              let minDist = Infinity;
+              for (let v = 0; v < nodes.length; v++) {
+                if (!visited[v] && dist[v] < minDist) {
+                  minDist = dist[v];
+                  u = v;
+                }
+              }
+              if (u === -1 || u === endNode) break;
+              visited[u] = 1;
 
-            // Skip if segment is too short
-            if (segment.length < 2) continue;
-
-            // Ensure we start exactly at station coord to avoid jumps
-            if (stations[s1.id]) segment[0] = [...stations[s1.id].coordinates] as [number, number];
-            if (stations[s2.id]) segment[segment.length - 1] = [...stations[s2.id].coordinates] as [number, number];
-
-            // Precompute per-segment distances and total length (Euclidean on lat/lng)
-            const dists: number[] = [0];
-            let totalDist = 0;
-            for (let i = 0; i < segment.length - 1; i++) {
-              const d = Math.sqrt(Math.pow(segment[i + 1][0] - segment[i][0], 2) + Math.pow(segment[i + 1][1] - segment[i][1], 2));
-              totalDist += d;
-              dists.push(totalDist);
+              for (const v of adj[u]) {
+                if (visited[v]) continue;
+                const dx = nodes[u][0] - nodes[v][0];
+                const dy = nodes[u][1] - nodes[v][1];
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if (dist[u] + d < dist[v]) {
+                  dist[v] = dist[u] + d;
+                  prev[v] = u;
+                }
+              }
             }
 
-            const entry = { geometry: segment, dists, totalDist };
+            if (prev[endNode] !== -1) {
+              const path: [number, number][] = [];
+              let curr = endNode;
+              while (curr !== -1) {
+                path.push(nodes[curr]);
+                curr = prev[curr];
+              }
+              path.reverse();
 
-            // Cache forward direction
-            if (!routeSegmentsRef.current.has(`${s1.id}-${s2.id}`)) {
-              routeSegmentsRef.current.set(`${s1.id}-${s2.id}`, entry);
-            }
-            // Cache reverse direction
-            if (!routeSegmentsRef.current.has(`${s2.id}-${s1.id}`)) {
-              const revEntry = { geometry: [...segment].reverse() as [number, number][], dists: [...dists].map(d => totalDist - d).reverse(), totalDist };
-              routeSegmentsRef.current.set(`${s2.id}-${s1.id}`, revEntry);
+              const dists: number[] = [0];
+              let totalDist = 0;
+              for (let k = 0; k < path.length - 1; k++) {
+                const d = Math.sqrt(Math.pow(path[k + 1][0] - path[k][0], 2) + Math.pow(path[k + 1][1] - path[k][1], 2));
+                totalDist += d;
+                dists.push(totalDist);
+              }
+
+              const entry = { geometry: path, dists, totalDist };
+              routeSegmentsRef.current.set(`${s1}-${s2}`, entry);
+
+              const revPath = [...path].reverse();
+              const revDists = [...dists].map(d => totalDist - d).reverse();
+              const revEntry = { geometry: revPath, dists: revDists, totalDist };
+              routeSegmentsRef.current.set(`${s2}-${s1}`, revEntry);
             }
           }
         };
@@ -1017,10 +1060,10 @@ export const MetroMap = () => {
 
         // Build route geometry cache for train animation
         routeSegmentsRef.current.clear();
-        blue.forEach(f => cacheRouteSegments(f, 'blue'));
-        red.forEach(f => cacheRouteSegments(f, 'red'));
-        green.forEach(f => cacheRouteSegments(f, 'green'));
-        purple.forEach(f => cacheRouteSegments(f, 'purple'));
+        buildLineCache(lineStations.blue, blue);
+        buildLineCache(lineStations.red, red);
+        buildLineCache(lineStations.green, green);
+        buildLineCache(lineStations.purple, purple);
 
       })
       .catch(err => console.error('Failed to load metro routes:', err));
@@ -1292,7 +1335,7 @@ export const MetroMap = () => {
             <div className="w-3 h-3 bg-green-500 rounded-full" />
             <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />
           </div>
-          <span className="text-sm font-medium">{activeTrainCount} trains running</span>
+          <span className="text-sm font-medium">{activeTrainCount} metros running</span>
         </div>
       )}
 

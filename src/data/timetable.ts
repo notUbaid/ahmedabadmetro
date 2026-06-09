@@ -10,6 +10,7 @@ export interface TrainSchedule {
   id: string;
   line: 'blue' | 'red' | 'green' | 'purple';
   direction: 'forward' | 'backward';
+  dayType?: string;
   startTime: string; // HH:MM format
   stations: string[]; // station IDs in order
   stationTimes: number[]; // minutes from start for each station
@@ -254,7 +255,12 @@ export const getCurrentTrainPositions = () => {
     status: 'stopped' | 'moving';
   }[] = [];
 
+  const dayOfWeek = now.getDay();
+  const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
+
   for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
+
     const startMinutes = toMinutes(schedule.startTime);
     const journeyTime = schedule.stationTimes[schedule.stationTimes.length - 1];
     const endMinutes = startMinutes + journeyTime;
