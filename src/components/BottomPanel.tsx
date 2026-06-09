@@ -62,10 +62,10 @@ export const BottomPanel = ({
   // Auto-refresh upcoming trains and last train warnings every 10 seconds
   useEffect(() => {
     if (station) {
-      setUpcomingTrains(getUpcomingTrains(station.id, 2));
+      setUpcomingTrains(getUpcomingTrains(station.id, 3));
       setLastTrainWarnings(getLastTrainWarnings(station.id));
       const interval = setInterval(() => {
-        setUpcomingTrains(getUpcomingTrains(station.id, 2));
+        setUpcomingTrains(getUpcomingTrains(station.id, 3));
         setLastTrainWarnings(getLastTrainWarnings(station.id));
       }, 10000);
       return () => clearInterval(interval);

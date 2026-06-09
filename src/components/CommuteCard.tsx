@@ -41,15 +41,26 @@ export const CommuteCard = ({
     return travelStep?.station?.id || toStation.id;
   }, [fromStation, toStation]);
 
+  // Show the first 3 upcoming trains from the departure station.
+  // Previously this filtered to only trains going all the way to the destination,
+  // but for long commutes (e.g. Paldi→GNLU), only a few trains per hour make that journey.
+  // Showing all trains in the right general direction is more practical.
   const trainsToDestination = useMemo(() => {
-    if (!fromStation || !firstTargetStationId) return [];
-    return upcomingTrains.filter(train => {
+    if (!fromStation || !firstTargetStationId) return upcomingTrains.slice(0, 3);
+    
+    // Prefer trains that actually go through the target station
+    const directTrains = upcomingTrains.filter(train => {
       const schedule = trainSchedules.find(s => s.id === train.trainId);
       if (!schedule) return false;
       const fromIdx = schedule.stations.indexOf(fromStation.id);
       const targetIdx = schedule.stations.indexOf(firstTargetStationId);
       return fromIdx !== -1 && targetIdx !== -1 && targetIdx > fromIdx;
-    }).slice(0, 3);
+    });
+    
+    if (directTrains.length >= 3) return directTrains.slice(0, 3);
+    
+    // Fall back to all upcoming trains from the station
+    return upcomingTrains.slice(0, 3);
   }, [upcomingTrains, fromStation, firstTargetStationId]);
 
   const getLiveMinutesAway = (arrivalTime: string): number => {
