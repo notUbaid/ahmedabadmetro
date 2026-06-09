@@ -38,17 +38,41 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       setIsDark(true);
     }
 
+    let promptTimeout: NodeJS.Timeout;
+
     const handleBeforeInstallPrompt = (e: Event) => {
       const event = e as BeforeInstallPromptEvent;
       event.preventDefault();
       setDeferredPrompt(event);
       setIsInstallable(true);
+
+      // Auto-prompt after 30 seconds of usage
+      promptTimeout = setTimeout(() => {
+        const triggerPrompt = async () => {
+          document.removeEventListener('click', triggerPrompt);
+          document.removeEventListener('touchstart', triggerPrompt);
+          try {
+            await event.prompt();
+            const { outcome } = await event.userChoice;
+            if (outcome === 'accepted') {
+              setIsInstallable(false);
+            }
+            setDeferredPrompt(null);
+          } catch (err) {
+            console.log('Auto-prompt prevented by browser', err);
+          }
+        };
+        // Wait for the next user interaction to trigger it to satisfy browser requirements
+        document.addEventListener('click', triggerPrompt);
+        document.addEventListener('touchstart', triggerPrompt);
+      }, 30000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      clearTimeout(promptTimeout);
     };
   }, []);
 
