@@ -12,6 +12,7 @@ export interface TrainSchedule {
   direction: 'forward' | 'backward';
   dayType?: string;
   startTime: string; // HH:MM format
+  _cachedStartMinutes?: number; // Precalculated for performance
   stations: string[]; // station IDs in order
   stationTimes: number[]; // minutes from start for each station
 }
@@ -237,6 +238,10 @@ export const getLastTrainWarnings = (stationId: string) => {
   return warnings.sort((a, b) => a.minutesRemaining - b.minutesRemaining);
 };
 
+// Cache the filtered schedules to avoid O(N) filtering on every frame
+let cachedDayType = '';
+let cachedActiveSchedules: TrainSchedule[] = [];
+
 export const getCurrentTrainPositions = () => {
   const now = new Date();
   const currentMinutes =
@@ -258,10 +263,20 @@ export const getCurrentTrainPositions = () => {
   const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
-  for (const schedule of trainSchedules) {
-    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
+  // Update cache if day changed or first run
+  if (cachedDayType !== currentDayType) {
+    cachedDayType = currentDayType;
+    cachedActiveSchedules = trainSchedules.filter(s => !s.dayType || s.dayType === currentDayType);
+    // Pre-calculate start minutes to avoid string split in animation loop
+    cachedActiveSchedules.forEach(s => {
+      if (s._cachedStartMinutes === undefined) {
+        s._cachedStartMinutes = toMinutes(s.startTime);
+      }
+    });
+  }
 
-    const startMinutes = toMinutes(schedule.startTime);
+  for (const schedule of cachedActiveSchedules) {
+    const startMinutes = schedule._cachedStartMinutes!;
     const journeyTime = schedule.stationTimes[schedule.stationTimes.length - 1];
     const endMinutes = startMinutes + journeyTime;
 

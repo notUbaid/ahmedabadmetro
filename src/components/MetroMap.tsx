@@ -572,8 +572,38 @@ export const MetroMap = () => {
             if (targetDist <= dists[segIdx + 1]) break;
           }
 
-          const [fromLat, fromLng] = geomForBearing[segIdx];
-          const [toLat, toLng] = geomForBearing[segIdx + 1];
+          let fromLat = geomForBearing[segIdx][0];
+          let fromLng = geomForBearing[segIdx][1];
+          let toLat = geomForBearing[segIdx + 1][0];
+          let toLng = geomForBearing[segIdx + 1][1];
+
+          // Look ahead to smooth out micro-segments (e.g. station perpendicular connecting to track)
+          const MIN_BEARING_DIST = 0.0005; // ~50 meters
+          let nextIdx = segIdx + 1;
+          while (nextIdx < geomForBearing.length) {
+            const d = Math.sqrt(Math.pow(geomForBearing[nextIdx][0] - fromLat, 2) + Math.pow(geomForBearing[nextIdx][1] - fromLng, 2));
+            if (d >= MIN_BEARING_DIST || nextIdx === geomForBearing.length - 1) {
+              toLat = geomForBearing[nextIdx][0];
+              toLng = geomForBearing[nextIdx][1];
+              break;
+            }
+            nextIdx++;
+          }
+
+          // If we reached the end and distance is still too short, look behind
+          if (nextIdx === geomForBearing.length - 1 && Math.sqrt(Math.pow(toLat - fromLat, 2) + Math.pow(toLng - fromLng, 2)) < MIN_BEARING_DIST) {
+            let prevIdx = segIdx;
+            while (prevIdx >= 0) {
+              const d = Math.sqrt(Math.pow(geomForBearing[prevIdx][0] - toLat, 2) + Math.pow(geomForBearing[prevIdx][1] - toLng, 2));
+              if (d >= MIN_BEARING_DIST || prevIdx === 0) {
+                fromLat = geomForBearing[prevIdx][0];
+                fromLng = geomForBearing[prevIdx][1];
+                break;
+              }
+              prevIdx--;
+            }
+          }
+
           const dLng = (toLng - fromLng) * Math.PI / 180;
           const lat1 = fromLat * Math.PI / 180;
           const lat2 = toLat * Math.PI / 180;
@@ -854,17 +884,45 @@ export const MetroMap = () => {
             }
           });
 
-          // 3. Connect disjoint features and stations to the path if they are very close (< ~300m)
+          // 3. Connect stations to their closest track node, and connect feature endpoints
           const MAX_GAP = 0.003;
-          for (let i = 0; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-              const dx = nodes[i][0] - nodes[j][0];
-              const dy = nodes[i][1] - nodes[j][1];
-              if (Math.abs(dx) < MAX_GAP && Math.abs(dy) < MAX_GAP) {
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < MAX_GAP) {
-                  adj[i].push(j);
-                  adj[j].push(i);
+          
+          // Connect stations (first lineStationsList.length nodes) to the closest track node
+          for (let i = 0; i < lineStationsList.length; i++) {
+            let closestNode = -1;
+            let minDist = MAX_GAP;
+            for (let j = lineStationsList.length; j < nodes.length; j++) {
+              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+              if (dist < minDist) {
+                minDist = dist;
+                closestNode = j;
+              }
+            }
+            if (closestNode !== -1) {
+              adj[i].push(closestNode);
+              adj[closestNode].push(i);
+            }
+          }
+
+          // Find feature endpoints
+          const endpoints: number[] = [];
+          features.forEach(f => {
+            if (f.geometry.type !== 'LineString') return;
+            // The logic above added these sequentially, so we can identify endpoints by their degree
+          });
+          // Actually, we can just connect any two track nodes if they are VERY close, but only if they belong to different features?
+          // No, we can just check all track nodes against each other but use a much smaller gap or just check endpoints.
+          // Wait, the easiest way to connect fragmented features is to connect their endpoints.
+          // Since adj[] was built sequentially for features, any track node with adj.length === 1 is an endpoint!
+          for (let i = lineStationsList.length; i < nodes.length; i++) {
+            if (adj[i].length === 1) { // It's an endpoint
+              for (let j = i + 1; j < nodes.length; j++) {
+                if (adj[j].length === 1) { // Another endpoint
+                  const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+                  if (dist < MAX_GAP) {
+                    adj[i].push(j);
+                    adj[j].push(i);
+                  }
                 }
               }
             }
