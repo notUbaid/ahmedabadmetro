@@ -312,10 +312,17 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
   for (const schedule of cachedActiveSchedules) {
     const startMinutes = schedule._cachedStartMinutes!;
     const journeyTime = schedule.stationTimes[schedule.stationTimes.length - 1];
-    const endMinutes = startMinutes + journeyTime;
 
-    // Active only between departure and final arrival (inclusive of dwell at last stop)
+    // Include dwell at the final station so trains remain visible while they're "at" the terminus.
+    const finalStationId = schedule.stations[schedule.stations.length - 1];
+    const finalIsInterchange = INTERCHANGE_STATIONS.includes(finalStationId);
+    const lastStopDwellMinutes = (finalIsInterchange ? INTERCHANGE_STOP : NORMAL_STOP) / 60;
+
+    const endMinutes = startMinutes + journeyTime + lastStopDwellMinutes;
+
+    // Active only between departure and final arrival (+ final dwell)
     if (currentMinutes < startMinutes || currentMinutes > endMinutes) continue;
+
 
     const elapsedMinutes = currentMinutes - startMinutes;
 
@@ -324,12 +331,21 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
 
     // stationTimes are cumulative arrivals; find segment by elapsed in [arr(i), arr(i+1)]
     for (let i = 0; i < schedule.stationTimes.length - 1; i++) {
-      if (elapsedMinutes >= schedule.stationTimes[i] && elapsedMinutes <= schedule.stationTimes[i + 1]) {
+      // Use half-open intervals to avoid segment-flipping at exact boundaries.
+      // This prevents flicker / duplicate segment selection around dwell edges.
+      if (elapsedMinutes >= schedule.stationTimes[i] && elapsedMinutes < schedule.stationTimes[i + 1]) {
         fromIdx = i;
         toIdx = i + 1;
         break;
       }
+
+      // If we are exactly at the final station time, clamp to the last segment's endpoint.
+      if (i === schedule.stationTimes.length - 2 && elapsedMinutes === schedule.stationTimes[i + 1]) {
+        fromIdx = i;
+        toIdx = i + 1;
+      }
     }
+
 
     const fromStationId = schedule.stations[fromIdx];
     const toStationId = schedule.stations[toIdx];

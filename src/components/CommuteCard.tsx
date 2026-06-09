@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X, Train, Clock, Users, Navigation, ArrowRight } from 'lucide-react';
 import { Station, LINE_COLORS } from '@/data/metroData';
-import { getUpcomingTrains, getCurrentHeadway, trainSchedules } from '@/data/timetable';
+import { getCurrentHeadway } from '@/data/timetable';
+import { getAvailableDepartures } from '@/lib/routePlanner';
 import { getSimpleCrowdLevel } from '@/lib/crowding';
-import { planRouteWithDeparture } from '@/lib/routePlanner';
 
 interface CommuteCardProps {
   fromStation: Station;
@@ -27,41 +27,23 @@ export const CommuteCard = ({
     return () => clearInterval(timer);
   }, []);
 
-  const upcomingTrains = getUpcomingTrains(fromStation.id, 10);
-  
-  // Memoize the target station for the first leg of the commute
-  const firstTargetStationId = useMemo(() => {
-    if (!fromStation || !toStation) return null;
-    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
-    const route = planRouteWithDeparture(fromStation.id, toStation.id, nowMins);
-    if (!route || route.steps.length < 2) return null;
-    
-    // Find the first travel step which represents the destination of the first train boarded
-    const travelStep = route.steps.find(s => s.type === 'travel');
-    return travelStep?.station?.id || toStation.id;
-  }, [fromStation, toStation]);
-
-  // Show the first 3 upcoming trains from the departure station.
-  // Previously this filtered to only trains going all the way to the destination,
-  // but for long commutes (e.g. Paldi→GNLU), only a few trains per hour make that journey.
-  // Showing all trains in the right general direction is more practical.
   const trainsToDestination = useMemo(() => {
-    if (!fromStation || !firstTargetStationId) return upcomingTrains.slice(0, 3);
-    
-    // Prefer trains that actually go through the target station
-    const directTrains = upcomingTrains.filter(train => {
-      const schedule = trainSchedules.find(s => s.id === train.trainId);
-      if (!schedule) return false;
-      const fromIdx = schedule.stations.indexOf(fromStation.id);
-      const targetIdx = schedule.stations.indexOf(firstTargetStationId);
-      return fromIdx !== -1 && targetIdx !== -1 && targetIdx > fromIdx;
-    });
-    
-    if (directTrains.length >= 3) return directTrains.slice(0, 3);
-    
-    // Fall back to all upcoming trains from the station
-    return upcomingTrains.slice(0, 3);
-  }, [upcomingTrains, fromStation, firstTargetStationId]);
+    if (!fromStation || !toStation) return [];
+
+    const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+    const departures = getAvailableDepartures(fromStation.id, toStation.id);
+
+    return departures
+      .filter(route => route.departureMinutes >= nowMinutes)
+      .slice(0, 3)
+      .map(route => ({
+        ...route,
+        line: fromStation.lines[0],
+        departureLabel: route.departureTime,
+        destinationArrivalTime: route.arrivalTime,
+        routeLabel: route.interchangeCount > 0 ? `via ${route.interchangeCount} change${route.interchangeCount > 1 ? 's' : ''}` : 'direct',
+      }));
+  }, [fromStation, toStation, currentTime]);
 
   const getLiveMinutesAway = (arrivalTime: string): number => {
     const [arrH, arrM] = arrivalTime.split(':').map(Number);
@@ -108,12 +90,12 @@ export const CommuteCard = ({
           {trainsToDestination.length > 0 ? (
             <div className="space-y-2">
               {trainsToDestination.map((train, idx) => {
-                const liveMinutes = getLiveMinutesAway(train.arrivalTime);
-                const crowd = getSimpleCrowdLevel(train.line, train.trainId);
+                const liveMinutes = getLiveMinutesAway(train.departureTime);
+                const crowd = getSimpleCrowdLevel(train.line);
                 
                 return (
                   <div 
-                    key={`${train.arrivalTime}-${idx}`}
+                    key={`${train.departureTime}-${idx}`}
                     className="flex items-center justify-between p-2.5 bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl shadow-sm"
                   >
                     <div className="flex items-center gap-3">
@@ -122,8 +104,10 @@ export const CommuteCard = ({
                         style={{ backgroundColor: LINE_COLORS[train.line as keyof typeof LINE_COLORS] }}
                       />
                       <div>
-                        <div className="text-sm font-semibold">{train.arrivalTime}</div>
-                        <div className="text-xs text-muted-foreground">{train.line.toUpperCase()}</div>
+                        <div className="text-sm font-semibold">{train.departureTime}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {train.line.toUpperCase()} • {train.routeLabel} • reaches {toStation.name} at {train.destinationArrivalTime}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -147,7 +131,7 @@ export const CommuteCard = ({
             </div>
           ) : (
             <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-              No upcoming trains right now
+              No upcoming direct trains to {toStation.name} right now
             </div>
           )}
 
