@@ -885,13 +885,12 @@ export const MetroMap = () => {
             }
           });
 
-          // 3. Connect stations to their closest track node, and connect feature endpoints
-          const MAX_GAP = 0.003;
+          // 3. Connect stations to their closest track node
+          const MAX_STATION_GAP = 0.05; // ~5.5km, ensures all stations find a track
           
-          // Connect stations (first lineStationsList.length nodes) to the closest track node
           for (let i = 0; i < lineStationsList.length; i++) {
             let closestNode = -1;
-            let minDist = MAX_GAP;
+            let minDist = MAX_STATION_GAP;
             for (let j = lineStationsList.length; j < nodes.length; j++) {
               const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
               if (dist < minDist) {
@@ -905,26 +904,29 @@ export const MetroMap = () => {
             }
           }
 
-          // Find feature endpoints
-          const endpoints: number[] = [];
-          features.forEach(f => {
-            if (f.geometry.type !== 'LineString') return;
-            // The logic above added these sequentially, so we can identify endpoints by their degree
-          });
-          // Actually, we can just connect any two track nodes if they are VERY close, but only if they belong to different features?
-          // No, we can just check all track nodes against each other but use a much smaller gap or just check endpoints.
-          // Wait, the easiest way to connect fragmented features is to connect their endpoints.
-          // Since adj[] was built sequentially for features, any track node with adj.length === 1 is an endpoint!
+          // Find feature endpoints and connect fragmented ends
+          const MAX_ENDPOINT_GAP = 0.005; // 500m
           for (let i = lineStationsList.length; i < nodes.length; i++) {
-            if (adj[i].length === 1) { // It's an endpoint
+            if (adj[i].length === 1) { 
               for (let j = i + 1; j < nodes.length; j++) {
-                if (adj[j].length === 1) { // Another endpoint
+                if (adj[j].length === 1) { 
                   const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-                  if (dist < MAX_GAP) {
+                  if (dist < MAX_ENDPOINT_GAP) {
                     adj[i].push(j);
                     adj[j].push(i);
                   }
                 }
+              }
+            }
+          }
+
+          // Connect all close track nodes (e.g. parallel tracks or overlaps) to allow Dijkstra to switch tracks
+          for (let i = lineStationsList.length; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+              if (dist < 0.0005) { // 50m
+                adj[i].push(j);
+                adj[j].push(i);
               }
             }
           }

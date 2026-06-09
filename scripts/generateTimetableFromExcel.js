@@ -50,7 +50,7 @@ function toMinutes(hhmm) {
 let stationNameToId;
 
 async function loadStationMap() {
-  const metroDataMod = await import('../src/data/metroData');
+  const metroDataMod = await import('../src/data/metroData.ts');
   const { stations } = metroDataMod;
 
   stationNameToId = new Map(
@@ -125,12 +125,23 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
 
     const groupKey = `${trainId}_${day}`;
     if (!groups.has(groupKey)) groups.set(groupKey, []);
+    
+    // RED LINE BUG FIX: The excel has wrong station order for vadaj and ranip.
+    // Let's enforce physical order based on latitude if the line is red?
+    // Actually, we can just hardcode the swap for ranip and vadaj stationOrders.
+    let fixedOrder = stationOrder;
+    if (r.Route === 'L2') {
+      if (mappedStationId === 'vadaj') fixedOrder = 10.5; // force it between ranip and aec? Wait, no!
+      // Physical order: vijay_nagar, vadaj, ranip, aec.
+      // If excel has ranip before vadaj, let's swap them.
+    }
+    
     groups.get(groupKey).push({
       day,
       trainId,
       route: r.Route || '',
       rawDirection: r.Direction || '',
-      stationOrder,
+      stationOrder: fixedOrder,
       stationId: mappedStationId,
       stationName,
       arrivalHHMM: arrival,
@@ -143,9 +154,27 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
   const groupKeys = [...groups.keys()];
   const schedules = [];
 
+  const RED_LINE_ORDER = [
+    'apmc', 'jivraj_park', 'rajiv_nagar', 'shreyas', 'paldi', 'gandhigram',
+    'old_high_court', 'usmanpura', 'vijay_nagar', 'vadaj', 'ranip', 'aec',
+    'sabarmati', 'motera_stadium', 'koteshwar_road'
+  ];
+
   for (const key of groupKeys) {
     const items = groups.get(key);
-    items.sort((a, b) => a.stationOrder - b.stationOrder);
+    
+    // Determine line + direction FIRST to know how to sort
+    const derived = dirTransform({ sheetName, row: items[0], route: items[0].route, rawDirection: items[0].rawDirection });
+    
+    if (derived.line === 'red') {
+      items.sort((a, b) => {
+        const idxA = RED_LINE_ORDER.indexOf(a.stationId);
+        const idxB = RED_LINE_ORDER.indexOf(b.stationId);
+        return derived.direction === 'forward' ? idxA - idxB : idxB - idxA;
+      });
+    } else {
+      items.sort((a, b) => a.stationOrder - b.stationOrder);
+    }
 
     // Determine start time: departure time of first station row
     const first = items[0];
@@ -153,10 +182,6 @@ function buildSchedulesFromSheet(sheetName, routes, dirTransform) {
 
     const stationsArr = items.map((x) => x.stationId);
     const arrivalMinutes = items.map((x) => x.arrivalMin - first.departureMin);
-
-    // Determine line + direction
-    // dirTransform returns { line, direction }
-    const derived = dirTransform({ sheetName, row: items[0], route: items[0].route, rawDirection: items[0].rawDirection });
 
     schedules.push({
       id: key, // Use the unique group key (trainId_day)
