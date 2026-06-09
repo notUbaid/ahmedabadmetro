@@ -273,7 +273,18 @@ export const getLastTrainWarnings = (stationId: string) => {
 let cachedDayType = '';
 let cachedActiveSchedules: TrainSchedule[] = [];
 
-export const getCurrentTrainPositions = () => {
+export interface TrainPosition {
+  id: string;
+  line: string;
+  fromStationId: string;
+  toStationId: string;
+  progress: number;
+  destination: string;
+  status: 'stopped' | 'moving';
+  _isGeometryUnreliable?: boolean;
+}
+
+export const getCurrentTrainPositions = (): TrainPosition[] => {
   const now = new Date();
   const currentMinutes =
     now.getHours() * 60 +
@@ -281,15 +292,7 @@ export const getCurrentTrainPositions = () => {
     now.getSeconds() / 60 +
     now.getMilliseconds() / 60000;
 
-  const positions: {
-    id: string;
-    line: string;
-    fromStationId: string;
-    toStationId: string;
-    progress: number;
-    destination: string;
-    status: 'stopped' | 'moving';
-  }[] = [];
+  const positions: TrainPosition[] = [];
 
   const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';

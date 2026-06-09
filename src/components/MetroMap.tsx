@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs } from '@/data/timetable';
+import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
@@ -567,7 +567,7 @@ export const MetroMap = () => {
         const bearingEntry = routeSegmentsRef.current.get(segKey) || routeSegmentsRef.current.get(revKey);
         
         // If geometry is missing or unreliable (e.g. disconnected station), fallback to straight line bearing
-        if (bearingEntry && bearingEntry.geometry.length >= 2 && !(pos as any)._isGeometryUnreliable) {
+        if (bearingEntry && bearingEntry.geometry.length >= 2 && !pos._isGeometryUnreliable) {
           const geomForBearing = bearingEntry.geometry;
           const dists = bearingEntry.dists;
           const totalDist = bearingEntry.totalDist;
@@ -795,13 +795,13 @@ export const MetroMap = () => {
       longPressTriggered = false;
       const touch = e.touches[0];
       
-      longPressTimer = setTimeout(() => {
-        longPressTriggered = true;
-        const point = map.containerPointToLatLng([touch.clientX - mapContainer.getBoundingClientRect().left, touch.clientY - mapContainer.getBoundingClientRect().top]);
-        handleSimulateLocation(point);
-        // Vibrate feedback if available
-        if (navigator.vibrate) navigator.vibrate(50);
-      }, 500);
+longPressTimer = setTimeout(() => {
+         longPressTriggered = true;
+         const point = map.containerPointToLatLng([touch.clientX - mapContainer.getBoundingClientRect().left, touch.clientY - mapContainer.getBoundingClientRect().top]);
+         handleLocationSelect(point.lat, point.lng, 'Dropped Pin');
+         // Vibrate feedback if available
+         if (navigator.vibrate) navigator.vibrate(50);
+       }, 500);
     };
 
     const onTouchEnd = () => {
@@ -1412,7 +1412,7 @@ export const MetroMap = () => {
         mapRef.current = null;
       }
     };
-  }, [handleLocationUpdate, updateNearestStation, toast]);
+  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast]);
 
   const handleClosePanel = () => {
     setSelectedStation(null);

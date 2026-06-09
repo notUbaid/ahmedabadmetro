@@ -1399,7 +1399,15 @@ const extractLegsFromRoute = (route: PlannedRoute): {
   departMinutes: number;
   arriveMinutes: number;
 }[] => {
-  const extractedLegs: any[] = [];
+  const extractedLegs: {
+    schedule: TrainSchedule;
+    fromId: string;
+    toId: string;
+    fromIdx: number;
+    toIdx: number;
+    departMinutes: number;
+    arriveMinutes: number;
+  }[] = [];
   let legFromId: string = '';
   let legFromIdx: number = -1;
   let legDepartMin: number = 0;
