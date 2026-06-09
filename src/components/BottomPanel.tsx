@@ -16,6 +16,7 @@ interface BottomPanelProps {
   onLocate: (lat: number, lng: number) => void;
   onPlanRoute?: (stationId: string) => void;
   userLocation: [number, number] | null;
+  searchedLocation?: [number, number] | null;
 }
 
 const formatDistance = (meters: number): string => {
@@ -41,6 +42,7 @@ export const BottomPanel = ({
   onLocate,
   onPlanRoute,
   userLocation,
+  searchedLocation,
 }: BottomPanelProps) => {
   const [upcomingTrains, setUpcomingTrains] = useState<ReturnType<typeof getUpcomingTrains>>([]);
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
@@ -134,8 +136,11 @@ export const BottomPanel = ({
           onClick={() => {
             const [lat, lng] = nearestStation.coordinates;
             let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
-            if (userLocation) {
-              url += `&origin=${userLocation[0]},${userLocation[1]}`;
+            
+            // Prefer searched location as origin if active, otherwise fallback to GPS location
+            const originLocation = searchedLocation || userLocation;
+            if (originLocation) {
+              url += `&origin=${originLocation[0]},${originLocation[1]}`;
             }
             window.open(url, '_blank');
           }}

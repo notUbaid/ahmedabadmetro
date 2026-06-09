@@ -46,10 +46,12 @@ export const MetroMap = () => {
 
   const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [searchedLocation, setSearchedLocation] = useState<[number, number] | null>(null);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [nearestStation, setNearestStation] = useState<Station | null>(null);
   const [nearestDistance, setNearestDistance] = useState<number | null>(null);
   const [nearestWalkingTime, setNearestWalkingTime] = useState<number | null>(null);
+  const searchedLocationMarkerRef = useRef<L.Marker | null>(null);
   const [isPanelExpanded, setIsPanelExpanded] = useState(true);
   const stationClickedRef = useRef(false);
   const [isRoutePlannerOpen, setIsRoutePlannerOpen] = useState(false);
@@ -220,39 +222,20 @@ export const MetroMap = () => {
     }
   }, [checkCommuteCard]);
 
-  // Handle location update (from search or locate button)
+  // Handle location update (from locate button)
   const handleLocationUpdate = useCallback((lat: number, lng: number) => {
     if (mapRef.current) {
       mapRef.current.setView([lat, lng], 15);
 
-      // Update user marker position
-      if (userMarkerRef.current) {
-        userMarkerRef.current.setLatLng([lat, lng]);
-      } else {
-        userMarkerRef.current = L.circleMarker([lat, lng], {
-          radius: 8,
-          fillColor: '#3B82F6',
-          color: '#FFFFFF',
-          weight: 3,
-          fillOpacity: 1,
-        }).addTo(mapRef.current);
+      // Clear searched location if any
+      if (searchedLocationMarkerRef.current) {
+        searchedLocationMarkerRef.current.remove();
+        searchedLocationMarkerRef.current = null;
       }
+      setSearchedLocation(null);
 
-      // Update pulse marker
-      if (userPulseRef.current) {
-        userPulseRef.current.setLatLng([lat, lng]);
-      } else {
-        userPulseRef.current = L.circleMarker([lat, lng], {
-          radius: 20,
-          fillColor: '#3B82F6',
-          color: '#3B82F6',
-          weight: 1,
-          fillOpacity: 0.2,
-          opacity: 0.5,
-        }).addTo(mapRef.current);
-      }
-
-      setUserLocation([lat, lng]);
+      // (userMarker is updated by watchPosition natively, no need to manually update here)
+      
       updateNearestStation(lat, lng);
       setSelectedStation(null);
       setIsPanelExpanded(true); // Show panel when located
@@ -261,8 +244,27 @@ export const MetroMap = () => {
 
   // Handle location search result
   const handleLocationSelect = useCallback((lat: number, lng: number, _name: string) => {
-    handleLocationUpdate(lat, lng);
-  }, [handleLocationUpdate]);
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], 15);
+
+      if (searchedLocationMarkerRef.current) {
+        searchedLocationMarkerRef.current.setLatLng([lat, lng]);
+      } else {
+        const icon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `<div style="background-color: #EF4444; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+        searchedLocationMarkerRef.current = L.marker([lat, lng], { icon }).addTo(mapRef.current);
+      }
+
+      setSearchedLocation([lat, lng]);
+      updateNearestStation(lat, lng);
+      setSelectedStation(null);
+      setIsPanelExpanded(true);
+    }
+  }, [updateNearestStation]);
 
   // Handle station selection from search
   const handleStationSelect = useCallback((stationId: string) => {
@@ -776,21 +778,16 @@ export const MetroMap = () => {
       }, 10);
     });
 
-    // Long press / right-click to simulate location ("If I start from here")
-    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-    let longPressTriggered = false;
-
-    const handleSimulateLocation = (latlng: L.LatLng) => {
-      handleLocationUpdate(latlng.lat, latlng.lng);
-    };
-
     // Right-click (contextmenu) for desktop
     map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       e.originalEvent.preventDefault();
-      handleSimulateLocation(e.latlng);
+      handleLocationSelect(e.latlng.lat, e.latlng.lng, 'Dropped Pin');
     });
 
-    // Long press for mobile (500ms)
+    // Long press for mobile
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    let longPressTriggered = false;
+
     const mapContainer = map.getContainer();
     
     const onTouchStart = (e: TouchEvent) => {
@@ -1436,6 +1433,7 @@ export const MetroMap = () => {
         onLocate={handleLocationUpdate}
         onPlanRoute={handlePlanRouteFromStation}
         userLocation={userLocation}
+        searchedLocation={searchedLocation}
       />
 
       <JoinRideDialog
