@@ -467,6 +467,18 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
     });
   }
 
-  return positions;
-};
+  // Deduplicate visually identical trains (same line, segment, and progress)
+  // This handles flawed timetable data where duplicate schedules exist
+  const uniquePositions: ReturnType<typeof getCurrentTrainPositions> = [];
+  const seenPositions = new Set<string>();
 
+  for (const pos of positions) {
+    const key = `${pos.line}-${pos.fromStationId}-${pos.toStationId}-${pos.progress.toFixed(4)}`;
+    if (!seenPositions.has(key)) {
+      seenPositions.add(key);
+      uniquePositions.push(pos);
+    }
+  }
+
+  return uniquePositions;
+};
