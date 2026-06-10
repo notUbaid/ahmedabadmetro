@@ -984,13 +984,16 @@ longPressTimer = setTimeout(() => {
                 dists.push(totalDist);
               }
 
-              const entry = { geometry: path, dists, totalDist };
-              routeSegmentsRef.current.set(`${s1}-${s2}`, entry);
+              const key1 = `${s1}-${s2}`;
+              if (!routeSegmentsRef.current.has(key1)) {
+                const entry = { geometry: path, dists, totalDist };
+                routeSegmentsRef.current.set(key1, entry);
 
-              const revPath = [...path].reverse();
-              const revDists = [...dists].map(d => totalDist - d).reverse();
-              const revEntry = { geometry: revPath, dists: revDists, totalDist };
-              routeSegmentsRef.current.set(`${s2}-${s1}`, revEntry);
+                const revPath = [...path].reverse();
+                const revDists = [...dists].map(d => totalDist - d).reverse();
+                const revEntry = { geometry: revPath, dists: revDists, totalDist };
+                routeSegmentsRef.current.set(`${s2}-${s1}`, revEntry);
+              }
             }
           }
         };
