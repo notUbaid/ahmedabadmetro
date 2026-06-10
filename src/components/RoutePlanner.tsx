@@ -43,12 +43,6 @@ export const RoutePlanner = ({
   const [internalIsCoordinating, setInternalIsCoordinating] = useState(isCoordinating);
   const activeTrainRef = useRef<HTMLButtonElement>(null);
 
-  // Auto-scroll to selected train when route changes
-  useEffect(() => {
-    if (activeTrainRef.current) {
-      activeTrainRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  }, [route?.departureTime]);
 
   // Sync initial props if they change after mount
   useEffect(() => {
@@ -152,6 +146,13 @@ export const RoutePlanner = ({
       return null;
     }
   }, [origin, destination, selectedDepartureIdx, availableDepartures, internalIsCoordinating, sharedSegments, friendDepMins]);
+
+  // Auto-scroll to selected train when route changes
+  useEffect(() => {
+    if (activeTrainRef.current) {
+      activeTrainRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [route?.departureTime]);
 
 // Calculate overlap with friend's journey when coordinating
    const overlapInfo = useMemo(() => {
