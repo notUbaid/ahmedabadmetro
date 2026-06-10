@@ -161,6 +161,38 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                         </div>
                     </div>
 
+                    {/* Detailed Steps */}
+                    {route && route.steps.length > 0 && (
+                        <div className="space-y-3 pt-4">
+                            <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest px-1">Journey Details</h3>
+                            <div className="bg-muted/30 border border-border rounded-3xl p-5 space-y-4">
+                                {route.steps.map((step, idx) => (
+                                    <div key={idx} className="flex gap-4">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
+                                            {idx < route.steps.length - 1 && <div className="w-0.5 h-full bg-border my-1" />}
+                                        </div>
+                                        <div className="flex-1 pb-4">
+                                            <p className="text-sm font-bold">
+                                                {step.type === 'board' ? `Board ${step.line} line at ${step.station.name}` : 
+                                                 step.type === 'interchange' ? `Interchange at ${step.station.name} to ${step.line} line` : 
+                                                 step.type === 'alight' ? `Arrive at ${step.station.name}` : 
+                                                 step.type === 'travel' ? `Travel ${step.stationCount} stops` : 
+                                                 `${step.type}`} 
+                                            </p>
+                                            {(step.trainTime || step.arrivalTime) && (
+                                                <p className="text-[11px] text-muted-foreground font-medium mt-1 flex items-center gap-1">
+                                                    <Clock size={10} />
+                                                    {step.trainTime || step.arrivalTime}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Call to Action & Customization */}
                     <div className="space-y-4 pb-8">
                         <div className="space-y-2">

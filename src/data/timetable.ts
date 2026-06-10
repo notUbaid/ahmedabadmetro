@@ -413,7 +413,7 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
     } else {
       status = 'moving';
       const travelDuration = arrivalAtB - departureFromA;
-      progress = travelDuration > 0 ? (elapsedMinutes - departureFromA) / travelDuration : 1;
+      progress = travelDuration > 0 ? (elapsedMinutes - departureFromA) / travelDuration : 0;
     }
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
