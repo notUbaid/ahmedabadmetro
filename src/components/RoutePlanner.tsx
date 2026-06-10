@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
@@ -41,6 +41,14 @@ export const RoutePlanner = ({
   const [originSearch, setOriginSearch] = useState(() => initialOrigin ? (stations[initialOrigin]?.name || '') : '');
   const [destSearch, setDestSearch] = useState(() => initialDestination ? (stations[initialDestination]?.name || '') : '');
   const [internalIsCoordinating, setInternalIsCoordinating] = useState(isCoordinating);
+  const activeTrainRef = useRef<HTMLButtonElement>(null);
+
+  // Auto-scroll to selected train when route changes
+  useEffect(() => {
+    if (activeTrainRef.current) {
+      activeTrainRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [route?.departureTime]);
 
   // Sync initial props if they change after mount
   useEffect(() => {
@@ -845,6 +853,7 @@ export const RoutePlanner = ({
                       return (
                         <button
                           key={idx}
+                          ref={isSelected ? activeTrainRef : null}
                           onClick={() => handleSelectDeparture(dep.departureTime)}
                           className={cn(
                             "flex-shrink-0 flex flex-col items-center justify-center min-w-[90px] p-2.5 rounded-2xl border transition-all",
