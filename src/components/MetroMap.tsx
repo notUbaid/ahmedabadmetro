@@ -43,6 +43,7 @@ export const MetroMap = () => {
   // Use a ref to store precise route segments between stations: "stationA-stationB" -> coordinates[]
   // Cache route geometry plus precomputed distances to avoid per-frame recomputation
   const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(new Map());
+  const latestPositionsRef = useRef<Map<string, TrainPosition>>(new Map());
 
   const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -496,6 +497,10 @@ export const MetroMap = () => {
       const positions = getCurrentTrainPositions();
       const existingIds = new Set(trainMarkersRef.current.keys());
 
+      // Update latest positions ref
+      latestPositionsRef.current.clear();
+      positions.forEach(p => latestPositionsRef.current.set(p.id, p));
+
       // Update active train count
       setActiveTrainCount(positions.length);
 
@@ -697,6 +702,22 @@ export const MetroMap = () => {
             bubblingMouseEvents: false
           }).addTo(mapRef.current!);
 
+          // Create click handler that uses latest position
+          const handleClick = (e?: any) => {
+            if (e && e.stopPropagation) e.stopPropagation();
+            if (e && e.preventDefault) e.preventDefault();
+            const currentPos = latestPositionsRef.current.get(pos.id);
+            if (currentPos) {
+              setSelectedTrain({
+                id: currentPos.id,
+                line: currentPos.line,
+                destination: currentPos.destination,
+                fromStationId: currentPos.fromStationId,
+                toStationId: currentPos.toStationId
+              });
+            }
+          };
+
           // Add tooltip showing train direction
           marker.bindTooltip(pos.destination, {
             permanent: false,
@@ -706,18 +727,9 @@ export const MetroMap = () => {
           });
 
           // Add click handler to show share popup
-          marker.on('click', () => {
-            setSelectedTrain({
-              id: pos.id,
-              line: pos.line,
-              destination: pos.destination,
-              fromStationId: pos.fromStationId,
-              toStationId: pos.toStationId
-            });
-          });
+          marker.on('click', handleClick);
 
           // Attach DOM click listener and set initial rotation after marker is added to DOM
-          const trainData = { ...pos };
           requestAnimationFrame(() => {
             const el = marker.getElement();
             if (el) {
@@ -725,17 +737,7 @@ export const MetroMap = () => {
               el.style.pointerEvents = 'auto';
               const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
               if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
-              el.onclick = (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setSelectedTrain({
-                  id: trainData.id,
-                  line: trainData.line,
-                  destination: trainData.destination,
-                  fromStationId: trainData.fromStationId,
-                  toStationId: trainData.toStationId
-                });
-              };
+              el.onclick = handleClick;
             }
           });
 
