@@ -10,6 +10,7 @@ export interface RouteStep {
   stationCount?: number;
   stations?: Station[];
   trainTime?: string; // When to board the train
+  arrivalTime?: string; // When this leg arrives at the interchange/alight station
   trainId?: string; // Unique ID of the train
   allStations?: string[]; // ALL station IDs in this leg (from -> to)
   isDirect?: boolean; // Is this a direct train (no interchange needed)
@@ -1205,6 +1206,7 @@ const buildRouteFromLegs = (
         direction: `towards ${nextFinalName}`,
         waitTime,
         trainTime: formatMinutesToTime(nextLeg.departMinutes),
+        arrivalTime: formatMinutesToTime(leg.arriveMinutes),
         trainId: nextLeg.schedule.id,
         allStations: getStationsSlice(nextLeg.schedule, nextLeg.fromIdx, nextLeg.toIdx)
       });
@@ -1213,7 +1215,11 @@ const buildRouteFromLegs = (
     }
   }
 
-  steps.push({ type: 'alight', station: destination });
+  steps.push({ 
+    type: 'alight', 
+    station: destination,
+    arrivalTime: formatMinutesToTime(mergedLegs[mergedLegs.length - 1].arriveMinutes)
+  });
 
   const lastArrivalMinutes = mergedLegs[mergedLegs.length - 1].arriveMinutes;
 

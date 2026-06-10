@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
-  CircleDot, Circle, Bus, Share2, Check, Info
+  CircleDot, Circle, Bus, Share2, Check, Info, Bookmark
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
@@ -64,6 +64,7 @@ export const RoutePlanner = ({
   const [showArriveDropdown, setShowArriveDropdown] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     setInternalIsCoordinating(isCoordinating);
@@ -267,7 +268,7 @@ export const RoutePlanner = ({
     setShowDestDropdown(false);
   };
 
-  const handleShareRide = () => {
+  const handleShareRide = async () => {
     if (!route || !route.departureTime) return;
 
     // Use the actual departure time from the route being displayed, not from dropdown index
@@ -283,13 +284,33 @@ export const RoutePlanner = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const handleSaveTrip = () => {
+    if (!route) return;
+    try {
+      const savedTrips = JSON.parse(localStorage.getItem('savedMetroTrips') || '[]');
+      savedTrips.push({
+        origin: route.origin.name,
+        destination: route.destination.name,
+        date: new Date().toISOString(),
+        departureTime: route.departureTime,
+        arrivalTime: route.arrivalTime,
+        totalTime: route.totalTime,
+      });
+      localStorage.setItem('savedMetroTrips', JSON.stringify(savedTrips));
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    } catch (e) {
+      console.error("Failed to save trip", e);
+    }
+  };
+
   const getLineColor = (line?: keyof typeof LINE_COLORS) => {
     return line ? LINE_COLORS[line] : '#6B7280';
   };
 
-  const renderStepIcon = (step: RouteStep, index: number, totalSteps: number) => {
+  const renderStepIcon = (step: RouteStep, index: number, total: number) => {
     const isFirst = index === 0;
-    const isLast = index === totalSteps - 1;
+    const isLast = index === total - 1;
 
     if (step.type === 'board' || isFirst) {
       return <CircleDot className="w-5 h-5" style={{ color: getLineColor(step.line) }} />;
@@ -406,6 +427,11 @@ export const RoutePlanner = ({
                   </span>
                 )}
               </div>
+              {step.arrivalTime && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Arrive at {step.arrivalTime}
+                </p>
+              )}
               {step.direction && (
                 <p className="text-xs text-muted-foreground mt-1">{step.direction}</p>
               )}
@@ -468,6 +494,11 @@ export const RoutePlanner = ({
               <p className="text-sm text-green-600 dark:text-green-400 font-medium">
                 🎯 Exit here
               </p>
+              {step.arrivalTime && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Arrive at {step.arrivalTime}
+                </p>
+              )}
             </div>
           </div>
         );
@@ -929,7 +960,25 @@ export const RoutePlanner = ({
 
               {/* Share Button */}
               {route.steps[0].trainId && (
-                <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex justify-end gap-2">
+                  {internalIsCoordinating && (
+                    <button
+                      onClick={handleSaveTrip}
+                      className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
+                    >
+                      {isSaved ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          Saved!
+                        </>
+                      ) : (
+                        <>
+                          <Bookmark className="w-3.5 h-3.5" />
+                          Save Trip
+                        </>
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={handleShareRide}
                     className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
