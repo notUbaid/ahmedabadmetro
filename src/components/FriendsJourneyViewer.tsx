@@ -180,12 +180,45 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                                                  step.type === 'travel' ? `Travel ${step.stationCount} stops` : 
                                                  `${step.type}`} 
                                             </p>
-                                            {(step.trainTime || step.arrivalTime) && (
-                                                <p className="text-[11px] text-muted-foreground font-medium mt-1 flex items-center gap-1">
-                                                    <Clock size={10} />
-                                                    {step.trainTime || step.arrivalTime}
-                                                </p>
-                                            )}
+                                            
+                                            <div className="flex flex-col gap-0.5 mt-1">
+                                                {step.type === 'board' && step.trainTime && (
+                                                    <p className="text-xs text-primary font-bold flex items-center gap-1.5 bg-primary/10 w-fit px-2 py-0.5 rounded-full">
+                                                        <Clock size={12} />
+                                                        Departing at {step.trainTime}
+                                                    </p>
+                                                )}
+                                                
+                                                {step.type === 'interchange' && (
+                                                    <>
+                                                        {step.arrivalTime && (
+                                                            <p className="text-[11px] text-muted-foreground font-medium flex items-center gap-1.5">
+                                                                <Clock size={10} />
+                                                                Arrive at {step.arrivalTime}
+                                                            </p>
+                                                        )}
+                                                        {step.trainTime && (
+                                                            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1.5 bg-amber-500/10 w-fit px-2 py-0.5 rounded-full mt-1">
+                                                                <Clock size={10} />
+                                                                Next train at {step.trainTime}
+                                                            </p>
+                                                        )}
+                                                    </>
+                                                )}
+                                                
+                                                {step.type === 'alight' && step.arrivalTime && (
+                                                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-500/10 w-fit px-2 py-0.5 rounded-full">
+                                                        <Clock size={12} />
+                                                        Arriving at {step.arrivalTime}
+                                                    </p>
+                                                )}
+                                                
+                                                {step.type === 'travel' && step.direction && (
+                                                    <p className="text-[11px] text-muted-foreground font-medium">
+                                                        Towards {step.direction}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
