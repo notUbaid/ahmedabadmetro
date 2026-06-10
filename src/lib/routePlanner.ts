@@ -1053,13 +1053,17 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
     });
   }
 
+  // If there are direct trains available for this route, filter out all interchange trains.
+  const hasDirectTrains = results.some(r => r.isDirect);
+  const filteredResults = hasDirectTrains ? results.filter(r => r.isDirect) : results;
+
   // Sort by departure time DESCENDING (latest first) to apply backwards domination filter
-  results.sort((a, b) => b.departureMinutes - a.departureMinutes);
+  filteredResults.sort((a, b) => b.departureMinutes - a.departureMinutes);
 
   const pruned: typeof results = [];
   let bestArrival = Infinity;
 
-  for (const r of results) {
+  for (const r of filteredResults) {
     if (r.arrivalMinutes < bestArrival) {
       pruned.push(r);
       bestArrival = r.arrivalMinutes;
