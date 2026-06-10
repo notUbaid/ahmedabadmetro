@@ -230,8 +230,12 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
 export const getAllTrainsForStation = (stationId: string) => {
   const trains: { time: string; destination: string; line: string; minutes: number }[] = [];
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
     if (stationIndex === schedule.stations.length - 1) continue;
@@ -261,8 +265,11 @@ export const getLastTrainWarnings = (stationId: string) => {
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   const destinationLastTrains = new Map<string, { line: string; arrivalMinutes: number }>();
+  const dayOfWeek = now.getDay();
+  const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1 || stationIndex === schedule.stations.length - 1) continue;
 

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
-  CircleDot, Circle, Bus, Share2, Check, Info, Bookmark
+  CircleDot, Circle, Bus, Share2, Check, Info
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
@@ -64,7 +64,6 @@ export const RoutePlanner = ({
   const [showArriveDropdown, setShowArriveDropdown] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     setInternalIsCoordinating(isCoordinating);
@@ -274,33 +273,17 @@ export const RoutePlanner = ({
     // Use the actual departure time from the route being displayed, not from dropdown index
     const depMins = route.departureMinutes ?? parseTimeToMinutes(route.departureTime);
 
-    const url = new URL(window.location.href);
-    url.searchParams.set('orig', origin);
-    url.searchParams.set('dest', destination);
-    url.searchParams.set('depMins', depMins.toString());
-
-    navigator.clipboard.writeText(url.toString());
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
-  const handleSaveTrip = () => {
-    if (!route) return;
     try {
-      const savedTrips = JSON.parse(localStorage.getItem('savedMetroTrips') || '[]');
-      savedTrips.push({
-        origin: route.origin.name,
-        destination: route.destination.name,
-        date: new Date().toISOString(),
-        departureTime: route.departureTime,
-        arrivalTime: route.arrivalTime,
-        totalTime: route.totalTime,
-      });
-      localStorage.setItem('savedMetroTrips', JSON.stringify(savedTrips));
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 2000);
-    } catch (e) {
-      console.error("Failed to save trip", e);
+      const url = new URL(window.location.href);
+      url.searchParams.set('orig', origin);
+      url.searchParams.set('dest', destination);
+      url.searchParams.set('depMins', depMins.toString());
+
+      await navigator.clipboard.writeText(url.toString());
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link', err);
     }
   };
 
@@ -960,25 +943,7 @@ export const RoutePlanner = ({
 
               {/* Share Button */}
               {route.steps[0].trainId && (
-                <div className="mt-3 flex justify-end gap-2">
-                  {internalIsCoordinating && (
-                    <button
-                      onClick={handleSaveTrip}
-                      className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
-                    >
-                      {isSaved ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          Saved!
-                        </>
-                      ) : (
-                        <>
-                          <Bookmark className="w-3.5 h-3.5" />
-                          Save Trip
-                        </>
-                      )}
-                    </button>
-                  )}
+                <div className="mt-3 flex justify-end">
                   <button
                     onClick={handleShareRide}
                     className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
