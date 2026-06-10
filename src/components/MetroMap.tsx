@@ -514,6 +514,7 @@ export const MetroMap = () => {
           // Moving Logic - use cached geometry entries (geometry + precomputed dists)
           const segmentKey = `${pos.fromStationId}-${pos.toStationId}`;
           const reverseKey = `${pos.toStationId}-${pos.fromStationId}`;
+          const isReversed = !routeSegmentsRef.current.has(segmentKey) && routeSegmentsRef.current.has(reverseKey);
           const entry = routeSegmentsRef.current.get(segmentKey) || routeSegmentsRef.current.get(reverseKey);
           const progress = pos.progress;
 
@@ -529,7 +530,8 @@ export const MetroMap = () => {
             const startDist = fromStation ? Math.sqrt(Math.pow(geometry[0][0] - fromStation.coordinates[0], 2) + Math.pow(geometry[0][1] - fromStation.coordinates[1], 2)) : Infinity;
             const endDist = toStation ? Math.sqrt(Math.pow(geometry[geometry.length - 1][0] - toStation.coordinates[0], 2) + Math.pow(geometry[geometry.length - 1][1] - toStation.coordinates[1], 2)) : Infinity;
             if (startDist <= 0.01 && endDist <= 0.01 && totalDist > 0) {
-              const targetDist = totalDist * progress;
+              // If we are using the reverse geometry, progress should be flipped!
+              const targetDist = totalDist * (isReversed ? (1 - progress) : progress);
 
               // Find segment index
               let i = 0;
@@ -542,6 +544,7 @@ export const MetroMap = () => {
 
               lat = geometry[i][0] + (geometry[i + 1][0] - geometry[i][0]) * segProgress;
               lng = geometry[i][1] + (geometry[i + 1][1] - geometry[i][1]) * segProgress;
+
             } else {
               // Geometry unreliable; fallback to straight line
               lat = fromStation.coordinates[0] + (toStation.coordinates[0] - fromStation.coordinates[0]) * pos.progress;
@@ -616,6 +619,12 @@ export const MetroMap = () => {
           const y = Math.sin(dLng) * Math.cos(lat2);
           const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
           bearing = Math.atan2(y, x) * 180 / Math.PI;
+
+          // If we are traversing the reverse geometry, flip the bearing 180 degrees!
+          const isReversed = !routeSegmentsRef.current.has(segKey) && routeSegmentsRef.current.has(revKey);
+          if (isReversed) {
+            bearing = (bearing + 180) % 360;
+          }
         } else {
           // Fallback to station-to-station bearing
           const fromStation = stations[pos.fromStationId];
