@@ -325,7 +325,7 @@ export const BottomPanel = ({
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-                    Service hours: 06:20 - 22:00
+                    No upcoming trains (End of service)
                   </div>
                 )}
               </div>

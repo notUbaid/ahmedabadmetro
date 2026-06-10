@@ -57,7 +57,7 @@ export const lineInfo = {
     distance: '21.1 km',
     travelTime: '45 min',
     firstTrain: '06:20',
-    lastTrain: '22:00',
+    lastTrain: '23:00',
     frequency: 'Peak: 7 min, Off-peak: 10-12 min',
   },
   red: {

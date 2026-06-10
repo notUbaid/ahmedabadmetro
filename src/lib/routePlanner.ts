@@ -40,6 +40,11 @@ export interface PlannedRoute {
 }
 
 // Define station order for each line (terminal to terminal)
+const getDayType = (date: Date = new Date()) => {
+  const day = date.getDay();
+  return day === 0 ? 'Sunday' : day === 6 ? 'Saturday' : 'Mon-Fri';
+};
+
 const LINE_STATIONS: Record<string, string[]> = {
   blue: [
     'thaltej_gam', 'thaltej', 'doordarshan_kendra', 'gurukul_road', 'gujarat_university',
@@ -861,7 +866,8 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   if (originId === destinationId) return null;
 
   const currentMinutes = getCurrentTimeMinutes();
-  const departures = getAvailableDepartures(originId, destinationId);
+  const currentDayType = getDayType();
+  const departures = getAvailableDepartures(originId, destinationId, currentDayType);
 
   const isPurpleDestination = destinationId === 'pdpu' || destinationId === 'gift_city';
 
@@ -878,8 +884,13 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   let possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
 
   if (possible.length === 0) {
-    // If no more departures today, show the first available departure for tomorrow morning (starts at 6:20 AM = 380 mins)
-    possible = departures.filter(d => d.departureMinutes >= 380);
+    // If no more departures today, show the first available departure for tomorrow morning
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDayType = getDayType(tomorrow);
+    
+    const tomorrowDepartures = getAvailableDepartures(originId, destinationId, tomorrowDayType);
+    possible = tomorrowDepartures.filter(d => d.departureMinutes >= 380);
     
     if (possible.length === 0) {
       return null;
@@ -902,7 +913,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 
   const best = sorted[0];
 
-  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes);
+  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, (possible === departures ? currentDayType : getDayType(new Date(Date.now() + 86400000))));
   if (!route) return null;
 
   // Special handling for PDPU and GIFT City: suggest bus even if a direct train exists but is infrequent
@@ -984,7 +995,7 @@ const departureCache = new Map<string, {
 }[]>();
 
 // Get all available departure times for a route from origin to destination
-export const getAvailableDepartures = (originId: string, destId: string): {
+export const getAvailableDepartures = (originId: string, destId: string, dayType: string = getDayType()): {
   departureTime: string;
   arrivalTime: string;
   departureMinutes: number;
@@ -992,7 +1003,7 @@ export const getAvailableDepartures = (originId: string, destId: string): {
   isDirect: boolean;
   interchangeCount: number;
 }[] => {
-  const cacheKey = `${originId}-${destId}`;
+  const cacheKey = `${originId}-${destId}-${dayType}`;
   if (departureCache.has(cacheKey)) {
     return departureCache.get(cacheKey)!;
   }
@@ -1001,6 +1012,7 @@ export const getAvailableDepartures = (originId: string, destId: string): {
   const departureMinutesSet = new Set<number>();
 
   for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== dayType) continue;
     const originIdx = schedule.stations.indexOf(originId);
     // Skip if origin not on this schedule or it's the last station
     if (originIdx === -1 || originIdx === schedule.stations.length - 1) continue;
@@ -1008,10 +1020,8 @@ export const getAvailableDepartures = (originId: string, destId: string): {
     const startMinutes = parseTimeToMinutes(schedule.startTime);
     const departureMinutes = startMinutes + schedule.stationTimes[originIdx];
 
-    // Only show times from 06:20 to 22:00
-    if (departureMinutes >= 380 && departureMinutes <= 1320) {
-      departureMinutesSet.add(departureMinutes);
-    }
+    // Do not arbitrarily limit departure minutes to 22:00, because trains depart later from intermediate stations
+    departureMinutesSet.add(departureMinutes);
   }
 
   const departureMinutesList = Array.from(departureMinutesSet).sort((a, b) => a - b);
@@ -1027,7 +1037,7 @@ export const getAvailableDepartures = (originId: string, destId: string): {
   }[] = [];
 
   for (const depMin of departureMinutesList) {
-    const route = planRouteWithDeparture(originId, destId, depMin);
+    const route = planRouteWithDeparture(originId, destId, depMin, dayType);
     if (!route?.departureTime || !route.arrivalTime) continue;
 
     const arrMin = parseTimeToMinutes(route.arrivalTime);
@@ -1078,9 +1088,10 @@ type PrevEdge = {
   arriveMinutes: number;
 };
 
-const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: number): { schedule: TrainSchedule; stationIdx: number; departMinutes: number }[] => {
+const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: number, dayType: string): { schedule: TrainSchedule; stationIdx: number; departMinutes: number }[] => {
   const matches: { schedule: TrainSchedule; stationIdx: number; departMinutes: number }[] = [];
   for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== dayType) continue;
     const stationIdx = schedule.stations.indexOf(stationId);
     if (stationIdx === -1 || stationIdx === schedule.stations.length - 1) continue;
 
@@ -1230,7 +1241,8 @@ const buildRouteFromLegs = (
 export const planRouteWithDeparture = (
   originId: string,
   destinationId: string,
-  departureMinutes: number
+  departureMinutes: number,
+  dayType: string = getDayType()
 ): PlannedRoute | null => {
   const origin = stations[originId];
   const destination = stations[destinationId];
@@ -1238,7 +1250,7 @@ export const planRouteWithDeparture = (
   if (originId === destinationId) return null;
 
   // Seed candidates: all trains that depart origin at exactly departureMinutes
-  const startingTrains = getSchedulesDepartingExactlyAt(originId, departureMinutes);
+  const startingTrains = getSchedulesDepartingExactlyAt(originId, departureMinutes, dayType);
   if (startingTrains.length === 0) return null;
 
   // Dijkstra / earliest-arrival search, seeded by the chosen departure (no waiting at origin)
@@ -1291,6 +1303,7 @@ export const planRouteWithDeparture = (
     if (current.stationId === destinationId) break;
 
     for (const schedule of trainSchedules) {
+      if (schedule.dayType && schedule.dayType !== dayType) continue;
       const fromIdx = schedule.stations.indexOf(current.stationId);
       if (fromIdx === -1 || fromIdx === schedule.stations.length - 1) continue;
 
