@@ -164,6 +164,20 @@ const getTrainLineAtStation = (schedule: TrainSchedule, stationId: string): 'blu
   return station.lines[0] as 'blue' | 'red' | 'green' | 'purple';
 };
 
+export const getDirectionStr = (destinationId: string): string => {
+  if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas'].includes(destinationId)) {
+    return 'Southbound';
+  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec'].includes(destinationId)) {
+    return 'Northbound';
+  } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony', 'gift_city'].includes(destinationId)) {
+    return 'Eastbound';
+  } else if (['thaltej_gam', 'thaltej', 'doordarshan_kendra'].includes(destinationId)) {
+    return 'Westbound';
+  } else {
+    return `towards ${formatStationName(destinationId)}`;
+  }
+};
+
 // Returns trains arriving within next 120 minutes for stationIndex visualization
 export const getUpcomingTrains = (stationId: string, limit = 3) => {
   const now = new Date();
@@ -203,15 +217,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
       const destinationId = schedule.stations[schedule.stations.length - 1];
       const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
-      
-      let directionStr = '';
-      if (currentLine === 'blue') {
-        directionStr = schedule.direction === 'forward' ? 'Eastbound' : 'Westbound';
-      } else if (currentLine === 'red') {
-        directionStr = schedule.direction === 'forward' ? 'Northbound' : 'Southbound';
-      } else {
-        directionStr = `towards ${formatStationName(destinationId)}`;
-      }
+      const directionStr = getDirectionStr(destinationId);
 
       upcoming.push({
         arrivalTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
@@ -225,11 +231,25 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
     }
   }
 
-  return upcoming.sort((a, b) => a.minutesAway - b.minutesAway).slice(0, limit);
+  const sorted = upcoming.sort((a, b) => a.minutesAway - b.minutesAway);
+  const deduplicated = [];
+  const seen = new Set<string>();
+  
+  for (const train of sorted) {
+    const key = `${train.minutesAway}-${train.direction}`;
+    if (!seen.has(key)) {
+      const same = sorted.filter(t => `${t.minutesAway}-${t.direction}` === key);
+      const best = same.reduce((prev, curr) => (prev.remainingStations.length > curr.remainingStations.length) ? prev : curr);
+      deduplicated.push(best);
+      seen.add(key);
+    }
+  }
+
+  return deduplicated.slice(0, limit);
 };
 
 export const getAllTrainsForStation = (stationId: string) => {
-  const trains: { time: string; destination: string; line: string; minutes: number }[] = [];
+  const trains: { time: string; destination: string; line: string; minutes: number; direction: string; remainingCount: number }[] = [];
   const now = new Date();
   const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
@@ -254,10 +274,26 @@ export const getAllTrainsForStation = (stationId: string) => {
       destination: formatStationName(destinationId),
       line: currentLine,
       minutes: arrivalMinutes,
+      direction: getDirectionStr(destinationId),
+      remainingCount: schedule.stations.length - 1 - stationIndex,
     });
   }
 
-  return trains.sort((a, b) => a.minutes - b.minutes).map(({ time, destination, line }) => ({ time, destination, line }));
+  const sorted = trains.sort((a, b) => a.minutes - b.minutes);
+  const deduplicated = [];
+  const seen = new Set<string>();
+  
+  for (const train of sorted) {
+    const key = `${Math.round(train.minutes)}-${train.direction}`;
+    if (!seen.has(key)) {
+      const same = sorted.filter(t => `${Math.round(t.minutes)}-${t.direction}` === key);
+      const best = same.reduce((prev, curr) => (prev.remainingCount > curr.remainingCount) ? prev : curr);
+      deduplicated.push(best);
+      seen.add(key);
+    }
+  }
+
+  return deduplicated.map(({ time, destination, line }) => ({ time, destination, line }));
 };
 
 export const getLastTrainWarnings = (stationId: string) => {

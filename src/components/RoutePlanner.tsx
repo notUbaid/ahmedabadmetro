@@ -150,7 +150,11 @@ export const RoutePlanner = ({
   // Auto-scroll to selected train when route changes
   useEffect(() => {
     if (activeTrainRef.current) {
-      activeTrainRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      // Small delay to ensure flex layout and overflow container are fully rendered
+      const timer = setTimeout(() => {
+        activeTrainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [route?.departureTime]);
 
