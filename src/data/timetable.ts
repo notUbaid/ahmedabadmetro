@@ -165,13 +165,14 @@ const getTrainLineAtStation = (schedule: TrainSchedule, stationId: string): 'blu
 };
 
 export const getDirectionStr = (destinationId: string): string => {
-  if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas'].includes(destinationId)) {
+  const dest = destinationId.toLowerCase();
+  if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas'].includes(dest)) {
     return 'Southbound';
-  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec'].includes(destinationId)) {
+  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec'].includes(dest)) {
     return 'Northbound';
-  } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony', 'gift_city'].includes(destinationId)) {
+  } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony', 'gift_city'].includes(dest)) {
     return 'Eastbound';
-  } else if (['thaltej_gam', 'thaltej', 'doordarshan_kendra'].includes(destinationId)) {
+  } else if (['thaltej_gam', 'thaltej', 'doordarshan_kendra'].includes(dest)) {
     return 'Westbound';
   } else {
     return `towards ${formatStationName(destinationId)}`;
@@ -200,7 +201,8 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
     if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
-    if (stationIndex === schedule.stations.length - 1) continue;
+    // Removed: if (stationIndex === schedule.stations.length - 1) continue;
+    // We want to show arriving trains at terminus stations so users know when trains arrive.
 
     const startMinutes = toMinutes(schedule.startTime);
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
@@ -258,7 +260,7 @@ export const getAllTrainsForStation = (stationId: string) => {
     if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
-    if (stationIndex === schedule.stations.length - 1) continue;
+    // Removed: if (stationIndex === schedule.stations.length - 1) continue;
 
     const startMinutes = toMinutes(schedule.startTime);
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
