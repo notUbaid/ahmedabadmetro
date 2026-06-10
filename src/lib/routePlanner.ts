@@ -155,9 +155,11 @@ const formatMinutesToTime = (minutes: number): string => {
 const getAccurateTravelTime = (originId: string, destId: string): number | null => {
   // Check corridor timings first (most accurate for cross-line journeys)
   const corridors = [
+    CORRIDOR_TIMINGS.apmcToMahatmaMandir,
     CORRIDOR_TIMINGS.apmcToSachivalaya,
     CORRIDOR_TIMINGS.apmcToGnlu,
     CORRIDOR_TIMINGS.apmcToGift,
+    REVERSE_CORRIDOR_TIMINGS.mahatmaMandirToApmc,
     REVERSE_CORRIDOR_TIMINGS.sachivalayaToApmc,
     REVERSE_CORRIDOR_TIMINGS.gnluToApmc,
     REVERSE_CORRIDOR_TIMINGS.giftToApmc,

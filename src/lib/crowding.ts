@@ -37,21 +37,16 @@ export const isWeekend = (date: Date = new Date()): boolean => {
 };
 
 // Check if a train is a corridor service (APMC → Mahatma Mandir or vice versa)
+// Corridor trains are through-running Green Line services that start at APMC
+// and go all the way to Mahatma Mandir (or vice versa).
 export const isCorridorService = (trainId: string): boolean => {
-  return trainId.includes('corridor');
+  // Import is circular, so we use a lazy check based on train ID patterns.
+  // L3 (Green Line) trains that go through APMC → Mahatma Mandir are corridor trains.
+  // All Green Line trains are corridor trains since they all run APMC ↔ Mahatma Mandir.
+  return trainId.startsWith('L3-');
 };
 
-// Corridor stations for reference
-const CORRIDOR_STATIONS = [
-  'apmc', 'shahpur', 'gheekanta', 'kalupur', 'kalupur_east', 'apparel_park',
-  'amraiwadi', 'rabari_colony', 'vastral_gam',
-  // And via the other branch
-  'kankaria_east', 'gandhigram', 'old_high_court', 'shahpur', 'usmanpura',
-  'vadaj', 'ranip', 'sabarmati', 'ahmedabad_railway', 'chandkheda',
-  'vishwakarma_college', 'tapovan_circle', 'narmada_canal', 'koba_circle',
-  'gnlu', 'pdpu', 'gift_city',
-  'juna_koba', 'koba_gam', 'dholakuva_circle', 'raysan', 'mahatma_mandir'
-];
+
 
 /**
  * Get base crowd level for a service type

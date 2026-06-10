@@ -21,12 +21,14 @@ export interface TrainSchedule {
 const parsed = timetableFromExcelData as { trainSchedules: TrainSchedule[] };
 export const trainSchedules: TrainSchedule[] = parsed.trainSchedules;
 
-// Station definitions extracted from the Excel timetable data (fallback to static segment timings)
+// Station definitions per line — uses the verified segment-timing station lists.
+// DO NOT use trainSchedules.find() here: through-running trains (e.g. green line
+// APMC→Mahatma Mandir) pollute the station list with Red Line stations.
 export const lineStations: Record<'blue' | 'red' | 'green' | 'purple', string[]> = {
-  blue: trainSchedules.find(s => s.line === 'blue')?.stations || LINE_TIMINGS.blue.stations,
-  red: trainSchedules.find(s => s.line === 'red')?.stations || LINE_TIMINGS.red.stations,
-  green: trainSchedules.find(s => s.line === 'green')?.stations || LINE_TIMINGS.green.stations,
-  purple: trainSchedules.find(s => s.line === 'purple')?.stations || LINE_TIMINGS.purple.stations,
+  blue: LINE_TIMINGS.blue.stations,
+  red: LINE_TIMINGS.red.stations,
+  green: LINE_TIMINGS.green.stations,
+  purple: LINE_TIMINGS.purple.stations,
 };
 
 // Get all unique adjacent station pairs across all train schedules.
@@ -238,9 +240,10 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
   const seen = new Set<string>();
   
   for (const train of sorted) {
-    const key = `${train.minutesAway}-${train.direction}`;
+    // Include line in key so trains on different lines at interchanges aren't dropped
+    const key = `${train.minutesAway}-${train.direction}-${train.line}`;
     if (!seen.has(key)) {
-      const same = sorted.filter(t => `${t.minutesAway}-${t.direction}` === key);
+      const same = sorted.filter(t => `${t.minutesAway}-${t.direction}-${t.line}` === key);
       const best = same.reduce((prev, curr) => (prev.remainingStations.length > curr.remainingStations.length) ? prev : curr);
       deduplicated.push(best);
       seen.add(key);
@@ -286,9 +289,10 @@ export const getAllTrainsForStation = (stationId: string) => {
   const seen = new Set<string>();
   
   for (const train of sorted) {
-    const key = `${Math.round(train.minutes)}-${train.direction}`;
+    // Include line in key so trains on different lines at interchanges aren't dropped
+    const key = `${Math.round(train.minutes)}-${train.direction}-${train.line}`;
     if (!seen.has(key)) {
-      const same = sorted.filter(t => `${Math.round(t.minutes)}-${t.direction}` === key);
+      const same = sorted.filter(t => `${Math.round(t.minutes)}-${t.direction}-${t.line}` === key);
       const best = same.reduce((prev, curr) => (prev.remainingCount > curr.remainingCount) ? prev : curr);
       deduplicated.push(best);
       seen.add(key);

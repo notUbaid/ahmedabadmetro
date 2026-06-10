@@ -51,7 +51,7 @@ export const stations: Record<string, Station> = {
   vadaj: { id: 'vadaj', name: 'Vadaj', nameGu: 'વાડજ', coordinates: [23.0676671, 72.5657588], lines: ['red'] },
   ranip: { id: 'ranip', name: 'Ranip', nameGu: 'રાણીપ', coordinates: [23.0676741, 72.5740838], lines: ['red'] },
   aec: { id: 'aec', name: 'AEC', nameGu: 'એ ઇ સી', coordinates: [23.0751088, 72.593291], lines: ['red'] },
-  sabarmati: { id: 'sabarmati', name: 'Sabarmati', nameGu: 'સાબરમતી', coordinates: [23.0856303, 72.592206], lines: ['red'], isWIP: true },
+  sabarmati: { id: 'sabarmati', name: 'Sabarmati', nameGu: 'સાબરમતી', coordinates: [23.0856303, 72.592206], lines: ['red'] },
   motera_stadium: { id: 'motera_stadium', name: 'Motera Stadium', nameGu: 'મોટેરા સ્ટેડિયમ', coordinates: [23.0967726, 72.596692], lines: ['red'] },
   koteshwar_road: { id: 'koteshwar_road', name: 'Koteshwar Road', nameGu: 'કોટેશ્વર રોડ', coordinates: [23.1031114, 72.6021329], lines: ['red', 'green'], isInterchange: true },
 
