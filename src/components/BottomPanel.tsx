@@ -270,7 +270,7 @@ export const BottomPanel = ({
                 <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
                   <Train className="w-4 h-4" />
                   Upcoming Trains
-                  {upcomingTrains.length > 0 && (
+                  {upcomingTrains.length > 0 && new Set(upcomingTrains.map(t => t.line)).size === 1 && (
                     <>
                       <span className="text-xs text-muted-foreground font-normal">
                         · every {getCurrentHeadway(upcomingTrains[0].line).label}
@@ -298,8 +298,12 @@ export const BottomPanel = ({
                               style={{ backgroundColor: LINE_COLORS[train.line as keyof typeof LINE_COLORS] }}
                             />
                             <div className="min-w-0">
-                              <div className="text-sm font-semibold truncate">{train.destination}</div>
-                              <div className="text-xs text-muted-foreground">{train.direction}</div>
+                              <div className="text-sm font-semibold truncate">
+                                {train.remainingStations.length === 0 ? 'Terminates Here' : train.destination}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {train.remainingStations.length === 0 ? 'Arrival Only' : train.direction}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">

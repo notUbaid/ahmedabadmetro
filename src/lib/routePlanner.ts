@@ -987,7 +987,9 @@ export const getOrganizedStations = (): {
   return { interchanges, byLine };
 };
 
-// Module-level cache to prevent running 150x Dijkstra loops repeatedly for the same route
+// Module-level cache to prevent running 150x Dijkstra loops repeatedly for the same route.
+// Includes a dayType sentinel so the cache auto-invalidates at midnight (dayType change).
+let departureCacheDayType = '';
 const departureCache = new Map<string, {
   departureTime: string;
   arrivalTime: string;
@@ -1006,6 +1008,11 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
   isDirect: boolean;
   interchangeCount: number;
 }[] => {
+  if (departureCacheDayType !== dayType) {
+    departureCache.clear();
+    departureCacheDayType = dayType;
+  }
+
   const cacheKey = `${originId}-${destId}-${dayType}`;
   if (departureCache.has(cacheKey)) {
     return departureCache.get(cacheKey)!;
