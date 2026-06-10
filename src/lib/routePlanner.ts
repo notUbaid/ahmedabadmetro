@@ -1260,18 +1260,18 @@ export const planRouteWithDeparture = (
   if (startingTrains.length === 0) return null;
 
   // Dijkstra / earliest-arrival search, seeded by the chosen departure (no waiting at origin)
-  const earliest = new Map<string, number>();
-  const prev = new Map<string, PrevEdge>();
+  const costMap = new Map<string, number>();
+  const prev = new Map<string, PrevEdge & { transfers: number; nonOfficialTransfers: number }>();
 
-  const pq: { stationId: string; time: number }[] = [];
+  const pq: { stationId: string; cost: number; time: number }[] = [];
 
-  const push = (stationId: string, time: number) => {
-    pq.push({ stationId, time });
+  const push = (stationId: string, cost: number, time: number) => {
+    pq.push({ stationId, cost, time });
   };
 
-  // Initialize earliest map
+  // Initialize cost map
   for (const s of Object.keys(stations)) {
-    earliest.set(s, Number.POSITIVE_INFINITY);
+    costMap.set(s, Number.POSITIVE_INFINITY);
   }
 
   // Seed from origin using all possible starting trains
@@ -1281,10 +1281,11 @@ export const planRouteWithDeparture = (
     for (let toIdx = stationIdx + 1; toIdx < schedule.stations.length; toIdx++) {
       const toId = schedule.stations[toIdx];
       const arriveMinutes = startMinutes + schedule.stationTimes[toIdx];
+      const cost = arriveMinutes; // initial route, no transfers
 
-      const best = earliest.get(toId) ?? Number.POSITIVE_INFINITY;
-      if (arriveMinutes < best) {
-        earliest.set(toId, arriveMinutes);
+      const best = costMap.get(toId) ?? Number.POSITIVE_INFINITY;
+      if (cost < best) {
+        costMap.set(toId, cost);
         prev.set(toId, {
           prevStationId: originId,
           scheduleId: schedule.id,
@@ -1292,19 +1293,21 @@ export const planRouteWithDeparture = (
           toIdx,
           departMinutes,
           arriveMinutes,
+          transfers: 0,
+          nonOfficialTransfers: 0
         });
-        push(toId, arriveMinutes);
+        push(toId, cost, arriveMinutes);
       }
     }
   }
 
   // Search
   while (pq.length > 0) {
-    pq.sort((a, b) => a.time - b.time);
+    pq.sort((a, b) => a.cost - b.cost);
     const current = pq.shift()!;
 
-    const currentBest = earliest.get(current.stationId) ?? Number.POSITIVE_INFINITY;
-    if (current.time !== currentBest) continue;
+    const currentBest = costMap.get(current.stationId) ?? Number.POSITIVE_INFINITY;
+    if (current.cost !== currentBest) continue;
 
     if (current.stationId === destinationId) break;
 
@@ -1317,20 +1320,38 @@ export const planRouteWithDeparture = (
       const departMin = startMinutes + schedule.stationTimes[fromIdx];
 
       // Boarding constraint: must depart at/after arrival time.
-      // If boarding a different train, require MIN_TRANSFER_TIME.
+      // If boarding a different train, require MIN_TRANSFER_TIME (reduced for same-platform transfers).
       const edgeToCurrent = prev.get(current.stationId);
       const arrivedOnTrainId = edgeToCurrent?.scheduleId;
-      const transferBuffer = (arrivedOnTrainId && arrivedOnTrainId !== schedule.id) ? MIN_TRANSFER_TIME : 0;
+      const isTransfer = arrivedOnTrainId && arrivedOnTrainId !== schedule.id;
+      
+      let transferBuffer = isTransfer ? MIN_TRANSFER_TIME : 0;
+      if (isTransfer && arrivedOnTrainId) {
+        const prevLine = trainSchedules.find(s => s.id === arrivedOnTrainId)?.line;
+        if ((prevLine === 'red' && schedule.line === 'green') || (prevLine === 'green' && schedule.line === 'red')) {
+          transferBuffer = 1; // Red and Green lines share the same track/platforms south of Koteshwar
+        }
+      }
 
       if (departMin < current.time + transferBuffer) continue;
+
+      const currentTransfers = edgeToCurrent?.transfers ?? 0;
+      const currentNonOfficial = edgeToCurrent?.nonOfficialTransfers ?? 0;
+      const newTransfers = currentTransfers + (isTransfer ? 1 : 0);
+      const newNonOfficial = currentNonOfficial + (isTransfer && !stations[current.stationId].isInterchange ? 1 : 0);
 
       for (let toIdx = fromIdx + 1; toIdx < schedule.stations.length; toIdx++) {
         const toId = schedule.stations[toIdx];
         const arriveMin = startMinutes + schedule.stationTimes[toIdx];
 
-        const best = earliest.get(toId) ?? Number.POSITIVE_INFINITY;
-        if (arriveMin < best) {
-          earliest.set(toId, arriveMin);
+        // Cost function: primarily minimize arrival time.
+        // Tie-breaker 1: minimize non-official transfers (adds 0.01 mins penalty)
+        // Tie-breaker 2: minimize total transfers (adds 0.001 mins penalty)
+        const cost = arriveMin + (newNonOfficial * 0.01) + (newTransfers * 0.001);
+
+        const best = costMap.get(toId) ?? Number.POSITIVE_INFINITY;
+        if (cost < best) {
+          costMap.set(toId, cost);
           prev.set(toId, {
             prevStationId: current.stationId,
             scheduleId: schedule.id,
@@ -1338,14 +1359,16 @@ export const planRouteWithDeparture = (
             toIdx,
             departMinutes: departMin,
             arriveMinutes: arriveMin,
+            transfers: newTransfers,
+            nonOfficialTransfers: newNonOfficial
           });
-          push(toId, arriveMin);
+          push(toId, cost, arriveMin);
         }
       }
     }
   }
 
-  const arrivalAtDest = earliest.get(destinationId) ?? Number.POSITIVE_INFINITY;
+  const arrivalAtDest = costMap.get(destinationId) ?? Number.POSITIVE_INFINITY;
   if (!Number.isFinite(arrivalAtDest)) return null;
 
   // Reconstruct legs from prev map
