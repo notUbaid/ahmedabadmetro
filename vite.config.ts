@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: "prompt",
+      injectRegister: "script",
       includeAssets: [
         "favicon.ico",
         "blueLineRoutes.geojson",
