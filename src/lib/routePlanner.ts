@@ -728,7 +728,7 @@ const buildBusRoute = (
   let departureTime = formatMinutesToTime(startTimeMinutes);
   let departureMinutes = startTimeMinutes;
   let totalTime = 0;
-  let routeConfidence: 'timetable' | 'mixed' | 'estimates' = 'timetable';
+  let routeConfidence: 'timetable' | 'mixed' | 'estimated' = 'timetable';
 
   if (originId !== 'gnlu') {
     // First, build route from origin to GNLU
