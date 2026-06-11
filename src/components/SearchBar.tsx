@@ -156,7 +156,7 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 
       const lat = f.geometry?.coordinates[1] || 0;
       const lng = f.geometry?.coordinates[0] || 0;
-      const nearest = type !== 'station' ? findNearestStation(lat, lng) : null;
+      const nearest = findNearestStation(lat, lng);
 
       return {
         id: `pelias_${i}_${props.id || ''}`,
