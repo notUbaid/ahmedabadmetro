@@ -35,7 +35,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
             icon: Clock,
             title: "Operating Hours",
             content:
-                "Blue/Red Lines: 6:20 AM – 10:00 PM. Green Line: 7:33 AM – 8:09 PM. Purple Line: 7:36 AM – 7:13 PM (with midday gap 10:18 AM – 4:06 PM).",
+                "Blue Line: 6:20 AM – 11:00 PM. Red Line: 6:16 AM – 10:11 PM. Green Line: 7:33 AM – 8:09 PM. Purple Line: 7:36 AM – 7:13 PM (with midday gap 10:18 AM – 4:06 PM).",
         },
     ];
 
@@ -50,11 +50,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
             content:
                 "If changing at Old High Court or Koteshwar Road, board one station earlier when possible. You'll get a seat and avoid the rush at interchange stations.",
         },
-        {
-            title: "Let One Metro Go",
-            content:
-                "If a metro arrives packed, don't force yourself in. The next one is usually 7–12 minutes later and far more comfortable.",
-        },
+
         {
             title: "Purple Line Has Limited Service",
             content:
