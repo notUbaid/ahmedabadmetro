@@ -16,10 +16,23 @@
 
 ---
 
+## 📑 Table of Contents
+- [🌟 What is Ahmedabad Metro Connect?](#-what-is-ahmedabad-metro-connect)
+- [🎯 Who is this for?](#-who-is-this-for)
+- [✨ Features Breakdown](#-features-breakdown)
+- [📖 How to Use the App](#-how-to-use-the-app)
+- [🚀 Quick Start & Setup](#-quick-start--setup)
+- [🏗️ Architecture & Stack](#️-architecture--stack)
+- [🤝 Contributing](#-contributing)
+
+---
+
 ## 🌟 What is Ahmedabad Metro Connect?
 Ahmedabad Metro Connect is a blazing-fast, strictly typed, and entirely offline-capable Progressive Web App (PWA) built specifically for the residents, daily commuters, and tourists of Ahmedabad and Gandhinagar. 
 
-Unlike generic transit apps that give basic static estimates, this app acts as a **hyper-intelligent transit engine**. It processes the official minute-by-minute train timetable, maps dynamic fare brackets, understands underground network loss, and orchestrates co-commuting logistics (syncing your ride with a friend's) all entirely within your browser.
+Unlike generic transit apps that give basic static estimates, this app acts as a **hyper-intelligent transit engine**. It processes the official minute-by-minute train timetable, maps dynamic fare brackets, understands underground network loss, and orchestrates co-commuting logistics (syncing your ride with a friend's) all entirely within your browser. 
+
+It is fully updated with the **Phase 2 Expansion**, including the Mahatma Mandir Green Line and the GIFT City Purple Line branch!
 
 ## 🎯 Who is this for?
 - **The Daily Commuter:** Who needs to know *exactly* when to leave their house to catch the 08:14 AM train and exactly what their commute will cost with a Smart Card discount.
@@ -50,7 +63,8 @@ Ever tried coordinating a metro ride with a friend starting from a different sta
 
 ### 📊 Real-World Dynamic Crowding AI
 - Tracks crowd density not just statically, but **dynamically** as the train progresses through its route.
-- Custom logic accounts for the massive Old High Court interchange spikes, bell-curve blue-line loading, and realistic terminal drop-offs. Know exactly if you'll get a seat before you swipe your card.
+- **Corridor & Extension Logic:** Custom rules model the heavy influx from GNLU to Old High Court on the Mahatma Mandir extension, bell-curve loading on the East-West Blue Line, and realistic terminal drop-offs.
+- Know exactly if you'll get a seat before you swipe your card.
 
 ### 📱 True Offline PWA Experience
 - Packaged with **Workbox Service Workers** to cache the entire application shell, interactive maps, and timetable matrices.
@@ -58,7 +72,7 @@ Ever tried coordinating a metro ride with a friend starting from a different sta
 
 ---
 
-## 📖 How to Use the App (Daily Commute Scenario)
+## 📖 How to Use the App
 
 **1. Finding Your Route:**
 Open the app. You don't need to know station names—just type your destination (e.g., "Gujarat University"). The search engine will instantly locate it and inform you that "Commerce Six Road" is your nearest station.
@@ -96,9 +110,12 @@ npm install
 
 # 4. Start the blazing-fast Vite dev server
 npm run dev
+
+# 5. Build for production (Optional)
+npm run build
 ```
 
-Your app will be live at `http://localhost:5000`.
+Your app will be live at `http://localhost:5000` (or whichever port Vite assigns).
 
 ---
 
@@ -132,5 +149,5 @@ We welcome contributions! Whether it's a bug fix, new feature, or performance op
 ---
 
 <div align="center">
-  <p>Built with ⚡ and ❤️ for the commuters of Ahmedabad.</p>
+  <p>Built with ⚡ and ❤️ for the commuters of Ahmedabad & Gandhinagar.</p>
 </div>
