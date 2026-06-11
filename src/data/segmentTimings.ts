@@ -94,15 +94,25 @@ const GNLU_TO_GIFT: SectionTiming = {
   cumulativeMinutes: [],
 };
 
-// Blue Line: Thaltej Gam → Vastral Gam
-const THALTEJ_TO_VASTRAL: SectionTiming = {
+// Blue Line: Thaltej Gam → Old High Court
+const THALTEJ_GAM_TO_OHC: SectionTiming = {
   stations: [
     'thaltej_gam', 'thaltej', 'doordarshan_kendra', 'gurukul_road', 'gujarat_university',
-    'commerce_six_road', 'stadium', 'old_high_court', 'shahpur', 'gheekanta',
+    'commerce_six_road', 'stadium', 'old_high_court'
+  ],
+  totalMinutes: 16, // Thaltej to OHC is exactly 14m, Thaltej Gam to Thaltej is 2m
+  travelPerSegmentSec: 0,
+  cumulativeMinutes: [],
+};
+
+// Blue Line: Old High Court → Vastral Gam
+const OHC_TO_VASTRAL: SectionTiming = {
+  stations: [
+    'old_high_court', 'shahpur', 'gheekanta',
     'kalupur', 'kankaria_east', 'apparel_park', 'amraiwadi', 'rabari_colony',
     'vastral', 'nirant_cross_roads', 'vastral_gam'
   ],
-  totalMinutes: 45, // Official journey time
+  totalMinutes: 29, // Remaining time for 45m official total
   travelPerSegmentSec: 0,
   cumulativeMinutes: [],
 };
@@ -154,7 +164,8 @@ calculateSectionTimes(GNLU_TO_INFOCITY);
 calculateSectionTimes(INFOCITY_TO_SACHIVALAYA);
 calculateSectionTimes(SACHIVALAYA_TO_MAHATMA_MANDIR);
 calculateSectionTimes(GNLU_TO_GIFT);
-calculateSectionTimes(THALTEJ_TO_VASTRAL);
+calculateSectionTimes(THALTEJ_GAM_TO_OHC);
+calculateSectionTimes(OHC_TO_VASTRAL);
 
 // ============= LINE TIMING DATA =============
 
@@ -197,7 +208,7 @@ export function joinSections(...sections: SectionTiming[]): LineTimingData {
 
 // Full line timings
 export const LINE_TIMINGS = {
-  blue: joinSections(THALTEJ_TO_VASTRAL),
+  blue: joinSections(THALTEJ_GAM_TO_OHC, OHC_TO_VASTRAL),
   red: joinSections(APMC_TO_OHC, OHC_TO_KOTESHWAR),
   green: joinSections(KOTESHWAR_TO_GNLU, GNLU_TO_INFOCITY, INFOCITY_TO_SACHIVALAYA, SACHIVALAYA_TO_MAHATMA_MANDIR),
   purple: joinSections(GNLU_TO_GIFT),
