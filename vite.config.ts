@@ -21,16 +21,33 @@ export default defineConfig(({ mode }) => ({
         "yellowLineRoutes.geojson",
       ],
       manifest: {
+        id: "/",
         name: "AhmMetro",
         short_name: "AhmMetro",
         description: "Real-time AhmMetro route planner with live train tracking",
         theme_color: "#0066CC",
         background_color: "#0f172a",
         display: "standalone",
+        display_override: ["standalone", "minimal-ui"],
         orientation: "portrait",
         scope: "/",
         start_url: "/",
+        lang: "en-IN",
+        dir: "ltr",
         categories: ["travel", "navigation", "transportation"],
+        screenshots: [
+          {
+            src: "/og-image.png",
+            sizes: "1200x630",
+            type: "image/png",
+            form_factor: "wide"
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ],
         icons: [
           {
             src: "/pwa-192x192.png",
