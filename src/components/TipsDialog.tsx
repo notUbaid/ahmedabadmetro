@@ -41,9 +41,9 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
 
     const tips = [
         {
-            title: "Corridor Through-Running Trains",
+            title: "Corridor Through-Running Metros",
             content:
-                "Some trains run directly from APMC to Mahatma Mandir or GIFT City without requiring a change at Koteshwar Road. Check the train destination display before boarding.",
+                "Some metros run directly from APMC to Mahatma Mandir or GIFT City without requiring a change at Koteshwar Road. Check the metro destination display before boarding.",
         },
         {
             title: "Board Before the Interchange",
@@ -51,19 +51,19 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                 "If changing at Old High Court or Koteshwar Road, board one station earlier when possible. You'll get a seat and avoid the rush at interchange stations.",
         },
         {
-            title: "Let One Train Go",
+            title: "Let One Metro Go",
             content:
-                "If a train arrives packed, don't force yourself in. The next one is usually 7–12 minutes later and far more comfortable.",
+                "If a metro arrives packed, don't force yourself in. The next one is usually 7–12 minutes later and far more comfortable.",
         },
         {
             title: "Purple Line Has Limited Service",
             content:
-                "GNLU ↔ GIFT City runs only morning and evening services with no trains from ~10 AM to 4 PM. Always check the schedule before planning trips to GIFT City.",
+                "GNLU ↔ GIFT City runs only morning and evening services with no metros from ~10 AM to 4 PM. Always check the schedule before planning trips to GIFT City.",
         },
         {
             title: "Peak Hours to Avoid",
             content:
-                "Trains are most crowded 8–11 AM and 5–8 PM on weekdays. If flexible, travel just before or after these windows for a more comfortable journey.",
+                "Metros are most crowded 8–11 AM and 5–8 PM on weekdays. If flexible, travel just before or after these windows for a more comfortable journey.",
         },
         {
             title: "Stand Near Middle of Platform",
@@ -73,12 +73,12 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
         {
             title: "For Stadium Events, Plan Ahead",
             content:
-                "Going to Motera Stadium? Reach early for empty trains. After the event, wait 20–30 minutes for crowds to thin out before heading to the metro.",
+                "Going to Motera Stadium? Reach early for empty metros. After the event, wait 20–30 minutes for crowds to thin out before heading to the metro.",
         },
         {
             title: "Weekend Frequency is Lower",
             content:
-                "Trains run less frequently on Sundays (every 12 min on Blue Line vs 7 min on weekday peak). Factor in extra waiting time for weekend trips.",
+                "Metros run less frequently on Sundays (every 12 min on Blue Line vs 7 min on weekday peak). Factor in extra waiting time for weekend trips.",
         },
         {
             title: "First/Last Coach for Less Crowd",
@@ -200,10 +200,10 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                             <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-4 border border-orange-200 dark:border-orange-900">
                                 <h3 className="font-semibold text-orange-700 dark:text-orange-400 text-sm flex items-center gap-2">
                                     <Train className="w-4 h-4" />
-                                    Live Train Tracking
+                                    Live Metro Tracking
                                 </h3>
                                 <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
-                                    Tap any orange train icon on the map to see its details and share your journey with friends so they can track you in real-time.
+                                    Tap any orange metro icon on the map to see its details and share your journey with friends so they can track you in real-time.
                                 </p>
                             </div>
                     </div>

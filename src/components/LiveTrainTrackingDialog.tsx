@@ -151,7 +151,7 @@ export const LiveTrainTrackingDialog = ({
     if (navigator.share) {
       navigator.share({
         title: 'Track my Metro journey!',
-        text: `I'm on the ${line.charAt(0).toUpperCase() + line.slice(1)} Line from ${originName} to ${destName}. Track my train live!`,
+        text: `I'm on the ${line.charAt(0).toUpperCase() + line.slice(1)} Line from ${originName} to ${destName}. Track my metro live!`,
         url: shareUrl
       }).catch(() => {});
     }
@@ -228,7 +228,7 @@ export const LiveTrainTrackingDialog = ({
 
           {/* Current Time */}
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-            <p className="text-xs text-muted-foreground">Train Tracking Time</p>
+            <p className="text-xs text-muted-foreground">Metro Tracking Time</p>
             <p className="text-2xl font-bold text-primary">{minutesToTime(currentTime)}</p>
           </div>
 

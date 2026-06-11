@@ -1700,7 +1700,7 @@ longPressTimer = setTimeout(() => {
                 className="w-full py-3 px-4 rounded-xl font-medium border border-border bg-muted/50 flex items-center justify-center gap-2 transition-all hover:bg-muted active:scale-[0.98]"
               >
                 <Train size={18} />
-                View Train Details
+                View Metro Details
               </button>
             </div>
           </div>

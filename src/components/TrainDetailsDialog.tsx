@@ -113,7 +113,7 @@ export const TrainDetailsDialog = ({
           {!hasStarted && (
             <div className="mb-6 p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/50">
               <p className="text-sm text-yellow-600 font-medium">
-                Train departs at {schedule.startTime}
+                Metro departs at {schedule.startTime}
               </p>
             </div>
           )}
@@ -206,7 +206,7 @@ export const TrainDetailsDialog = ({
           {isCompleted && (
             <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted text-center">
               <p className="text-sm text-muted-foreground">
-                Service for this train has ended for today.
+                Service for this metro has ended for today.
               </p>
             </div>
           )}

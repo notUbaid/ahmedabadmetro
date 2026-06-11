@@ -200,7 +200,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                                                         {step.trainTime && (
                                                             <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1.5 bg-amber-500/10 w-fit px-2 py-0.5 rounded-full mt-1">
                                                                 <Clock size={10} />
-                                                                Next train at {step.trainTime}
+                                                                Next metro at {step.trainTime}
                                                             </p>
                                                         )}
                                                     </>

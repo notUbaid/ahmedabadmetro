@@ -120,7 +120,7 @@ export const JoinRideDialog = ({
                     </div>
                     <div>
                         <h2 className="text-xl font-bold">Join Shared Ride</h2>
-                        <p className="text-sm text-muted-foreground capitalize">{sharedTrain.line} Line Train</p>
+                        <p className="text-sm text-muted-foreground capitalize">{sharedTrain.line} Line Metro</p>
                     </div>
                 </div>
 
@@ -167,8 +167,8 @@ export const JoinRideDialog = ({
                         <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3">
                             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                             <div className="text-sm">
-                                <p className="font-semibold">Train doesn't stop here</p>
-                                <p>This train does not pass through {stations[userStationId]?.name}.</p>
+                                <p className="font-semibold">Metro doesn't stop here</p>
+                                <p>This metro does not pass through {stations[userStationId]?.name}.</p>
                             </div>
                         </div>
                     )}
@@ -177,7 +177,7 @@ export const JoinRideDialog = ({
                         <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3">
                             <Clock className="w-5 h-5 flex-shrink-0" />
                             <div className="text-sm">
-                                <p className="font-semibold">Train has departed</p>
+                                <p className="font-semibold">Metro has departed</p>
                                 <p>You missed it by {interceptDetails.minutesAgo} mins.</p>
                             </div>
                         </div>

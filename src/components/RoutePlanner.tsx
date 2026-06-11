@@ -354,7 +354,7 @@ export const RoutePlanner = ({
                 )}
                 {step.isDirect && (
                   <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
-                    ✓ Direct Train
+                    ✓ Direct Metro
                   </span>
                 )}
               </div>
@@ -595,7 +595,7 @@ export const RoutePlanner = ({
                     <Info className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium italic leading-tight">
-                    You cannot reach the shared train in time from this origin. Try a closer station.
+                    You cannot reach the shared metro in time from this origin. Try a closer station.
                   </p>
                 </div>
               </div>
@@ -837,7 +837,7 @@ export const RoutePlanner = ({
                   <span className="text-sm font-medium">{route.destination.name}</span>
                   {route.isDirect && (
                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium ml-2">
-                      Direct Train
+                      Direct Metro
                     </span>
                   )}
                   {route.hasBusSegment && (
@@ -851,7 +851,7 @@ export const RoutePlanner = ({
               {/* Available Departures (Modern Chips) */}
               {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && !internalIsCoordinating && (
                 <div className="mb-4">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Available Trains</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Available Metros</p>
                   <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                     {uniqueDepartureTimes.map((dep, idx) => {
                       const isSelected = route.departureTime === dep.departureTime;

@@ -53,7 +53,7 @@ export const WelcomeOverlay = () => {
             </div>
             <div>
               <h3 className="font-semibold text-sm">Live Animated Map</h3>
-              <p className="text-xs text-muted-foreground mt-1">Watch trains move across the network in real-time, click on them to track and share.</p>
+              <p className="text-xs text-muted-foreground mt-1">Watch metros move across the network in real-time, click on them to track and share.</p>
             </div>
           </div>
 
