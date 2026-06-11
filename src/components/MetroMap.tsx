@@ -1609,6 +1609,7 @@ longPressTimer = setTimeout(() => {
             setCommuteCard(null);
           }}
           onPlanRoute={() => {
+            incrementDismissCount(commuteCard.direction);
             setRoutePlannerOrigin(commuteCard.fromStation.id);
             setRoutePlannerDestination(commuteCard.toStation.id);
             setIsRoutePlannerOpen(true);
