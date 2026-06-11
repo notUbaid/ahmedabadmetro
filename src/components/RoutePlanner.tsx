@@ -650,7 +650,7 @@ export const RoutePlanner = ({
                   <>
                     {organizedStations.interchanges.length > 0 && (
                       <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30 sticky top-0">
+                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
                           Interchange Stations
                         </div>
                         {organizedStations.interchanges.map(s => (
@@ -680,7 +680,7 @@ export const RoutePlanner = ({
                     {organizedStations.byLine.map(group => (
                       <div key={group.line}>
                         <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30 sticky top-0 flex items-center gap-2"
+                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
                         >
                           <span
                             className="w-2 h-2 rounded-full"
@@ -765,7 +765,7 @@ export const RoutePlanner = ({
                   <>
                     {organizedStations.interchanges.length > 0 && (
                       <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30 sticky top-0">
+                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
                           Interchange Stations
                         </div>
                         {organizedStations.interchanges.map(s => (
@@ -795,7 +795,7 @@ export const RoutePlanner = ({
                     {organizedStations.byLine.map(group => (
                       <div key={group.line}>
                         <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30 sticky top-0 flex items-center gap-2"
+                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
                         >
                           <span
                             className="w-2 h-2 rounded-full"
