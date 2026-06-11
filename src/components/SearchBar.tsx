@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
+import { cn } from '@/lib/utils';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -237,6 +238,33 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const containerRef = useRef<HTMLDivElement>(null);
   const isSelectedRef = useRef(false);
   const activeSearchIdRef = useRef(0);
+  const [isOfflineExpanded, setIsOfflineExpanded] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+    const handleOffline = () => {
+      setIsOfflineExpanded(true);
+      if (timeout) window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => setIsOfflineExpanded(false), 3000);
+    };
+    const handleOnline = () => {
+      setIsOfflineExpanded(true);
+      if (timeout) window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => setIsOfflineExpanded(false), 3000);
+    };
+
+    if (!navigator.onLine) {
+      timeout = window.setTimeout(() => setIsOfflineExpanded(false), 3000);
+    }
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    };
+  }, []);
 
   const metroStations = getMetroStationResults();
 
@@ -510,7 +538,10 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   };
 
   return (
-    <div ref={containerRef} className="fixed top-4 left-4 right-4 z-[1001] max-w-md mx-auto pointer-events-none safe-m-top">
+    <div ref={containerRef} className={cn(
+      "fixed left-4 right-4 z-[1001] max-w-md mx-auto pointer-events-none safe-m-top transition-all duration-300",
+      isOfflineExpanded ? "top-12" : "top-4"
+    )}>
       <div className="relative pointer-events-auto">
         <div className="flex items-center bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
           <Search className="w-5 h-5 text-muted-foreground ml-3 flex-shrink-0" />
