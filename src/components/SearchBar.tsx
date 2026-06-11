@@ -236,6 +236,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isSelectedRef = useRef(false);
+  const activeSearchIdRef = useRef(0);
 
   const metroStations = getMetroStationResults();
 
@@ -268,6 +269,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       return;
     }
 
+    const searchId = ++activeSearchIdRef.current;
+
     // Check cache first
     const cached = searchCache.get(normalizedQuery);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -292,6 +295,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
       // Search Pelias API
       const peliasResults = await searchPelias(searchQuery);
+      
+      if (searchId !== activeSearchIdRef.current) return;
 
       // Fallback to Nominatim if Pelias returns fewer than 3 results
       let nominatimResults: SearchResult[] = [];
@@ -334,6 +339,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       if (peliasResults.length === 0 && nominatimResults.length === 0) {
         try {
           const { localPlaces } = await import('../data/localPlaces');
+          if (searchId !== activeSearchIdRef.current) return;
           const localMatches = localPlaces.filter((place: { n: string, t: string, c: number[] }) => 
             place.n.toLowerCase().includes(normalizedQuery)
           ).slice(0, 5);
@@ -381,10 +387,13 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         timestamp: Date.now()
       });
 
+      if (searchId !== activeSearchIdRef.current) return;
+
       setResults(finalResults);
       setShowResults(true);
     } catch (error) {
       console.error('Search failed:', error);
+      if (searchId !== activeSearchIdRef.current) return;
       // Fallback to metro stations only
       const localResults = metroStations.filter(station =>
         station.name.toLowerCase().includes(normalizedQuery)
@@ -392,7 +401,9 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       setResults(localResults);
       setShowResults(true);
     } finally {
-      setIsLoading(false);
+      if (searchId === activeSearchIdRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [metroStations]);
 
@@ -405,6 +416,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   }, [query, performSearch]);
 
   const handleSelect = (result: SearchResult) => {
+    activeSearchIdRef.current++; // Cancel any in-flight searches
+    
     // Save to recent searches
     saveRecentSearch({
       name: result.name,
@@ -429,6 +442,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   };
 
   const handleRecentSelect = (recent: RecentSearch) => {
+    activeSearchIdRef.current++; // Cancel any in-flight searches
+    
     // For metro stations, use station select handler if available
     if (recent.type === 'station' && onStationSelect) {
       // Find station ID from name
