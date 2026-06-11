@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/train.svg" alt="Ahmedabad Metro Logo" width="120" height="120">
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/train.svg" alt="AhmMetro Logo" width="120" height="120">
   
-  # 🚇 Ahmedabad Metro Connect
+  # 🚇 AhmMetro
   **The Next-Generation Transit Companion for the Modern Commuter**
 
   <p align="center">
@@ -17,7 +17,7 @@
 ---
 
 ## 📑 Table of Contents
-- [🌟 What is Ahmedabad Metro Connect?](#-what-is-ahmedabad-metro-connect)
+- [🌟 What is AhmMetro?](#-what-is-ahmedabad-metro-connect)
 - [🎯 Who is this for?](#-who-is-this-for)
 - [✨ Features Breakdown](#-features-breakdown)
 - [📖 How to Use the App](#-how-to-use-the-app)
@@ -27,8 +27,8 @@
 
 ---
 
-## 🌟 What is Ahmedabad Metro Connect?
-Ahmedabad Metro Connect is a blazing-fast, strictly typed, and entirely offline-capable Progressive Web App (PWA) built specifically for the residents, daily commuters, and tourists of Ahmedabad and Gandhinagar. 
+## 🌟 What is AhmMetro?
+AhmMetro is a blazing-fast, strictly typed, and entirely offline-capable Progressive Web App (PWA) built specifically for the residents, daily commuters, and tourists of Ahmedabad and Gandhinagar. 
 
 Unlike generic transit apps that give basic static estimates, this app acts as a **hyper-intelligent transit engine**. It processes the official minute-by-minute train timetable, maps dynamic fare brackets, understands underground network loss, and orchestrates co-commuting logistics (syncing your ride with a friend's) all entirely within your browser. 
 

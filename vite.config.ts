@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => ({
         "yellowLineRoutes.geojson",
       ],
       manifest: {
-        name: "Ahmedabad Metro",
+        name: "AhmMetro",
         short_name: "AhmMetro",
-        description: "Real-time Ahmedabad Metro route planner with live train tracking",
+        description: "Real-time AhmMetro route planner with live train tracking",
         theme_color: "#0066CC",
         background_color: "#0f172a",
         display: "standalone",

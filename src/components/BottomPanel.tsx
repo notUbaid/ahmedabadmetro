@@ -237,7 +237,7 @@ export const BottomPanel = ({
           ) : (
             <div className="text-center py-3">
               <Train className="w-10 h-10 mx-auto mb-2 opacity-50 text-muted-foreground" />
-              <h2 className="text-base font-semibold mb-1">Welcome to Ahmedabad Metro</h2>
+              <h2 className="text-base font-semibold mb-1">Welcome to AhmMetro</h2>
               <p className="text-xs text-muted-foreground">Tap a station or enable location</p>
             </div>
           )}

@@ -1,4 +1,4 @@
-# Deployment Guide - Ahmedabad Metro Navigator
+# Deployment Guide - AhmMetro Navigator
 
 ## Vercel Deployment
 

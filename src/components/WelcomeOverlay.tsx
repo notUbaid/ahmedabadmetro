@@ -33,7 +33,7 @@ export const WelcomeOverlay = () => {
             <Train className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Welcome to AhmMetro!</h2>
-          <p className="text-muted-foreground mt-2 text-sm">Your digital guide to stress-free travel on the Ahmedabad Metro.</p>
+          <p className="text-muted-foreground mt-2 text-sm">Your digital guide to stress-free travel on the AhmMetro.</p>
         </div>
 
         <div className="p-6 space-y-4">
