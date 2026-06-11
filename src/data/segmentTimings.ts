@@ -100,7 +100,7 @@ const THALTEJ_GAM_TO_OHC: SectionTiming = {
     'thaltej_gam', 'thaltej', 'doordarshan_kendra', 'gurukul_road', 'gujarat_university',
     'commerce_six_road', 'stadium', 'old_high_court'
   ],
-  totalMinutes: 16, // Thaltej to OHC is exactly 14m, Thaltej Gam to Thaltej is 2m
+  totalMinutes: 15, // Thaltej Gam to OHC is 15m
   travelPerSegmentSec: 0,
   cumulativeMinutes: [],
 };
@@ -112,7 +112,7 @@ const OHC_TO_VASTRAL: SectionTiming = {
     'kalupur', 'kankaria_east', 'apparel_park', 'amraiwadi', 'rabari_colony',
     'vastral', 'nirant_cross_roads', 'vastral_gam'
   ],
-  totalMinutes: 29, // Remaining time for 45m official total
+  totalMinutes: 30, // Remaining time for 45m official total
   travelPerSegmentSec: 0,
   cumulativeMinutes: [],
 };
