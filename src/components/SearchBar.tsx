@@ -235,6 +235,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isSelectedRef = useRef(false);
 
   const metroStations = getMetroStationResults();
 
@@ -261,6 +262,11 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
 
     const normalizedQuery = searchQuery.toLowerCase().trim();
+
+    if (isSelectedRef.current) {
+      isSelectedRef.current = false;
+      return;
+    }
 
     // Check cache first
     const cached = searchCache.get(normalizedQuery);
@@ -415,9 +421,11 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       onLocationSelect(result.lat, result.lng, result.name);
     }
 
+    isSelectedRef.current = true;
     setQuery(result.name);
     setShowResults(false);
     setShowRecent(false);
+    inputRef.current?.blur();
   };
 
   const handleRecentSelect = (recent: RecentSearch) => {
@@ -429,15 +437,19 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       );
       if (stationEntry) {
         onStationSelect(stationEntry[0]);
+        isSelectedRef.current = true;
         setQuery(recent.name);
         setShowRecent(false);
+        inputRef.current?.blur();
         return;
       }
     }
 
     onLocationSelect(recent.lat, recent.lng, recent.name);
+    isSelectedRef.current = true;
     setQuery(recent.name);
     setShowRecent(false);
+    inputRef.current?.blur();
   };
 
   const clearSearch = () => {
