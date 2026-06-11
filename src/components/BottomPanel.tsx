@@ -2,7 +2,7 @@ import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTrian
 import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
 import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
-import { getSimpleCrowdLevel } from '@/lib/crowding';
+import { getCrowdLevel } from '@/lib/crowding';
 import { useEffect, useState } from 'react';
 
 interface BottomPanelProps {
@@ -286,7 +286,11 @@ export const BottomPanel = ({
                   <div className="space-y-2">
                     {upcomingTrains.map((train) => {
                       const liveMinutes = getLiveMinutesAway(train.arrivalTime);
-                      const crowd = getSimpleCrowdLevel(train.line, train.trainId || '');
+                      const crowd = getCrowdLevel(train.line, train.trainId || '', {
+                        stationIndex: train.stationIndex,
+                        totalStations: train.stationList.length,
+                        stationList: train.stationList,
+                      });
                       return (
                         <div
                           key={`${train.arrivalTime}-${train.destination}`}

@@ -164,28 +164,39 @@ export const getCrowdLevel = (
   if (serviceType === 'corridor') {
     // Northbound (APMC to Gandhinagar)
     if (originStationId === 'apmc') {
-      if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
-        // APMC -> OHC: Starts Low, grows to Moderate
-        level = stationIndex > 2 ? 'moderate' : 'low';
-        if (isPeak && level === 'moderate') level = 'heavy';
+      const paldiIndex = stationList.indexOf('paldi');
+      const ohcIndex = stationList.indexOf('old_high_court');
+      const gnluIndex = stationList.indexOf('gnlu');
+      const infocityIndex = stationList.indexOf('infocity');
+      
+      if (paldiIndex !== -1 && stationIndex < paldiIndex) {
+        level = 'low';
+      } else if (ohcIndex !== -1 && stationIndex < ohcIndex) {
+        level = 'moderate';
+      } else if (gnluIndex !== -1 && stationIndex <= gnluIndex) {
+        level = 'heavy';
+      } else if (infocityIndex !== -1 && stationIndex <= infocityIndex) {
+        level = 'moderate';
       } else {
-        // At or after OHC: Massive influx to Gandhinagar
-        level = isPeak ? 'heavy' : 'moderate';
+        level = 'low';
       }
     } 
     // Southbound (Gandhinagar to APMC)
     else if (destStationId === 'apmc') {
-      if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
-        // Gandhinagar -> OHC: Moderate/Heavy crowd going to city
-        level = isPeak ? 'heavy' : 'moderate';
+      const infocityIndex = stationList.indexOf('infocity');
+      const gnluIndex = stationList.indexOf('gnlu');
+      const paldiIndex = stationList.indexOf('paldi');
+      
+      if (infocityIndex !== -1 && stationIndex < infocityIndex) {
+        level = 'low';
+      } else if (gnluIndex !== -1 && stationIndex < gnluIndex) {
+        level = 'moderate';
+      } else if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
+        level = 'heavy';
+      } else if (paldiIndex !== -1 && stationIndex <= paldiIndex) {
+        level = 'moderate';
       } else {
-        // After OHC to APMC
-        const paldiIndex = stationList.indexOf('paldi');
-        if (paldiIndex !== -1 && stationIndex >= paldiIndex) {
-          level = 'low'; // Paldi to APMC is mostly empty
-        } else {
-          level = isPeak ? 'moderate' : 'low';
-        }
+        level = 'low';
       }
     } else {
       // Fallback for corridor

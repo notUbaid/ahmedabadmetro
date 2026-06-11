@@ -135,36 +135,7 @@ const formatStationName = (stationId: string): string => {
   return stationId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
-const getTrainLineAtStation = (schedule: TrainSchedule, stationId: string): 'blue' | 'red' | 'green' | 'purple' | undefined => {
-  const station = stations[stationId];
-  if (!station) return undefined;
-
-  const stationIndex = schedule.stations.indexOf(stationId);
-  if (stationIndex === -1) return undefined;
-
-  if (station.lines.length === 1) {
-    return station.lines[0] as 'blue' | 'red' | 'green' | 'purple';
-  }
-
-  const nextStationId = schedule.stations[stationIndex + 1];
-  const prevStationId = stationIndex > 0 ? schedule.stations[stationIndex - 1] : undefined;
-
-  if (nextStationId) {
-    const candidate = station.lines.find(line => stations[nextStationId]?.lines.includes(line));
-    if (candidate) return candidate as 'blue' | 'red' | 'green' | 'purple';
-  }
-
-  if (prevStationId) {
-    const candidate = station.lines.find(line => stations[prevStationId]?.lines.includes(line));
-    if (candidate) return candidate as 'blue' | 'red' | 'green' | 'purple';
-  }
-
-  if (station.lines.includes(schedule.line)) {
-    return schedule.line;
-  }
-
-  return station.lines[0] as 'blue' | 'red' | 'green' | 'purple';
-};
+// getTrainLineAtStation was removed.
 
 export const getDirectionStr = (destinationId: string): string => {
   const dest = destinationId.toLowerCase();
@@ -196,6 +167,8 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
     destination: string;
     trainId: string;
     remainingStations: string[];
+    stationIndex: number;
+    stationList: string[];
   }[] = [];
 
   for (const schedule of trainSchedules) {
@@ -203,7 +176,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
     if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
-    // Removed: if (stationIndex === schedule.stations.length - 1) continue;
+    if (stationIndex === schedule.stations.length - 1) continue; // Hide terminating trains
     // We want to show arriving trains at terminus stations so users know when trains arrive.
 
     const startMinutes = toMinutes(schedule.startTime);
@@ -220,7 +193,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
       const arrivalMin = Math.floor(arrivalMinutes % 60);
 
       const destinationId = schedule.stations[schedule.stations.length - 1];
-      const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
+      const currentLine = schedule.line;
       const directionStr = getDirectionStr(destinationId);
 
       upcoming.push({
@@ -231,6 +204,8 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
         destination: formatStationName(destinationId),
         trainId: schedule.id,
         remainingStations: schedule.stations.slice(stationIndex + 1),
+        stationIndex: stationIndex,
+        stationList: schedule.stations,
       });
     }
   }
@@ -263,7 +238,7 @@ export const getAllTrainsForStation = (stationId: string) => {
     if (schedule.dayType && schedule.dayType !== currentDayType) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
-    // Removed: if (stationIndex === schedule.stations.length - 1) continue;
+    if (stationIndex === schedule.stations.length - 1) continue; // Hide terminating trains
 
     const startMinutes = toMinutes(schedule.startTime);
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
@@ -272,7 +247,7 @@ export const getAllTrainsForStation = (stationId: string) => {
     const arrivalMin = Math.floor(arrivalMinutes % 60);
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
-    const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
+    const currentLine = schedule.line;
 
     trains.push({
       time: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
@@ -319,7 +294,7 @@ export const getLastTrainWarnings = (stationId: string) => {
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
-    const currentLine = getTrainLineAtStation(schedule, stationId) ?? schedule.line;
+    const currentLine = schedule.line;
     const existing = destinationLastTrains.get(destinationId);
 
     if (!existing || arrivalMinutes > existing.arrivalMinutes) {
