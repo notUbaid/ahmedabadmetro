@@ -1691,7 +1691,26 @@ export const findCommonTrainRoute = (
   });
   
   const bestOption = viableOptions[0];
-  const { candidate: bestCandidate, routeToInterchange: bestRouteToInterchange } = bestOption;
+  const bestCandidate = bestOption.candidate;
+  let bestRouteToInterchange = bestOption.routeToInterchange;
+  
+  // Optimize User 2's waiting time by finding the latest possible departure for the winning candidate
+  // Since we only do this full search for ONE candidate, it runs instantly without crashing!
+  if (bestRouteToInterchange) {
+    const departures = getAvailableDepartures(userOriginId, bestCandidate.stationId);
+    const possibleDepartures = departures.filter(d => 
+      d.departureMinutes >= currentTimeMins && 
+      d.arrivalMinutes + MIN_TRANSFER_TIME <= bestCandidate.trainArrivalMin
+    );
+    
+    if (possibleDepartures.length > 0) {
+      possibleDepartures.sort((a, b) => b.departureMinutes - a.departureMinutes);
+      const optimizedRoute = planRouteWithDeparture(userOriginId, bestCandidate.stationId, possibleDepartures[0].departureMinutes);
+      if (optimizedRoute) {
+        bestRouteToInterchange = optimizedRoute;
+      }
+    }
+  }
   
   // STEP 7: Determine where User 2 should alight from the shared train
   let alightIdx: number;
