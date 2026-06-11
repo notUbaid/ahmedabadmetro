@@ -22,16 +22,30 @@ export const CommuteCard = ({
 }: CommuteCardProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [departures, setDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (!fromStation || !toStation) return;
+    
+    setIsLoading(true);
+    const timeoutId = setTimeout(() => {
+       const deps = getAvailableDepartures(fromStation.id, toStation.id);
+       setDepartures(deps);
+       setIsLoading(false);
+    }, 10);
+    return () => clearTimeout(timeoutId);
+  }, [fromStation, toStation]);
+
   const trainsToDestination = useMemo(() => {
-    if (!fromStation || !toStation) return [];
+    if (departures.length === 0) return [];
 
     const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const departures = getAvailableDepartures(fromStation.id, toStation.id);
 
     return departures
       .filter(route => route.departureMinutes >= nowMinutes)
@@ -43,7 +57,7 @@ export const CommuteCard = ({
         destinationArrivalTime: route.arrivalTime,
         routeLabel: route.interchangeCount > 0 ? `via ${route.interchangeCount} change${route.interchangeCount > 1 ? 's' : ''}` : 'direct',
       }));
-  }, [fromStation, toStation, currentTime]);
+  }, [departures, currentTime, fromStation]);
 
   const getLiveMinutesAway = (arrivalTime: string): number => {
     const [arrH, arrM] = arrivalTime.split(':').map(Number);
@@ -87,7 +101,12 @@ export const CommuteCard = ({
             </div>
           )}
 
-          {trainsToDestination.length > 0 ? (
+          {isLoading ? (
+            <div className="space-y-2 py-1">
+               <div className="w-full h-[60px] bg-muted animate-pulse rounded-xl shadow-sm"></div>
+               <div className="w-full h-[60px] bg-muted animate-pulse rounded-xl shadow-sm"></div>
+            </div>
+          ) : trainsToDestination.length > 0 ? (
             <div className="space-y-2">
               {trainsToDestination.map((train, idx) => {
                 const liveMinutes = getLiveMinutesAway(train.departureTime);

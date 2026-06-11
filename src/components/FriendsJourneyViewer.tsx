@@ -33,36 +33,39 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
         return destSearch ? stationOptions.filter(s => s.name.toLowerCase().includes(destSearch.toLowerCase())) : stationOptions;
     }, [destSearch, stationOptions]);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         if (!data || !isOpen) return;
 
-        // Plan the exact route to show the friend's path
-        const pRoute = planRouteWithDeparture(data.origin, data.dest, data.depMins);
-        setRoute(pRoute);
-        setCustomDest(data.dest);
-        setDestSearch(stations[data.dest]?.name || '');
-
-        const updateProgress = () => {
-            const now = new Date();
-            // Include seconds for smoother real-time progress
-            const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-            if (pRoute) {
-                setJourneyProgress(calculateJourneyProgress(pRoute, currentMins));
+        setIsLoading(true);
+        const timerId = setTimeout(() => {
+            try {
+                // Plan the exact route to show the friend's path
+                const pRoute = planRouteWithDeparture(data.origin, data.dest, data.depMins);
+                setRoute(pRoute);
+                setCustomDest(data.dest);
+                setDestSearch(stations[data.dest]?.name || '');
+            } finally {
+                setIsLoading(false);
             }
-        };
+        }, 10);
 
-        updateProgress();
-        // Update every second for real-time tracking
-        const interval = setInterval(updateProgress, 1000);
-        return () => clearInterval(interval);
+        return () => clearTimeout(timerId);
     }, [data, isOpen]);
     
-    // Update progress when route changes
+    // Update progress when route changes and set up interval
     useEffect(() => {
         if (route) {
-            const now = new Date();
-            const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-            setJourneyProgress(calculateJourneyProgress(route, currentMins));
+            const updateProgress = () => {
+                const now = new Date();
+                const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+                setJourneyProgress(calculateJourneyProgress(route, currentMins));
+            };
+            
+            updateProgress();
+            const interval = setInterval(updateProgress, 1000);
+            return () => clearInterval(interval);
         }
     }, [route]);
 
@@ -113,56 +116,85 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                         </div>
                     )}
 
-                    {/* Quick Summary Card */}
-                    <div className="bg-muted/30 border border-border rounded-3xl p-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <Route size={120} />
-                        </div>
-
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="flex flex-col items-center flex-1">
-                                <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-2">
-                                    <Clock className="text-green-600" size={24} />
+                    {isLoading ? (
+                        <div className="bg-muted/30 border border-border rounded-3xl p-6 space-y-8 animate-in fade-in duration-300">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex flex-col items-center flex-1 space-y-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-muted animate-pulse" />
+                                    <div className="w-16 h-4 bg-muted animate-pulse rounded-full" />
+                                    <div className="w-20 h-6 bg-muted animate-pulse rounded-full" />
                                 </div>
-                                <p className="text-sm font-bold text-muted-foreground uppercase">Depart</p>
-                                <p className="text-xl font-black">{formatMinutesToTime(data.depMins)}</p>
-                                <p className="text-[11px] font-bold mt-1 text-center truncate w-full">{stations[data.origin]?.name}</p>
-                            </div>
-
-                            <div className="flex flex-col items-center px-4">
-                                <ArrowRight className="text-muted-foreground mb-4" />
-                            </div>
-
-                            <div className="flex flex-col items-center flex-1">
-                                <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-2">
-                                    <MapPin className="text-red-600" size={24} />
+                                <div className="flex flex-col items-center flex-1 space-y-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-muted animate-pulse" />
+                                    <div className="w-16 h-4 bg-muted animate-pulse rounded-full" />
+                                    <div className="w-20 h-6 bg-muted animate-pulse rounded-full" />
                                 </div>
-                                <p className="text-sm font-bold text-muted-foreground uppercase">Arrive</p>
-                                <p className="text-xl font-black">{route?.arrivalTime || '--:--'}</p>
-                                <p className="text-[11px] font-bold mt-1 text-center truncate w-full">{stations[data.dest]?.name}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
+                                <div className="h-16 bg-muted animate-pulse rounded-2xl" />
+                                <div className="h-16 bg-muted animate-pulse rounded-2xl" />
                             </div>
                         </div>
+                    ) : (
+                        <div className="bg-muted/30 border border-border rounded-3xl p-6 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <Route size={120} />
+                            </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
-                            <div className="bg-background/50 rounded-2xl p-3 flex items-center gap-3">
-                                <Train size={18} className="text-primary" />
-                                <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Stops</p>
-                                    <p className="text-sm font-black">{route?.totalStations || '--'}</p>
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex flex-col items-center flex-1">
+                                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-2">
+                                        <Clock className="text-green-600" size={24} />
+                                    </div>
+                                    <p className="text-sm font-bold text-muted-foreground uppercase">Depart</p>
+                                    <p className="text-xl font-black">{formatMinutesToTime(data.depMins)}</p>
+                                    <p className="text-[11px] font-bold mt-1 text-center truncate w-full">{stations[data.origin]?.name}</p>
+                                </div>
+
+                                <div className="flex flex-col items-center px-4">
+                                    <ArrowRight className="text-muted-foreground mb-4" />
+                                </div>
+
+                                <div className="flex flex-col items-center flex-1">
+                                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center mb-2">
+                                        <MapPin className="text-red-600" size={24} />
+                                    </div>
+                                    <p className="text-sm font-bold text-muted-foreground uppercase">Arrive</p>
+                                    <p className="text-xl font-black">{route?.arrivalTime || '--:--'}</p>
+                                    <p className="text-[11px] font-bold mt-1 text-center truncate w-full">{stations[data.dest]?.name}</p>
                                 </div>
                             </div>
-                            <div className="bg-background/50 rounded-2xl p-3 flex items-center gap-3">
-                                <Clock size={18} className="text-primary" />
-                                <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Time</p>
-                                    <p className="text-sm font-black">{route?.totalTime || '--'} min</p>
+
+                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
+                                <div className="bg-background/50 rounded-2xl p-3 flex items-center gap-3">
+                                    <Train size={18} className="text-primary" />
+                                    <div>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Stops</p>
+                                        <p className="text-sm font-black">{route?.totalStations || '--'}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-background/50 rounded-2xl p-3 flex items-center gap-3">
+                                    <Clock size={18} className="text-primary" />
+                                    <div>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Time</p>
+                                        <p className="text-sm font-black">{route?.totalTime || '--'} min</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Detailed Steps */}
-                    {route && route.steps.length > 0 && (
+                    {isLoading ? (
+                        <div className="space-y-4 pt-4">
+                            <div className="w-32 h-4 bg-muted animate-pulse rounded-full" />
+                            <div className="bg-muted/30 border border-border rounded-3xl p-5 space-y-6">
+                                <div className="w-full h-12 bg-muted animate-pulse rounded-xl" />
+                                <div className="w-full h-12 bg-muted animate-pulse rounded-xl" />
+                                <div className="w-full h-12 bg-muted animate-pulse rounded-xl" />
+                            </div>
+                        </div>
+                    ) : route && route.steps.length > 0 && (
                         <div className="space-y-3 pt-4">
                             <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest px-1">Journey Details</h3>
                             <div className="bg-muted/30 border border-border rounded-3xl p-5 space-y-4">

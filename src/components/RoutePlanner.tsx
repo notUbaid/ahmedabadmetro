@@ -74,11 +74,49 @@ export const RoutePlanner = ({
   const stationOptions = useMemo(() => getStationOptions(), []);
   const organizedStations = useMemo(() => getOrganizedStations(), []);
 
-  // Get all available departures for this route
-  const availableDepartures = useMemo(() => {
-    if (!origin || !destination || origin === destination) return [];
-    return getAvailableDepartures(origin, destination);
-  }, [origin, destination]);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [availableDepartures, setAvailableDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
+  const [route, setRoute] = useState<PlannedRoute | null>(null);
+
+  // Get all available departures for this route and compute the route
+  useEffect(() => {
+    if (!origin || !destination || origin === destination) {
+      setAvailableDepartures([]);
+      setRoute(null);
+      return;
+    }
+
+    setIsCalculating(true);
+    const timeoutId = setTimeout(() => {
+      try {
+        const departures = getAvailableDepartures(origin, destination);
+        setAvailableDepartures(departures);
+
+        let newRoute: PlannedRoute | null = null;
+        if (internalIsCoordinating && sharedSegments && sharedSegments.length > 0) {
+          // Find route relative to friend's departure, giving user up to 120 minutes of travel time
+          const baseTime = friendDepMins !== undefined
+            ? Math.max(0, friendDepMins - 120)
+            : 0;
+          newRoute = findCommonTrainRoute(sharedSegments, origin, destination, baseTime);
+        } else if (selectedDepartureIdx !== null && departures[selectedDepartureIdx]) {
+          const dep = departures[selectedDepartureIdx];
+          newRoute = planRouteWithDeparture(origin, destination, dep.departureMinutes);
+        } else {
+          newRoute = planRoute(origin, destination);
+        }
+        setRoute(newRoute);
+      } catch (e) {
+        console.error("Error calculating route:", e);
+        setAvailableDepartures([]);
+        setRoute(null);
+      } finally {
+        setIsCalculating(false);
+      }
+    }, 10);
+
+    return () => clearTimeout(timeoutId);
+  }, [origin, destination, selectedDepartureIdx, internalIsCoordinating, sharedSegments, friendDepMins]);
 
   // Create unique departure times list
   const uniqueDepartureTimes = useMemo(() => {
@@ -120,32 +158,6 @@ export const RoutePlanner = ({
       s.name.toLowerCase().includes(destSearch.toLowerCase())
     );
   }, [stationOptions, destSearch]);
-
-  // Calculate route based on selected departure time or use default
-  const route = useMemo(() => {
-    try {
-      if (!origin || !destination || origin === destination) return null;
-
-      if (internalIsCoordinating && sharedSegments && sharedSegments.length > 0) {
-        // Find route relative to friend's departure, giving user up to 120 minutes of travel time
-        const baseTime = friendDepMins !== undefined
-          ? Math.max(0, friendDepMins - 120)
-          : 0;
-        const coordinated = findCommonTrainRoute(sharedSegments, origin, destination, baseTime);
-        return coordinated;
-      }
-
-      if (selectedDepartureIdx !== null && availableDepartures[selectedDepartureIdx]) {
-        const dep = availableDepartures[selectedDepartureIdx];
-        return planRouteWithDeparture(origin, destination, dep.departureMinutes);
-      }
-
-      return planRoute(origin, destination);
-    } catch (e) {
-      console.error("Error calculating route:", e);
-      return null;
-    }
-  }, [origin, destination, selectedDepartureIdx, availableDepartures, internalIsCoordinating, sharedSegments, friendDepMins]);
 
   // Auto-scroll to selected train when route changes
   useEffect(() => {
@@ -825,8 +837,36 @@ export const RoutePlanner = ({
           </div>
         </div>
 
+        {/* Route Result Loading Skeleton */}
+        {isCalculating && (
+          <div className="flex-1 overflow-y-auto border-t border-border p-6 space-y-8 animate-in fade-in duration-300">
+            <div className="flex items-center gap-4 justify-between">
+              <div className="w-1/3 h-8 bg-muted animate-pulse rounded-lg"></div>
+              <div className="w-6 h-6 bg-muted animate-pulse rounded-full"></div>
+              <div className="w-1/3 h-8 bg-muted animate-pulse rounded-lg"></div>
+            </div>
+            
+            <div>
+              <div className="w-32 h-4 bg-muted animate-pulse rounded-full mb-3"></div>
+              <div className="flex gap-3 overflow-hidden">
+                <div className="w-20 h-24 bg-muted animate-pulse rounded-2xl flex-shrink-0"></div>
+                <div className="w-20 h-24 bg-muted animate-pulse rounded-2xl flex-shrink-0"></div>
+                <div className="w-20 h-24 bg-muted animate-pulse rounded-2xl flex-shrink-0"></div>
+                <div className="w-20 h-24 bg-muted animate-pulse rounded-2xl flex-shrink-0"></div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="w-24 h-4 bg-muted animate-pulse rounded-full mb-2"></div>
+              <div className="w-full h-16 bg-muted animate-pulse rounded-2xl"></div>
+              <div className="w-full h-16 bg-muted animate-pulse rounded-2xl"></div>
+              <div className="w-full h-16 bg-muted animate-pulse rounded-2xl"></div>
+            </div>
+          </div>
+        )}
+
         {/* Route Result */}
-        {route && (
+        {!isCalculating && route && (
           <div className="flex-1 overflow-y-auto border-t border-border">
             {/* Summary */}
             <div className="p-4 bg-muted/30">
