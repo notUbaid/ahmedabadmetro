@@ -337,7 +337,7 @@ export const MetroMap = () => {
         // Draw main line
         const line = L.polyline(segmentCoords, {
           pane: 'routeHighlight',
-          color: LINE_COLORS[currentLine],
+          color: (currentLine === 'green' || currentLine === 'purple') ? LINE_COLORS['red'] : LINE_COLORS[currentLine],
           weight: 7,
           opacity: 1,
           lineCap: 'round',
