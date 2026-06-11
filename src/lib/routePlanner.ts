@@ -886,6 +886,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   const GRACE_PERIOD = 2;
   let possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
 
+  let isTomorrow = false;
   if (possible.length === 0) {
     // If no more departures today, show the first available departure for tomorrow morning
     const tomorrow = new Date();
@@ -894,6 +895,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
     
     const tomorrowDepartures = getAvailableDepartures(originId, destinationId, tomorrowDayType);
     possible = tomorrowDepartures.filter(d => d.departureMinutes >= 380);
+    isTomorrow = true;
     
     if (possible.length === 0) {
       return null;
@@ -916,7 +918,8 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 
   const best = sorted[0];
 
-  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, (possible === departures ? currentDayType : getDayType(new Date(Date.now() + 86400000))));
+  const targetDayType = isTomorrow ? getDayType(new Date(Date.now() + 86400000)) : currentDayType;
+  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, targetDayType);
   if (!route) return null;
 
   // Special handling for PDPU and GIFT City: suggest bus even if a direct train exists but is infrequent
@@ -1346,7 +1349,10 @@ export const planRouteWithDeparture = (
         }
       }
 
-      if (departMin < current.time + transferBuffer) continue;
+      if (departMin < current.time + transferBuffer) {
+        continue;
+      }
+
 
       const currentTransfers = edgeToCurrent?.transfers ?? 0;
       const currentNonOfficial = edgeToCurrent?.nonOfficialTransfers ?? 0;
@@ -1617,7 +1623,7 @@ export const findCommonTrainRoute = (
     }
   }
   
-  console.log("Candidates generated:", candidates.length, candidates);
+
   
   if (candidates.length === 0) return null;
   
@@ -1666,7 +1672,7 @@ export const findCommonTrainRoute = (
     }
   }
   
-  console.log("Viable options:", viableOptions.length, viableOptions);
+
   
   if (viableOptions.length === 0) return null;
   
