@@ -1646,20 +1646,10 @@ export const findCommonTrainRoute = (
       continue;
     }
     
-    // Find the latest possible departure from User 2's origin to this interchange station
-    // that arrives before the shared train departs
-    const departures = getAvailableDepartures(userOriginId, candidate.stationId);
-    const possibleDepartures = departures.filter(d => 
-      d.departureMinutes >= currentTimeMins && 
-      d.arrivalMinutes + MIN_TRANSFER_TIME <= candidate.trainArrivalMin
-    );
-    if (possibleDepartures.length === 0) continue;
+    const path = findShortestPath(userOriginId, candidate.stationId);
+    if (!path) continue;
     
-    // Sort by departure time descending to minimize waiting time at interchange
-    possibleDepartures.sort((a, b) => b.departureMinutes - a.departureMinutes);
-    const bestDeparture = possibleDepartures[0];
-    
-    const routeToInterchange = planRouteWithDeparture(userOriginId, candidate.stationId, bestDeparture.departureMinutes);
+    const routeToInterchange = buildTimeAwareRoute(path, currentTimeMins);
     
     if (routeToInterchange) {
       const arrivalAtInterchange = routeToInterchange.arrivalMinutes;
