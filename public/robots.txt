@@ -1,4 +1,4 @@
-# Ahmedabad Metro Route Planner - ahmmetro.vercel.app
+# Ahmedabad Metro Route Planner - www.ahmedabadmetro.site
 # https://www.robotstxt.org/robotstxt.html
 
 User-agent: Googlebot
@@ -20,7 +20,7 @@ Allow: /
 Disallow: /assets/
 
 # Sitemaps
-Sitemap: https://ahmmetro.vercel.app/sitemap.xml
+Sitemap: https://www.ahmedabadmetro.site/sitemap.xml
 
 # Host
-Host: https://ahmmetro.vercel.app
+Host: https://www.ahmedabadmetro.site

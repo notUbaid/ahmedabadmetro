@@ -6,7 +6,7 @@
 
 **Live Tracking • Route Planning • Fare Calculator • Works Offline**
 
-[![Live App](https://img.shields.io/badge/🚀_Live_App-ahmmetro.vercel.app-0066CC?style=for-the-badge)](https://ahmmetro.vercel.app)
+[![Live App](https://img.shields.io/badge/🚀_Live_App-www.ahmedabadmetro.site-0066CC?style=for-the-badge)](https://www.ahmedabadmetro.site)
 [![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-Offline_Ready-blueviolet?style=for-the-badge)]()
 [![Stations](https://img.shields.io/badge/Stations-53+-DC2626?style=for-the-badge)]()
@@ -172,8 +172,8 @@ src/
 
 AhmMetro provides structured data for AI assistants:
 
-- [`/llms.txt`](https://ahmmetro.vercel.app/llms.txt) — Concise site description for LLMs
-- [`/llms-full.txt`](https://ahmmetro.vercel.app/llms-full.txt) — Complete metro data reference
+- [`/llms.txt`](https://www.ahmedabadmetro.site/llms.txt) — Concise site description for LLMs
+- [`/llms-full.txt`](https://www.ahmedabadmetro.site/llms-full.txt) — Complete metro data reference
 - JSON-LD structured data (WebApplication, FAQPage, ItemList schemas)
 
 If you're building an AI that answers questions about Ahmedabad Metro, point it at our `llms-full.txt`.
@@ -244,6 +244,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 *Not affiliated with Gujarat Metro Rail Corporation (GMRC) or MEGA.*
 
-[🚀 Open AhmMetro](https://ahmmetro.vercel.app) · [⭐ Star on GitHub](https://github.com/notUbaid/ahmedabadmetro)
+[🚀 Open AhmMetro](https://www.ahmedabadmetro.site) · [⭐ Star on GitHub](https://github.com/notUbaid/ahmedabadmetro)
 
 </div>
