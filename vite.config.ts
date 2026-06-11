@@ -89,7 +89,7 @@ export default defineConfig(({ mode }) => ({
         edge_side_panel: { preferred_width: 400 },
         note_taking: { new_note_url: "/" },
         scope_extensions: [{ origin: "*.ahmedabadmetro.site" }]
-      },
+      } as any,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,geojson,json}"],
         navigateFallback: "/index.html",
