@@ -236,21 +236,28 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
 
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background safe-p-bottom">
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-xs text-muted-foreground font-medium">
-              v1.2.0 • Timetable updated June 2026
-            </p>
-            <p className="text-xs text-muted-foreground/70">
-              made with ❤️ by{' '}
-              <a
-                href="https://www.linkedin.com/in/notubaid/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors font-medium"
-              >
-                Ubaid
-              </a>
-            </p>
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="bg-muted/50 p-2 rounded-lg text-[10px] text-muted-foreground leading-relaxed w-full border border-border/50">
+              <span className="font-semibold block mb-1">Disclaimer</span>
+              This app does not represent a government entity. Timings and fares are sourced from the official <a href="https://www.gujaratmetrorail.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Gujarat Metro Rail Corporation (GMRC)</a>.
+            </div>
+            
+            <div className="flex items-center justify-between w-full px-1 mt-1">
+              <p className="text-xs text-muted-foreground font-medium">
+                v1.2.1 • June 2026
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                by{' '}
+                <a
+                  href="https://www.linkedin.com/in/notubaid/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors font-medium"
+                >
+                  Ubaid
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

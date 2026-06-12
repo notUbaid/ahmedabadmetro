@@ -212,16 +212,18 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
   const sorted = upcoming.sort((a, b) => a.minutesAway - b.minutesAway);
   const deduplicated = [];
-  const seen = new Set<string>();
   
   for (const train of sorted) {
-    // Include line in key so trains on different lines at interchanges aren't dropped
-    const key = `${train.minutesAway}-${train.direction}-${train.line}`;
-    if (!seen.has(key)) {
-      const same = sorted.filter(t => `${t.minutesAway}-${t.direction}-${t.line}` === key);
-      const best = same.reduce((prev, curr) => (prev.remainingStations.length > curr.remainingStations.length) ? prev : curr);
-      deduplicated.push(best);
-      seen.add(key);
+    // Suppress trains that are less than 3 minutes apart on the same line and direction
+    // to prevent weird timetable anomalies (like 1 minute gap duplicates)
+    const isTooClose = deduplicated.some(
+      t => t.line === train.line && 
+           t.direction === train.direction && 
+           Math.abs(t.minutesAway - train.minutesAway) < 3
+    );
+
+    if (!isTooClose) {
+      deduplicated.push(train);
     }
   }
 
@@ -261,16 +263,18 @@ export const getAllTrainsForStation = (stationId: string) => {
 
   const sorted = trains.sort((a, b) => a.minutes - b.minutes);
   const deduplicated = [];
-  const seen = new Set<string>();
   
   for (const train of sorted) {
-    // Include line in key so trains on different lines at interchanges aren't dropped
-    const key = `${Math.round(train.minutes)}-${train.direction}-${train.line}`;
-    if (!seen.has(key)) {
-      const same = sorted.filter(t => `${Math.round(t.minutes)}-${t.direction}-${t.line}` === key);
-      const best = same.reduce((prev, curr) => (prev.remainingCount > curr.remainingCount) ? prev : curr);
-      deduplicated.push(best);
-      seen.add(key);
+    // Suppress trains that are less than 3 minutes apart on the same line and direction
+    // to prevent weird timetable anomalies (like 1 minute gap duplicates)
+    const isTooClose = deduplicated.some(
+      t => t.line === train.line && 
+           t.direction === train.direction && 
+           Math.abs(t.minutes - train.minutes) < 3
+    );
+
+    if (!isTooClose) {
+      deduplicated.push(train);
     }
   }
 
@@ -446,15 +450,22 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
     });
   }
 
-  // Deduplicate visually identical trains (same line, segment, and progress)
-  // This handles flawed timetable data where duplicate schedules exist
+  // Deduplicate visually identical or overlapping trains
+  // This handles flawed timetable data where duplicate schedules exist, 
+  // or when trains on shared tracks (e.g. Red/Green) are scheduled too closely.
   const uniquePositions: ReturnType<typeof getCurrentTrainPositions> = [];
-  const seenPositions = new Set<string>();
 
   for (const pos of positions) {
-    const key = `${pos.line}-${pos.fromStationId}-${pos.toStationId}-${pos.progress.toFixed(4)}`;
-    if (!seenPositions.has(key)) {
-      seenPositions.add(key);
+    // We check if another train is on the exact same physical segment
+    // and its progress is within 15% of this one. 
+    // If so, we assume they are visually colliding and drop one.
+    const isVisuallyColliding = uniquePositions.some(
+      up => up.fromStationId === pos.fromStationId && 
+            up.toStationId === pos.toStationId && 
+            Math.abs(up.progress - pos.progress) < 0.30
+    );
+
+    if (!isVisuallyColliding) {
       uniquePositions.push(pos);
     }
   }

@@ -1540,150 +1540,122 @@ export const findCommonTrainRoute = (
   const origin = stations[userOriginId];
   const dest = stations[userDestId];
   if (!origin || !dest || userOriginId === userDestId || !sharedSegments?.length) return null;
-
-  const primarySegment = sharedSegments[0];
-  const sharedSchedule = trainSchedules.find(s => s.id === primarySegment.trainId);
-  
-  if (!sharedSchedule) return null;
-  
-  const scheduleStartMin = parseTimeToMinutes(sharedSchedule.startTime);
-  
-  // STEP 2: Find where User 2's destination is on the shared train's route
-  // User 2 might want to go to the same destination as User 1, or a different one
-  const user2DestIdx = sharedSchedule.stations.indexOf(userDestId);
-  
-  // If User 2's destination is NOT on the shared train's route, we can't coordinate on this train
-  // But we should still try - maybe they can travel together for part of the journey
-  
-  // STEP 3: Find the range of stations where User 1 is on this train
-  const user1Stations = new Set(primarySegment.stations);
-  let user1FirstIdx = -1;
-  let user1LastIdx = -1;
-  
-  for (let i = 0; i < sharedSchedule.stations.length; i++) {
-    if (user1Stations.has(sharedSchedule.stations[i])) {
-      if (user1FirstIdx === -1) user1FirstIdx = i;
-      user1LastIdx = i;
-    }
-  }
-  
-  if (user1FirstIdx === -1) return null;
-  
-  // STEP 4: Find potential interchange points
-  // These are stations where:
-  // a) The shared train passes through
-  // b) User 2 could potentially reach from their origin
-  // c) After boarding, User 2 can travel with User 1 for at least 1 stop
   
   interface InterchangeCandidate {
     stationId: string;
     stationIdx: number;
-    trainArrivalMin: number; // When the shared train arrives at this station
-    sharedStopsWithUser1: number; // How many stops User 2 would travel WITH User 1
-    totalStopsOnSharedTrain: number; // Total stops User 2 would travel on shared train
+    trainArrivalMin: number;
+    sharedStopsWithUser1: number;
+    totalStopsOnSharedTrain: number;
   }
   
-  const candidates: InterchangeCandidate[] = [];
-  
-  // Check all stations from the beginning of the shared train's route up to User 1's last station
-  // (User 2 must board BEFORE or AT a station where User 1 is still on the train)
-  for (let i = 0; i <= user1LastIdx; i++) {
-    const stationId = sharedSchedule.stations[i];
-    const trainArrivalMin = scheduleStartMin + sharedSchedule.stationTimes[i];
-    
-    // Calculate shared stops: from this station to min(user1LastIdx, user2DestIdx or end of line)
-    let endIdx: number;
-    if (user2DestIdx !== -1 && user2DestIdx <= user1LastIdx) {
-      // User 2's destination is on the shared train and before/at User 1's destination
-      endIdx = user2DestIdx;
-    } else if (user2DestIdx !== -1) {
-      // User 2's destination is after User 1 gets off - they travel together until User 1's stop
-      endIdx = user1LastIdx;
-    } else {
-      // User 2's destination is NOT on this train - they can still travel together until User 1's stop
-      endIdx = user1LastIdx;
-    }
-    
-    // Shared stops with User 1 = overlap between [i, endIdx] and [user1FirstIdx, user1LastIdx]
-    const overlapStart = Math.max(i, user1FirstIdx);
-    const overlapEnd = Math.min(endIdx, user1LastIdx);
-    const sharedStopsWithUser1 = Math.max(0, overlapEnd - overlapStart);
-    
-    // Total stops on shared train for User 2
-    const totalStopsOnSharedTrain = endIdx > i ? endIdx - i : 0;
-    
-    if (sharedStopsWithUser1 > 0 && totalStopsOnSharedTrain > 0) {
-      candidates.push({
-        stationId,
-        stationIdx: i,
-        trainArrivalMin,
-        sharedStopsWithUser1,
-        totalStopsOnSharedTrain
-      });
-    }
-  }
-  
-
-  
-  if (candidates.length === 0) return null;
-  
-  // STEP 5: For each candidate, check if User 2 can reach it in time
   interface ViableOption {
+    segmentIdx: number;
     candidate: InterchangeCandidate;
-    routeToInterchange: PlannedRoute | null; // null if User 2 starts at the interchange
+    routeToInterchange: PlannedRoute | null;
     arrivalAtInterchange: number;
+    sharedSchedule: TrainSchedule;
+    user1LastIdx: number;
+    user2DestIdx: number;
   }
-  
-  const viableOptions: ViableOption[] = [];
-  
-  for (const candidate of candidates) {
-    // Check if User 2 starts at this station
-    if (candidate.stationId === userOriginId) {
-      // User 2 can directly board the shared train here
-      // Check if they can catch it (current time + buffer <= train arrival)
-      // Add a small buffer for reaching the platform
-      if (currentTimeMins + MIN_TRANSFER_TIME <= candidate.trainArrivalMin) {
-        viableOptions.push({
-          candidate,
-          routeToInterchange: null,
-          arrivalAtInterchange: currentTimeMins
-        });
-      }
-      continue;
-    }
-    
-    const path = findShortestPath(userOriginId, candidate.stationId);
-    if (!path) continue;
-    
-    const routeToInterchange = buildTimeAwareRoute(path, currentTimeMins);
-    
-    if (routeToInterchange) {
-      const arrivalAtInterchange = routeToInterchange.arrivalMinutes;
-      
-      // User 2 must arrive at the interchange BEFORE the shared train departs
-      // Add a small buffer for the transfer
-      if (arrivalAtInterchange !== undefined && arrivalAtInterchange + MIN_TRANSFER_TIME <= candidate.trainArrivalMin) {
-        viableOptions.push({
-          candidate,
-          routeToInterchange,
-          arrivalAtInterchange
-        });
-      }
-    }
-  }
-  
 
-  
+  const viableOptions: ViableOption[] = [];
+
+  for (let segmentIdx = 0; segmentIdx < sharedSegments.length; segmentIdx++) {
+    const segment = sharedSegments[segmentIdx];
+    const sharedSchedule = trainSchedules.find(s => s.id === segment.trainId);
+    if (!sharedSchedule) continue;
+    
+    const scheduleStartMin = parseTimeToMinutes(sharedSchedule.startTime);
+    const user2DestIdx = sharedSchedule.stations.indexOf(userDestId);
+    
+    const user1Stations = new Set(segment.stations);
+    let user1FirstIdx = -1;
+    let user1LastIdx = -1;
+    for (let i = 0; i < sharedSchedule.stations.length; i++) {
+      if (user1Stations.has(sharedSchedule.stations[i])) {
+        if (user1FirstIdx === -1) user1FirstIdx = i;
+        user1LastIdx = i;
+      }
+    }
+    if (user1FirstIdx === -1) continue;
+    
+    const candidates: InterchangeCandidate[] = [];
+    for (let i = 0; i <= user1LastIdx; i++) {
+      const stationId = sharedSchedule.stations[i];
+      const trainArrivalMin = scheduleStartMin + sharedSchedule.stationTimes[i];
+      
+      let endIdx: number;
+      if (user2DestIdx !== -1 && user2DestIdx <= user1LastIdx) {
+        endIdx = user2DestIdx;
+      } else if (user2DestIdx !== -1) {
+        endIdx = user1LastIdx;
+      } else {
+        endIdx = user1LastIdx;
+      }
+      
+      const overlapStart = Math.max(i, user1FirstIdx);
+      const overlapEnd = Math.min(endIdx, user1LastIdx);
+      const sharedStopsWithUser1 = Math.max(0, overlapEnd - overlapStart);
+      const totalStopsOnSharedTrain = endIdx > i ? endIdx - i : 0;
+      
+      if (sharedStopsWithUser1 > 0 && totalStopsOnSharedTrain > 0) {
+        candidates.push({
+          stationId,
+          stationIdx: i,
+          trainArrivalMin,
+          sharedStopsWithUser1,
+          totalStopsOnSharedTrain
+        });
+      }
+    }
+    
+    for (const candidate of candidates) {
+      if (candidate.stationId === userOriginId) {
+        if (currentTimeMins + MIN_TRANSFER_TIME <= candidate.trainArrivalMin) {
+          viableOptions.push({
+            segmentIdx,
+            candidate,
+            routeToInterchange: null,
+            arrivalAtInterchange: currentTimeMins,
+            sharedSchedule,
+            user1LastIdx,
+            user2DestIdx
+          });
+        }
+        continue;
+      }
+      
+      const path = findShortestPath(userOriginId, candidate.stationId);
+      if (!path) continue;
+      
+      const routeToInterchange = buildTimeAwareRoute(path, currentTimeMins);
+
+      if (routeToInterchange) {
+        const arrivalAtInterchange = routeToInterchange.arrivalMinutes;
+        if (arrivalAtInterchange !== undefined && arrivalAtInterchange + MIN_TRANSFER_TIME <= candidate.trainArrivalMin) {
+          viableOptions.push({
+            segmentIdx,
+            candidate,
+            routeToInterchange,
+            arrivalAtInterchange,
+            sharedSchedule,
+            user1LastIdx,
+            user2DestIdx
+          });
+        }
+      }
+    }
+  }
+
   if (viableOptions.length === 0) return null;
-  
+
   // STEP 6: Select the best option
-  // Priority: Earliest arrival at interchange, then maximum shared stops
   viableOptions.sort((a, b) => {
     // First priority: minimum travel time for user to reach the interchange
     const travelTimeA = a.routeToInterchange ? a.routeToInterchange.totalTime : 0;
     const travelTimeB = b.routeToInterchange ? b.routeToInterchange.totalTime : 0;
     
-    // If travel times are significantly different (e.g., > 5 mins), pick the closer one
     if (Math.abs(travelTimeA - travelTimeB) > 5) {
       return travelTimeA - travelTimeB;
     }
@@ -1692,13 +1664,23 @@ export const findCommonTrainRoute = (
     if (b.candidate.sharedStopsWithUser1 !== a.candidate.sharedStopsWithUser1) {
       return b.candidate.sharedStopsWithUser1 - a.candidate.sharedStopsWithUser1;
     }
-    // Second priority: earlier arrival at destination
+    
+    // Third priority: earlier segments so they can travel together sooner
+    if (a.segmentIdx !== b.segmentIdx) {
+      return a.segmentIdx - b.segmentIdx;
+    }
+    
     return a.arrivalAtInterchange - b.arrivalAtInterchange;
   });
-  
+
   const bestOption = viableOptions[0];
   const bestCandidate = bestOption.candidate;
   let bestRouteToInterchange = bestOption.routeToInterchange;
+  const sharedSchedule = bestOption.sharedSchedule;
+  const user1LastIdx = bestOption.user1LastIdx;
+  const user2DestIdx = bestOption.user2DestIdx;
+  
+  const scheduleStartMin = parseTimeToMinutes(sharedSchedule.startTime);
   
   // Optimize User 2's waiting time by finding the latest possible departure for the winning candidate
   // Since we only do this full search for ONE candidate, it runs instantly without crashing!
@@ -1766,10 +1748,20 @@ export const findCommonTrainRoute = (
   // STEP 9: If User 2 needs to continue after alighting from the shared train
   if (alightStationId !== userDestId) {
     // User 2 needs another connection to reach their final destination
-    const continueRoute = planRouteWithDeparture(alightStationId, userDestId, arriveAtAlight + MIN_TRANSFER_TIME);
+    const departures = getAvailableDepartures(alightStationId, userDestId);
+    const validDepartures = departures.filter(d => d.departureMinutes >= arriveAtAlight + MIN_TRANSFER_TIME);
+    
+    let continueRoute: PlannedRoute | null = null;
+    if (validDepartures.length > 0) {
+      validDepartures.sort((a, b) => a.departureMinutes - b.departureMinutes);
+      continueRoute = planRouteWithDeparture(alightStationId, userDestId, validDepartures[0].departureMinutes);
+    }
     
     if (continueRoute) {
       legs.push(...extractLegsFromRoute(continueRoute));
+    } else {
+      // If we cannot reach the final destination, this is not a valid coordinate route
+      return null;
     }
   }
   

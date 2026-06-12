@@ -99,6 +99,15 @@ export const RoutePlanner = ({
             ? Math.max(0, friendDepMins - 120)
             : 0;
           newRoute = findCommonTrainRoute(sharedSegments, origin, destination, baseTime);
+          
+          // Fallback to a normal route if coordination is impossible
+          if (!newRoute) {
+            if (selectedDepartureIdx !== null && departures[selectedDepartureIdx]) {
+              newRoute = planRouteWithDeparture(origin, destination, departures[selectedDepartureIdx].departureMinutes);
+            } else {
+              newRoute = planRoute(origin, destination);
+            }
+          }
         } else if (selectedDepartureIdx !== null && departures[selectedDepartureIdx]) {
           const dep = departures[selectedDepartureIdx];
           newRoute = planRouteWithDeparture(origin, destination, dep.departureMinutes);
