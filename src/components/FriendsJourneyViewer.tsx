@@ -246,9 +246,40 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                                                 )}
                                                 
                                                 {step.type === 'travel' && step.direction && (
-                                                    <p className="text-[11px] text-muted-foreground font-medium">
+                                                    <p className="text-[11px] text-muted-foreground font-medium mb-3">
                                                         Towards {step.direction}
                                                     </p>
+                                                )}
+
+                                                {step.type === 'travel' && step.allStations && (
+                                                    <div className="mt-3 relative ml-1 space-y-3">
+                                                        <div className="absolute top-2 bottom-2 left-1 w-[2px] bg-border/50" />
+                                                        {step.allStations.map((stationId, sIdx) => {
+                                                            const isCurrent = journeyProgress?.currentStationId === stationId;
+                                                            const isNext = journeyProgress?.nextStationId === stationId;
+                                                            // If we can't perfectly determine "passed", let's just highlight current/next
+                                                            const stationInfo = stations[stationId];
+                                                            
+                                                            return (
+                                                                <div key={stationId} className="relative flex items-center gap-3">
+                                                                    <div className={cn(
+                                                                        "w-[10px] h-[10px] rounded-full z-10 bg-background border-2 border-muted-foreground/30",
+                                                                        isCurrent && "w-3 h-3 bg-primary border-primary animate-pulse -ml-px",
+                                                                        isNext && "border-primary bg-primary/20"
+                                                                    )} />
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={cn(
+                                                                            "text-xs",
+                                                                            isCurrent ? "text-primary font-bold" : isNext ? "text-foreground font-medium" : "text-muted-foreground font-medium"
+                                                                        )}>
+                                                                            {stationInfo?.name || stationId}
+                                                                        </span>
+                                                                        {isCurrent && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Here</span>}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
