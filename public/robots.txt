@@ -1,4 +1,4 @@
-# Ahmedabad Metro Route Planner - www.ahmedabadmetro.site
+# AhmMetro - Route Planner (Unofficial) - www.ahmedabadmetro.site
 # https://www.robotstxt.org/robotstxt.html
 
 User-agent: Googlebot
