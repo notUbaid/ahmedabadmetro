@@ -139,9 +139,9 @@ const formatStationName = (stationId: string): string => {
 
 export const getDirectionStr = (destinationId: string): string => {
   const dest = destinationId.toLowerCase();
-  if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas', 'gift_city'].includes(dest)) {
+  if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas', 'gnlu'].includes(dest)) {
     return 'Southbound';
-  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec'].includes(dest)) {
+  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec', 'gift_city'].includes(dest)) {
     return 'Northbound';
   } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony'].includes(dest)) {
     return 'Eastbound';
