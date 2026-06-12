@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#0066CC",
         background_color: "#0f172a",
         display: "standalone",
-        display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
         orientation: "portrait",
         scope: "/",
         start_url: "/",
@@ -46,7 +45,8 @@ export default defineConfig(({ mode }) => ({
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
-            type: "image/png"
+            type: "image/png",
+            form_factor: "narrow"
           }
         ],
         icons: [
@@ -88,7 +88,6 @@ export default defineConfig(({ mode }) => ({
         widgets: [{ name: "Metro Route", description: "Quick route", tag: "metro-widget", ms_ac_filepath: "/" }],
         edge_side_panel: { preferred_width: 400 },
         note_taking: { new_note_url: "/" },
-        scope_extensions: [{ origin: "*.ahmedabadmetro.site" }]
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       workbox: {

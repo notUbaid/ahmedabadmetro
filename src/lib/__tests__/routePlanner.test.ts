@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { findCommonTrainRoute, planRoute, calculateFare } from '../routePlanner';
-import { trainSchedules } from '../../data/timetableFromExcel.generated';
+import { trainSchedules } from '../../data/timetable';
 
 describe('Route Planner API', () => {
   beforeEach(() => {
