@@ -83,7 +83,7 @@ const MIN_TRANSFER_TIME = 2; // Minimum minutes required to change trains
 import { BLUE_LINE_STATION_INDEX, BLUE_LINE_FARE_MATRIX, RED_LINE_STATION_INDEX, BLUE_RED_FARE_MATRIX, RED_LINE_FARE_MATRIX } from '@/data/fareData';
 
 // Fare calculation (based on number of stations, with precise matrix for Blue, Red and Blue-Red lookups)
-const calculateFare = (originId: string, destId: string, stationCount: number): number => {
+export const calculateFare = (originId: string, destId: string, stationCount: number): number => {
   // 1. Check Blue-Blue internal fare
   const originBlueIdx = BLUE_LINE_STATION_INDEX[originId];
   const destBlueIdx = BLUE_LINE_STATION_INDEX[destId];

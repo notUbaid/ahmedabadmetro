@@ -88,3 +88,33 @@ describe('Timetable Deduplication Logic', () => {
     expect(segmentTrains[0].id).toBe('TEST-RED-1');
   });
 });
+
+import { getDirectionStr, getCurrentHeadway } from '../timetable';
+
+describe('Timetable Utility Functions', () => {
+  it('getDirectionStr returns correct string for known destinations', () => {
+    expect(getDirectionStr('apmc')).toBe('Southbound');
+    expect(getDirectionStr('koteshwar_road')).toBe('Northbound');
+    expect(getDirectionStr('vastral_gam')).toBe('Eastbound');
+    expect(getDirectionStr('thaltej_gam')).toBe('Westbound');
+    expect(getDirectionStr('gnlu')).toBe('towards GNLU'); // Fallback
+  });
+
+  it('getCurrentHeadway calculates peak and off-peak headways correctly for Blue line', () => {
+    // Wednesday 09:00 AM (Peak)
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2024, 0, 3, 9, 0, 0));
+    expect(getCurrentHeadway('blue').minutes).toBe(7);
+
+    // Wednesday 13:00 PM (Off-Peak)
+    vi.setSystemTime(new Date(2024, 0, 3, 13, 0, 0));
+    expect(getCurrentHeadway('blue').minutes).toBe(10);
+
+    // Sunday 13:00 PM (Always 12 mins)
+    vi.setSystemTime(new Date(2024, 0, 7, 13, 0, 0)); // Jan 7 is Sunday
+    expect(getCurrentHeadway('blue').minutes).toBe(12);
+
+    vi.useRealTimers();
+  });
+});
+
