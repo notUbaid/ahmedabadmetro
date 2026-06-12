@@ -319,7 +319,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                         </button>
                         <p className="text-[11px] text-center text-muted-foreground font-medium px-8 leading-relaxed">
                             {customDest === data.dest
-                                ? "Traveling to the same destination! We'll find the best trains to meet up."
+                                ? "Traveling to the same destination! We'll find the best Metros to meet up."
                                 : `Meeting friend on their journey from ${stations[data.origin]?.name} to ${stations[data.dest]?.name}.`}
                         </p>
                     </div>

@@ -1,7 +1,7 @@
 import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTriangle, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
-import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
+import { getUpcomingMetros, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
 import { getCrowdLevel } from '@/lib/crowding';
 import { useEffect, useState } from 'react';
 
@@ -44,7 +44,7 @@ export const BottomPanel = ({
   userLocation,
   searchedLocation,
 }: BottomPanelProps) => {
-  const [upcomingTrains, setUpcomingTrains] = useState<ReturnType<typeof getUpcomingTrains>>([]);
+  const [upcomingMetros, setUpcomingMetros] = useState<ReturnType<typeof getUpcomingMetros>>([]);
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
   const [isLocating, setIsLocating] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -59,13 +59,13 @@ export const BottomPanel = ({
     return () => clearInterval(timeInterval);
   }, []);
 
-  // Auto-refresh upcoming trains and last train warnings every 10 seconds
+  // Auto-refresh upcoming metros and Last Metro warnings every 10 seconds
   useEffect(() => {
     if (station) {
-      setUpcomingTrains(getUpcomingTrains(station.id, 3));
+      setUpcomingMetros(getUpcomingMetros(station.id, 3));
       setLastTrainWarnings(getLastTrainWarnings(station.id));
       const interval = setInterval(() => {
-        setUpcomingTrains(getUpcomingTrains(station.id, 3));
+        setUpcomingMetros(getUpcomingMetros(station.id, 3));
         setLastTrainWarnings(getLastTrainWarnings(station.id));
       }, 10000);
       return () => clearInterval(interval);
@@ -243,11 +243,11 @@ export const BottomPanel = ({
           )}
         </div>
 
-        {/* Collapsible content - Upcoming trains */}
+        {/* Collapsible content - Upcoming Metros */}
         {station && (
           <div className={`transition-all duration-300 ease-out overflow-hidden ${isExpanded ? 'max-h-[60vh]' : 'max-h-0'}`}>
             <div className="px-4 pb-4 overflow-y-auto">
-              {/* Last train warnings */}
+              {/* Last Metro warnings */}
               {lastTrainWarnings.length > 0 && (
                 <div className="mb-3 space-y-2">
                   {lastTrainWarnings.map((warning, i) => (
@@ -257,7 +257,7 @@ export const BottomPanel = ({
                     >
                       <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
                       <span className="text-sm text-amber-700 dark:text-amber-400">
-                        <span className="font-medium">Last train</span> to {warning.destination} departs in{' '}
+                        <span className="font-medium">Last Metro</span> to {warning.destination} departs in{' '}
                         <span className="font-semibold">{warning.minutesRemaining} min</span>
                       </span>
                     </div>
@@ -265,15 +265,15 @@ export const BottomPanel = ({
                 </div>
               )}
 
-              {/* Upcoming trains */}
+              {/* Upcoming Metros */}
               <div>
                 <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
                   <Train className="w-4 h-4" />
-                  Upcoming Trains
-                  {upcomingTrains.length > 0 && new Set(upcomingTrains.map(t => t.line)).size === 1 && (
+                  Upcoming Metros
+                  {upcomingMetros.length > 0 && new Set(upcomingMetros.map(t => t.line)).size === 1 && (
                     <>
                       <span className="text-xs text-muted-foreground font-normal">
-                        · every {getCurrentHeadway(upcomingTrains[0].line).label}
+                        · every {getCurrentHeadway(upcomingMetros[0].line).label}
                       </span>
                       <span className="ml-auto text-xs text-muted-foreground font-normal flex items-center">
                         Live
@@ -282,9 +282,9 @@ export const BottomPanel = ({
                     </>
                   )}
                 </h3>
-                {upcomingTrains.length > 0 ? (
+                {upcomingMetros.length > 0 ? (
                   <div className="space-y-2">
-                    {upcomingTrains.map((train) => {
+                    {upcomingMetros.map((train) => {
                       const liveMinutes = getLiveMinutesAway(train.arrivalTime);
                       const crowd = getCrowdLevel(train.line, train.trainId || '', {
                         stationIndex: train.stationIndex,
@@ -333,7 +333,7 @@ export const BottomPanel = ({
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-                    No upcoming trains (End of service)
+                    No upcoming metros (End of service)
                   </div>
                 )}
               </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { X, Clock, MapPin, Train, Zap } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
-import { trainSchedules } from '@/data/timetable';
+import { Metroschedules } from '@/data/timetable';
 import { cn } from '@/lib/utils';
 
 interface TrainDetailsDialogProps {
@@ -35,7 +35,7 @@ export const TrainDetailsDialog = ({
 
   // Find the train schedule
   const schedule = useMemo(() => {
-    return trainSchedules.find(s => s.id === trainId);
+    return Metroschedules.find(s => s.id === trainId);
   }, [trainId]);
 
   if (!isOpen || !schedule) return null;

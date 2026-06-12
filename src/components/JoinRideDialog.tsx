@@ -4,7 +4,7 @@ import {
     CircleDot, Navigation
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
-import { trainSchedules } from '@/data/timetable';
+import { Metroschedules } from '@/data/timetable';
 import { cn } from '@/lib/utils';
 
 interface JoinRideDialogProps {
@@ -28,7 +28,7 @@ export const JoinRideDialog = ({
 
     // Find the shared train schedule
     const sharedTrain = useMemo(() => {
-        return trainSchedules.find(s => s.id === trainId);
+        return Metroschedules.find(s => s.id === trainId);
     }, [trainId]);
 
     // Station options
@@ -58,7 +58,7 @@ export const JoinRideDialog = ({
         const startMinutes = parseInt(sharedTrain.startTime.split(':')[0]) * 60 + parseInt(sharedTrain.startTime.split(':')[1]);
         const arrivalMinutes = startMinutes + sharedTrain.stationTimes[stationIdx];
 
-        // Check if train has already passed (simplified check against current time)
+        // Check if metro has already passed (simplified check against current time)
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 

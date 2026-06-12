@@ -149,7 +149,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
         <div className="p-4 space-y-4">
           <p className="text-sm text-muted-foreground">
-            Set up your daily route and get quick access to upcoming trains when you're near your home or work station.
+            Set up your daily route and get quick access to upcoming metros when you're near your home or work station.
           </p>
 
           <div className="space-y-3">

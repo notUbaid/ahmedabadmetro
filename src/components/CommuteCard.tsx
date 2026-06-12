@@ -42,7 +42,7 @@ export const CommuteCard = ({
     return () => clearTimeout(timeoutId);
   }, [fromStation, toStation]);
 
-  const trainsToDestination = useMemo(() => {
+  const MetrosToDestination = useMemo(() => {
     if (departures.length === 0) return [];
 
     const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
@@ -106,9 +106,9 @@ export const CommuteCard = ({
                <div className="w-full h-[60px] bg-muted animate-pulse rounded-xl shadow-sm"></div>
                <div className="w-full h-[60px] bg-muted animate-pulse rounded-xl shadow-sm"></div>
             </div>
-          ) : trainsToDestination.length > 0 ? (
+          ) : MetrosToDestination.length > 0 ? (
             <div className="space-y-2">
-              {trainsToDestination.map((train, idx) => {
+              {MetrosToDestination.map((train, idx) => {
                 const liveMinutes = getLiveMinutesAway(train.departureTime);
                 const crowd = getSimpleCrowdLevel(train.line);
                 
@@ -150,7 +150,7 @@ export const CommuteCard = ({
             </div>
           ) : (
             <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-              No upcoming direct trains to {toStation.name} right now
+              No upcoming direct Metros to {toStation.name} right now
             </div>
           )}
 

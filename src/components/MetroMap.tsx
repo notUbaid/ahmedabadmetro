@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
+import { getCurrentTrainPositions, Metroschedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
@@ -509,7 +509,7 @@ export const MetroMap = () => {
         let lat = 0, lng = 0;
 
         if (pos.status === 'stopped') {
-          // If stopped, train is exactly at the station
+          // If stopped, metro is exactly at the station
           const station = stations[pos.fromStationId];
           if (station) {
             lat = station.coordinates[0];
@@ -569,7 +569,7 @@ export const MetroMap = () => {
         // Calculate bearing for train direction based on actual geometry
         let bearing = 0;
         
-        // Try to get bearing from the geometry the train is on (use cached entry)
+        // Try to get bearing from the geometry the metro is on (use cached entry)
         const segKey = `${pos.fromStationId}-${pos.toStationId}`;
         const revKey = `${pos.toStationId}-${pos.fromStationId}`;
         const bearingEntry = routeSegmentsRef.current.get(segKey) || routeSegmentsRef.current.get(revKey);
@@ -646,7 +646,7 @@ export const MetroMap = () => {
           }
         }
 
-        const trainColor = '#FFB347'; // Light orange for all trains
+        const trainColor = '#FFB347'; // Light orange for all Metros
         const isMoving = pos.status === 'moving';
         const trainIconHtml = `
           <div class="train-icon-wrapper" style="padding: 6px;">
@@ -695,7 +695,7 @@ export const MetroMap = () => {
           });
 
           const marker = L.marker([lat, lng], {
-            pane: 'trains',
+            pane: 'Metros',
             icon: trainIcon,
             zIndexOffset: 100,
             interactive: true,
@@ -745,7 +745,7 @@ export const MetroMap = () => {
         }
       });
 
-      // Remove trains that are no longer active
+      // Remove Metros that are no longer active
       existingIds.forEach(id => {
         trainMarkersRef.current.get(id)?.remove();
         trainMarkersRef.current.delete(id);
@@ -838,12 +838,12 @@ longPressTimer = setTimeout(() => {
     // Create custom panes for layering
     map.createPane('routes');
     map.createPane('stations');
-    map.createPane('trains');
+    map.createPane('Metros');
     map.createPane('labels');
     map.getPane('routes')!.style.zIndex = '400';
     map.getPane('stations')!.style.zIndex = '450';
-    map.getPane('trains')!.style.zIndex = '650'; // Ensure trains are above everything
-    map.getPane('trains')!.style.pointerEvents = 'auto';
+    map.getPane('Metros')!.style.zIndex = '650'; // Ensure Metros are above everything
+    map.getPane('Metros')!.style.pointerEvents = 'auto';
     map.getPane('labels')!.style.zIndex = '460';
     map.getPane('labels')!.style.pointerEvents = 'none'; // Labels shouldn't block clicks
 
@@ -1141,7 +1141,7 @@ longPressTimer = setTimeout(() => {
         buildLineCache(lineStations.purple, purple);
 
         // Fill in missing station pairs from through-running train schedules.
-        // Through-running trains (e.g. purple APMC→GIFT) traverse station pairs
+        // Through-running Metros (e.g. purple APMC→GIFT) traverse station pairs
         // that aren't in any single line's cache. Build those using all features.
         const allPairs = getAllAdjacentStationPairs();
         const allFeatures = [...blue, ...red, ...green, ...purple];
@@ -1515,10 +1515,10 @@ longPressTimer = setTimeout(() => {
           pointer-events: auto !important;
           cursor: pointer !important;
         }
-        .leaflet-pane.leaflet-trains-pane {
+        .leaflet-pane.leaflet-Metros-pane {
           pointer-events: auto !important;
         }
-        .leaflet-pane.leaflet-trains-pane .leaflet-marker-icon {
+        .leaflet-pane.leaflet-Metros-pane .leaflet-marker-icon {
           pointer-events: auto !important;
         }
         
@@ -1539,7 +1539,7 @@ longPressTimer = setTimeout(() => {
       <SearchBar onLocationSelect={handleLocationSelect} onStationSelect={handleStationSelect} />
       <SideMenu onOpenRoutePlanner={() => setIsRoutePlannerOpen(true)} />
 
-      {/* Active trains indicator */}
+      {/* Active Metros indicator */}
       {activeTrainCount > 0 && (
         <div className="fixed top-20 left-4 z-[1000] bg-background/95 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg border border-border flex items-center gap-2 animate-fade-in pointer-events-none">
           <div className="relative">
@@ -1660,7 +1660,7 @@ longPressTimer = setTimeout(() => {
               </div>
               
               {(() => {
-                const schedule = trainSchedules.find(s => s.id === selectedTrain.id);
+                const schedule = Metroschedules.find(s => s.id === selectedTrain.id);
                 if (schedule) {
                   const currentStationIndex = schedule.stations.indexOf(selectedTrain.fromStationId);
                   const crowd = getCrowdLevel(selectedTrain.line, selectedTrain.id, {
@@ -1708,7 +1708,7 @@ longPressTimer = setTimeout(() => {
         </div>
       )}
 
-      {/* Train Details Dialog */}
+      {/* Metro Details Dialog */}
       {selectedTrain && (
         <TrainDetailsDialog
           isOpen={trainDetailsDialogOpen}
@@ -1721,7 +1721,7 @@ longPressTimer = setTimeout(() => {
         />
       )}
 
-      {/* Live Train Tracking Dialog */}
+      {/* Live Metro Tracking Dialog */}
       {selectedTrain && (
         <LiveTrainTrackingDialog
           isOpen={liveTrackingDialogOpen}

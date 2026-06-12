@@ -29,7 +29,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
             icon: MapPin,
             title: "Interchange Stations",
             content:
-                "Old High Court connects Blue Line with the North-South corridor. Koteshwar Road connects Red Line (south) with Green Line (north). Some trains run through without transfer.",
+                "Old High Court connects Blue Line with the North-South corridor. Koteshwar Road connects Red Line (south) with Green Line (north). Some Metros run through without transfer.",
         },
         {
             icon: Clock,

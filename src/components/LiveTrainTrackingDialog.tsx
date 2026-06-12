@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { X, Share2, Copy, Check } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
-import { trainSchedules } from '@/data/timetable';
+import { Metroschedules } from '@/data/timetable';
 import L from 'leaflet';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +41,7 @@ export const LiveTrainTrackingDialog = ({
 
   // Find the train schedule
   const schedule = useMemo(() => {
-    return trainSchedules.find(s => s.id === trainId);
+    return Metroschedules.find(s => s.id === trainId);
   }, [trainId]);
 
   // Initialize map

@@ -186,11 +186,11 @@ export const RoutePlanner = ({
 
       const sharedTrainIds = sharedSegments.map(s => s.trainId);
 
-      const commonTrains = route.steps
+      const commonMetros = route.steps
         .filter(step => step.trainId && sharedTrainIds.includes(step.trainId))
         .map(step => step.trainId as string);
 
-      if (commonTrains.length === 0) return null;
+      if (commonMetros.length === 0) return null;
 
       // Find the strict intersection of stations where the user is on the shared train AND the friend is too
       const sharedStations: string[] = [];
@@ -218,7 +218,7 @@ export const RoutePlanner = ({
         first: firstStationName,
         last: lastStationName,
         count: sharedStations.length - 1,
-        trains: Array.from(new Set(commonTrains))
+        Metros: Array.from(new Set(commonMetros))
       };
     } catch (e) {
       console.error("Error calculating overlap info:", e);
