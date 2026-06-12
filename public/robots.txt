@@ -1,4 +1,4 @@
-# AhmMetro - Route Planner (Unofficial) - www.ahmedabadmetro.site
+# AhmMetro Unofficial Route Planner - www.ahmedabadmetro.site
 # https://www.robotstxt.org/robotstxt.html
 
 User-agent: Googlebot

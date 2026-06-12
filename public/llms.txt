@@ -1,4 +1,4 @@
-# AhmMetro — Route Planner (Unofficial)
+# AhmMetro Unofficial Route Planner
 
 > AhmMetro is a free, open-source web application for navigating the Ahmedabad and Gandhinagar metro network. It provides live train tracking, route planning, fare calculation, and works entirely offline.
 
