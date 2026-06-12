@@ -141,7 +141,7 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
     // Set current time to 15 minutes before the train reaches Paldi
     const currentTimeMins = trainArrivalAtPaldi - 15;
 
-    const route = findCommonTrainRoute(sharedSegments as any, userOriginId, userDestId, currentTimeMins);
+    const route = findCommonTrainRoute(sharedSegments as { trainId: string; stations: string[] }[], userOriginId, userDestId, currentTimeMins);
     
     expect(route).toBeDefined();
     expect(route).not.toBeNull();
@@ -197,7 +197,7 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
     // Set current time to 45 minutes before Red line train reaches OHC, plenty of time to travel from Thaltej
     const currentTimeMins = trainArrivalAtOHC - 45;
 
-    const route = findCommonTrainRoute(sharedSegments as any, userOriginId, userDestId, currentTimeMins);
+    const route = findCommonTrainRoute(sharedSegments as { trainId: string; stations: string[] }[], userOriginId, userDestId, currentTimeMins);
     
     expect(route).toBeDefined();
     expect(route).not.toBeNull();

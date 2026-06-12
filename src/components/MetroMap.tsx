@@ -703,6 +703,7 @@ export const MetroMap = () => {
           }).addTo(mapRef.current!);
 
           // Create click handler that uses latest position
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const handleClick = (e?: any) => {
             if (e && e.stopPropagation) e.stopPropagation();
             if (e && e.preventDefault) e.preventDefault();

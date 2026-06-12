@@ -153,9 +153,10 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
+          vendor: ["react", "react-dom", "react-router-dom", "lucide-react"],
           leaflet: ["leaflet"],
           ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-popover"],
+          data: ["./src/data/metroData.ts", "./src/data/timetable.ts"],
         },
       },
     },
