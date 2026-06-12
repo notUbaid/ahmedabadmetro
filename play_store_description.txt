@@ -1,0 +1,26 @@
+Ahmedabad Metro App - Live Route Planner, Map & Timings
+
+Plan your journey across the city with the ultimate Ahmedabad Metro app. Whether you are a daily commuter, a student, or a tourist exploring Gujarat, AhmMetro is your all-in-one companion for navigating the Ahmedabad and Gandhinagar metro network. Get real-time train tracking, exact arrival times, ticket fares, and the fastest routes instantly—even when you do not have internet access. 
+
+KEY FEATURES
+- Live Route Planner: Simply enter your starting station and destination. The app instantly calculates the fastest route, total travel time, and exact ticket fare. 
+- Real-Time Train Tracking: Know exactly when your train will arrive with live timings for every station. 
+- Complete Offline Support: The routing engine, fare calculator, and timings work 100% offline, even when you lose signal underground. 
+- Interactive Metro Map: View the entire Ahmedabad Metro network in a clean, high-quality interactive map that is easy to zoom and navigate. 
+- Interchange Guidance: Step-by-step instructions on where to change trains at major junctions like Old High Court, Koteshwar Road, and GNLU. 
+- Station Information: Discover all 45+ stations across Ahmedabad and Gandhinagar. 
+
+COMPLETE LINE COVERAGE
+AhmMetro is fully updated with the newest operational lines and extensions: 
+- Blue Line: Thaltej Gam to Vastral Gam (East-West Corridor) 
+- Red Line: APMC to Koteshwar Road (North-South Corridor) 
+- Green Line: Koteshwar Road to Mahatma Mandir (Gandhinagar Extension) 
+- Purple Line: GNLU to GIFT City (Financial District Extension) 
+
+LIGHTWEIGHT & FAST
+Designed to be incredibly fast and consume almost zero battery or storage space on your device. Instantly loads routes in milliseconds without any annoying pop-ups or heavy ads. Simplify your daily commute and travel smarter across Ahmedabad and Gandhinagar. Download AhmMetro today! 
+
+--- IMPORTANT DISCLAIMER ---
+This application does not represent a government entity. AhmMetro is an independent, privately-developed utility application designed to assist passengers. 
+
+Data Source: All metro timings, routes, and fare information provided in this app are sourced directly from the official Gujarat Metro Rail Corporation (GMRC) website (https://www.gujaratmetrorail.com/). This app is not affiliated with, endorsed by, or connected to GMRC or the Government of Gujarat in any official capacity.
