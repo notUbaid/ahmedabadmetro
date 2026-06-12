@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, Metroschedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
+import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
@@ -1660,7 +1660,7 @@ longPressTimer = setTimeout(() => {
               </div>
               
               {(() => {
-                const schedule = Metroschedules.find(s => s.id === selectedTrain.id);
+                const schedule = trainSchedules.find(s => s.id === selectedTrain.id);
                 if (schedule) {
                   const currentStationIndex = schedule.stations.indexOf(selectedTrain.fromStationId);
                   const crowd = getCrowdLevel(selectedTrain.line, selectedTrain.id, {

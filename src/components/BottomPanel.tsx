@@ -1,7 +1,7 @@
 import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTriangle, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
-import { getUpcomingMetros, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
+import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
 import { getCrowdLevel } from '@/lib/crowding';
 import { useEffect, useState } from 'react';
 
@@ -44,7 +44,7 @@ export const BottomPanel = ({
   userLocation,
   searchedLocation,
 }: BottomPanelProps) => {
-  const [upcomingMetros, setUpcomingMetros] = useState<ReturnType<typeof getUpcomingMetros>>([]);
+  const [upcomingMetros, setUpcomingMetros] = useState<ReturnType<typeof getUpcomingTrains>>([]);
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
   const [isLocating, setIsLocating] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -62,10 +62,10 @@ export const BottomPanel = ({
   // Auto-refresh upcoming metros and Last Metro warnings every 10 seconds
   useEffect(() => {
     if (station) {
-      setUpcomingMetros(getUpcomingMetros(station.id, 3));
+      setUpcomingMetros(getUpcomingTrains(station.id, 3));
       setLastTrainWarnings(getLastTrainWarnings(station.id));
       const interval = setInterval(() => {
-        setUpcomingMetros(getUpcomingMetros(station.id, 3));
+        setUpcomingMetros(getUpcomingTrains(station.id, 3));
         setLastTrainWarnings(getLastTrainWarnings(station.id));
       }, 10000);
       return () => clearInterval(interval);
