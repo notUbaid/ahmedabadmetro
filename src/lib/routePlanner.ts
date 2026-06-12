@@ -882,8 +882,8 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
     return null;
   }
 
-  // We allow a small 2-minute "sprint" grace if a train is leaving right now
-  const GRACE_PERIOD = 2;
+  // We strictly show trains that are departing from the current minute onwards
+  const GRACE_PERIOD = 0;
   let possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
 
   let isTomorrow = false;
