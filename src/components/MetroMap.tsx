@@ -94,6 +94,7 @@ export const MetroMap = () => {
     walkingTime: number | null;
   } | null>(null);
   const commuteCardShownRef = useRef(false);
+  const updateIdRef = useRef(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -191,6 +192,8 @@ export const MetroMap = () => {
 
   // Update nearest station with real walking route
   const updateNearestStation = useCallback(async (lat: number, lng: number) => {
+    const currentUpdateId = ++updateIdRef.current;
+
     // Clear old walking route
     if (walkingRouteRef.current) {
       walkingRouteRef.current.remove();
@@ -203,6 +206,9 @@ export const MetroMap = () => {
 
     // Get walking route (includes fallback calculation)
     const walkingRoute = await findNearestByWalking(lat, lng);
+
+    // If a new update was triggered while we were waiting, ignore this one
+    if (currentUpdateId !== updateIdRef.current) return;
 
     if (walkingRoute && mapRef.current) {
       setNearestStation(walkingRoute.station);
@@ -849,7 +855,9 @@ longPressTimer = setTimeout(() => {
     map.getPane('labels')!.style.pointerEvents = 'none'; // Labels shouldn't block clicks
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
+      attribution: '© OpenStreetMap',
+      maxNativeZoom: 19,
+      maxZoom: 22
     }).addTo(map);
 
     // Fetch and draw metro routes
