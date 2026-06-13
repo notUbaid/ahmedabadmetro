@@ -1336,10 +1336,11 @@ longPressTimer = setTimeout(() => {
       });
     });
 
+    let pulseAnimationId: ReturnType<typeof setInterval> | null = null;
+
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
       let isFirstPosition = true;
-      let pulseAnimationId: ReturnType<typeof setInterval> | null = null;
       
       // Use watchPosition for continuous tracking (updates when user moves)
       geoWatchIdRef.current = navigator.geolocation.watchPosition(
@@ -1429,6 +1430,9 @@ longPressTimer = setTimeout(() => {
       if (geoWatchIdRef.current !== null) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
+      }
+      if (pulseAnimationId !== null) {
+        clearInterval(pulseAnimationId);
       }
       if (mapRef.current) {
         mapRef.current.remove();

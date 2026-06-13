@@ -44,11 +44,10 @@ export const LiveTrainTrackingDialog = ({
     return trainSchedules.find(s => s.id === trainId);
   }, [trainId]);
 
-  // Initialize map
+  // Initialize map and route line
   useEffect(() => {
     if (!isOpen || !mapContainerRef.current || !schedule) return;
 
-    // Initialize map if not already done
     if (!mapRef.current) {
       mapRef.current = L.map(mapContainerRef.current).setView(
         [23.1815, 72.6369], // Ahmedabad center
@@ -57,30 +56,41 @@ export const LiveTrainTrackingDialog = ({
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 22,
       }).addTo(mapRef.current);
     }
 
-    // Draw the complete route
-    if (routeLineRef.current) {
-      routeLineRef.current.remove();
+    if (!routeLineRef.current) {
+      const coordinates = schedule.stations
+        .map(stationId => {
+          const station = stations[stationId];
+          return station ? [station.coordinates[0], station.coordinates[1]] as [number, number] : null;
+        })
+        .filter((coord): coord is [number, number] => coord !== null);
+
+      routeLineRef.current = L.polyline(coordinates, {
+        color: LINE_COLORS[line as keyof typeof LINE_COLORS],
+        weight: 4,
+        opacity: 0.6,
+        dashArray: '5, 5'
+      }).addTo(mapRef.current);
     }
 
-    const coordinates = schedule.stations
-      .map(stationId => {
-        const station = stations[stationId];
-        return station ? [station.coordinates[0], station.coordinates[1]] as [number, number] : null;
-      })
-      .filter((coord): coord is [number, number] => coord !== null);
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        routeLineRef.current = null;
+        trainMarkerRef.current = null;
+      }
+    };
+  }, [isOpen, schedule, line]);
 
-    routeLineRef.current = L.polyline(coordinates, {
-      color: LINE_COLORS[line as keyof typeof LINE_COLORS],
-      weight: 4,
-      opacity: 0.6,
-      dashArray: '5, 5'
-    }).addTo(mapRef.current);
+  // Update train marker
+  useEffect(() => {
+    if (!isOpen || !mapRef.current || !schedule) return;
 
-    // Update train marker position
     const currentStationIndex = schedule.stationTimes.findIndex(
       (time, idx) => {
         const nextTime = schedule.stationTimes[idx + 1];
@@ -116,15 +126,9 @@ export const LiveTrainTrackingDialog = ({
         ).addTo(mapRef.current);
       }
 
-      // Center map on train
-      if (mapRef.current) {
-        mapRef.current.setView([currentStation.coordinates[0], currentStation.coordinates[1]], 13);
-      }
+      // Center map on train smoothly
+      mapRef.current.panTo([currentStation.coordinates[0], currentStation.coordinates[1]]);
     }
-
-    return () => {
-      // Don't remove map on unmount, just stop updating
-    };
   }, [isOpen, schedule, line, currentTime]);
 
   if (!isOpen || !schedule) return null;
