@@ -173,7 +173,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
   for (const schedule of trainSchedules) {
     // Filter by day type — don't show Sunday/Saturday trains on weekdays
-    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
+    if (schedule.dayType && schedule.dayType !== currentDayType && !(schedule.line !== 'blue' && schedule.dayType === 'Mon-Fri')) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
     if (stationIndex === schedule.stations.length - 1) continue; // Hide terminating trains
@@ -237,7 +237,7 @@ export const getAllTrainsForStation = (stationId: string) => {
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   for (const schedule of trainSchedules) {
-    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
+    if (schedule.dayType && schedule.dayType !== currentDayType && !(schedule.line !== 'blue' && schedule.dayType === 'Mon-Fri')) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1) continue;
     if (stationIndex === schedule.stations.length - 1) continue; // Hide terminating trains
@@ -290,7 +290,7 @@ export const getLastTrainWarnings = (stationId: string) => {
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   for (const schedule of trainSchedules) {
-    if (schedule.dayType && schedule.dayType !== currentDayType) continue;
+    if (schedule.dayType && schedule.dayType !== currentDayType && !(schedule.line !== 'blue' && schedule.dayType === 'Mon-Fri')) continue;
     const stationIndex = schedule.stations.indexOf(stationId);
     if (stationIndex === -1 || stationIndex === schedule.stations.length - 1) continue;
 
@@ -362,7 +362,7 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
   // Update cache if day changed or first run
   if (cachedDayType !== currentDayType) {
     cachedDayType = currentDayType;
-    cachedActiveSchedules = trainSchedules.filter(s => !s.dayType || s.dayType === currentDayType);
+    cachedActiveSchedules = trainSchedules.filter(s => !s.dayType || s.dayType === currentDayType || (s.line !== 'blue' && s.dayType === 'Mon-Fri'));
     // Pre-calculate start minutes to avoid string split in animation loop
     cachedActiveSchedules.forEach(s => {
       if (s._cachedStartMinutes === undefined) {
