@@ -95,23 +95,40 @@ export const BottomPanel = ({
     }
 
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        onLocate(latitude, longitude);
-        setIsLocating(false);
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        setIsLocating(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          toast.error('Location access denied. Please enable location permissions.');
-        } else {
-          toast.error('Failed to get your location. Please try again.');
+    
+    const requestPosition = (highAccuracy: boolean, fallback: boolean) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          onLocate(latitude, longitude);
+          setIsLocating(false);
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            console.error('Geolocation error:', error);
+            setIsLocating(false);
+            toast.error('Location access denied. Please enable location permissions.');
+            return;
+          }
+          
+          if (fallback) {
+            console.warn('High accuracy geolocation failed, trying low accuracy...');
+            requestPosition(false, false);
+          } else {
+            console.error('Geolocation error:', error);
+            setIsLocating(false);
+            toast.error('Failed to get your location. Please try again.');
+          }
+        },
+        { 
+          enableHighAccuracy: highAccuracy, 
+          timeout: highAccuracy ? 10000 : 20000, 
+          maximumAge: highAccuracy ? 10000 : 60000 
         }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+      );
+    };
+
+    requestPosition(true, true);
   };
 
 
