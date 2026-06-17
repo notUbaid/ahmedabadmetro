@@ -12,6 +12,17 @@ const translations = {
     'common.from': 'From station...',
     'common.to': 'To station...',
     
+    // Search Bar
+    'search.placeholder': 'Search stations, places, landmarks...',
+    'search.recentSearches': 'Recent Searches',
+    'search.metroStation': 'Metro Station',
+    'search.landmark': 'Landmark',
+    'search.address': 'Address',
+    'search.place': 'Place',
+    'search.noPlacesFound': 'No places found',
+    'search.tryDifferent': 'Try searching for a different landmark or area.',
+    'search.nearestMetro': 'Nearest Metro',
+    
     // Bottom Panel
     'panel.planRoute': 'Plan Route',
     'panel.directions': 'Directions',
@@ -94,6 +105,17 @@ const translations = {
     'common.from': 'ક્યાંથી...',
     'common.to': 'ક્યાં સુધી...',
     
+    // Search Bar
+    'search.placeholder': 'સ્ટેશન, સ્થળ, લેન્ડમાર્ક શોધો...',
+    'search.recentSearches': 'તાજેતરની શોધો',
+    'search.metroStation': 'મેટ્રો સ્ટેશન',
+    'search.landmark': 'લેન્ડમાર્ક',
+    'search.address': 'સરનામું',
+    'search.place': 'સ્થળ',
+    'search.noPlacesFound': 'કોઈ સ્થળ મળ્યું નથી',
+    'search.tryDifferent': 'અન્ય લેન્ડમાર્ક અથવા વિસ્તાર શોધવાનો પ્રયાસ કરો.',
+    'search.nearestMetro': 'નજીકનું મેટ્રો',
+    
     // Bottom Panel
     'panel.planRoute': 'રૂટ પ્લાન કરો',
     'panel.directions': 'દિશાઓ',
@@ -175,6 +197,17 @@ const translations = {
     'common.search': 'स्टेशन खोजें...',
     'common.from': 'कहाँ से...',
     'common.to': 'कहाँ तक...',
+    
+    // Search Bar
+    'search.placeholder': 'स्टेशन, स्थान, लैंडमार्क खोजें...',
+    'search.recentSearches': 'हाल की खोजें',
+    'search.metroStation': 'मेट्रो स्टेशन',
+    'search.landmark': 'लैंडमार्क',
+    'search.address': 'पता',
+    'search.place': 'स्थान',
+    'search.noPlacesFound': 'कोई स्थान नहीं मिला',
+    'search.tryDifferent': 'किसी अन्य लैंडमार्क या क्षेत्र को खोजने का प्रयास करें।',
+    'search.nearestMetro': 'निकटतम मेट्रो',
     
     // Bottom Panel
     'panel.planRoute': 'मार्ग खोजें',
