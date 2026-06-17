@@ -85,7 +85,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "06:34",
+      "startTime": "06:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -126,7 +126,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "06:45",
+      "startTime": "06:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -185,7 +185,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "06:58",
+      "startTime": "06:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -264,7 +264,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "07:10",
+      "startTime": "07:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -305,7 +305,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "07:23",
+      "startTime": "07:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -384,7 +384,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "07:34",
+      "startTime": "07:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -443,7 +443,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "07:47",
+      "startTime": "07:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -522,7 +522,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "07:58",
+      "startTime": "07:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -563,7 +563,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "08:03",
+      "startTime": "08:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -622,7 +622,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "08:17",
+      "startTime": "08:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -701,7 +701,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "08:33",
+      "startTime": "08:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -780,7 +780,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "08:46",
+      "startTime": "08:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -821,7 +821,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "08:59",
+      "startTime": "08:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -900,7 +900,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "09:11",
+      "startTime": "09:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -959,7 +959,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "09:19",
+      "startTime": "09:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1038,7 +1038,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "09:34",
+      "startTime": "09:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1079,7 +1079,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "09:48",
+      "startTime": "09:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1158,7 +1158,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "09:58",
+      "startTime": "09:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1199,7 +1199,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "10:12",
+      "startTime": "10:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1278,7 +1278,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "10:22",
+      "startTime": "10:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1319,7 +1319,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "10:36",
+      "startTime": "10:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1398,7 +1398,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "10:46",
+      "startTime": "10:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1439,7 +1439,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "10:59",
+      "startTime": "10:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1518,7 +1518,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "11:10",
+      "startTime": "11:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1559,7 +1559,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "11:25",
+      "startTime": "11:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1638,7 +1638,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "11:34",
+      "startTime": "11:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1679,7 +1679,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "11:49",
+      "startTime": "11:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1758,7 +1758,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "11:58",
+      "startTime": "11:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1799,7 +1799,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "12:13",
+      "startTime": "12:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1878,7 +1878,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "12:22",
+      "startTime": "12:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1919,7 +1919,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "12:37",
+      "startTime": "12:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -1998,7 +1998,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "12:46",
+      "startTime": "12:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2039,7 +2039,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "12:58",
+      "startTime": "12:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2080,7 +2080,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:02",
+      "startTime": "12:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2159,7 +2159,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:10",
+      "startTime": "13:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2200,7 +2200,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:22",
+      "startTime": "13:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2241,7 +2241,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:27",
+      "startTime": "13:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2320,7 +2320,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:46",
+      "startTime": "13:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2361,7 +2361,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:50",
+      "startTime": "13:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2440,7 +2440,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "13:58",
+      "startTime": "13:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2481,7 +2481,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "14:10",
+      "startTime": "14:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2522,7 +2522,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "14:15",
+      "startTime": "14:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2601,7 +2601,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "14:34",
+      "startTime": "14:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2642,7 +2642,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "14:40",
+      "startTime": "14:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2721,7 +2721,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "14:58",
+      "startTime": "14:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2762,7 +2762,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "15:04",
+      "startTime": "15:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2841,7 +2841,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "15:16",
+      "startTime": "15:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2900,7 +2900,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "15:28",
+      "startTime": "15:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -2979,7 +2979,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "15:46",
+      "startTime": "15:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3020,7 +3020,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "15:53",
+      "startTime": "15:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3099,7 +3099,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "16:03",
+      "startTime": "16:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3158,7 +3158,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "16:17",
+      "startTime": "16:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3237,7 +3237,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "16:34",
+      "startTime": "16:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3278,7 +3278,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "16:40",
+      "startTime": "16:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3357,7 +3357,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "16:58",
+      "startTime": "16:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3398,7 +3398,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "17:06",
+      "startTime": "17:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3477,7 +3477,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "17:16",
+      "startTime": "17:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3536,7 +3536,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "17:30",
+      "startTime": "17:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3615,7 +3615,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "17:46",
+      "startTime": "17:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3656,7 +3656,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "17:54",
+      "startTime": "17:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3735,7 +3735,7 @@
       "line": "purple",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "18:06",
+      "startTime": "18:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3794,7 +3794,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "18:18",
+      "startTime": "18:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3873,7 +3873,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "18:34",
+      "startTime": "18:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3914,7 +3914,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "18:43",
+      "startTime": "18:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -3993,7 +3993,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "18:58",
+      "startTime": "18:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4113,7 +4113,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "19:22",
+      "startTime": "19:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4154,7 +4154,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "19:34",
+      "startTime": "19:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4195,7 +4195,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "19:42",
+      "startTime": "19:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4274,7 +4274,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "19:58",
+      "startTime": "19:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4315,7 +4315,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "20:10",
+      "startTime": "20:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4356,7 +4356,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "20:22",
+      "startTime": "20:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4397,7 +4397,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "20:34",
+      "startTime": "20:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4438,7 +4438,7 @@
       "line": "green",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "20:45",
+      "startTime": "20:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4517,7 +4517,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "20:58",
+      "startTime": "20:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4558,7 +4558,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "21:10",
+      "startTime": "21:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4599,7 +4599,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "21:22",
+      "startTime": "21:20",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4640,7 +4640,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "21:34",
+      "startTime": "21:32",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4681,7 +4681,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "21:46",
+      "startTime": "21:44",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4722,7 +4722,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "21:58",
+      "startTime": "21:56",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4763,7 +4763,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "22:22",
+      "startTime": "22:28",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4804,7 +4804,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "22:42",
+      "startTime": "22:48",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4845,7 +4845,7 @@
       "line": "red",
       "direction": "forward",
       "dayType": "Mon-Fri",
-      "startTime": "23:02",
+      "startTime": "23:08",
       "stations": [
         "apmc",
         "jivraj_park",
@@ -4886,7 +4886,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "06:18",
+      "startTime": "06:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -4927,7 +4927,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "06:30",
+      "startTime": "06:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -4968,7 +4968,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "06:40",
+      "startTime": "06:43",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -5047,7 +5047,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "06:42",
+      "startTime": "06:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5088,7 +5088,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "06:54",
+      "startTime": "06:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5129,7 +5129,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:06",
+      "startTime": "07:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5170,7 +5170,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:18",
+      "startTime": "07:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5211,7 +5211,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:33",
+      "startTime": "07:28",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -5290,7 +5290,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:42",
+      "startTime": "07:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5331,7 +5331,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:48",
+      "startTime": "07:43",
       "stations": [
         "gift_city",
         "pdpu",
@@ -5390,7 +5390,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "07:54",
+      "startTime": "07:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5431,7 +5431,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:00",
+      "startTime": "07:54",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -5510,7 +5510,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:25",
+      "startTime": "08:19",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -5589,7 +5589,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:30",
+      "startTime": "08:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5630,7 +5630,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:37",
+      "startTime": "08:31",
       "stations": [
         "gift_city",
         "pdpu",
@@ -5689,7 +5689,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:42",
+      "startTime": "08:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5730,7 +5730,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:49",
+      "startTime": "08:43",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -5809,7 +5809,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "08:54",
+      "startTime": "08:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5850,7 +5850,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:01",
+      "startTime": "09:06",
       "stations": [
         "gift_city",
         "pdpu",
@@ -5909,7 +5909,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:06",
+      "startTime": "09:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -5950,7 +5950,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:13",
+      "startTime": "09:07",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6029,7 +6029,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:18",
+      "startTime": "09:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6070,7 +6070,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:37",
+      "startTime": "09:42",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6149,7 +6149,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:42",
+      "startTime": "09:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6190,7 +6190,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "09:54",
+      "startTime": "09:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6231,7 +6231,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:01",
+      "startTime": "10:06",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6310,7 +6310,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:06",
+      "startTime": "10:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6351,7 +6351,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:18",
+      "startTime": "10:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6392,7 +6392,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:18",
+      "startTime": "10:19",
       "stations": [
         "gift_city",
         "pdpu",
@@ -6451,7 +6451,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:26",
+      "startTime": "10:30",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6530,7 +6530,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "10:50",
+      "startTime": "10:54",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6609,7 +6609,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "11:06",
+      "startTime": "11:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6650,7 +6650,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "11:14",
+      "startTime": "11:18",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6729,7 +6729,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "11:30",
+      "startTime": "11:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6770,7 +6770,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "11:38",
+      "startTime": "11:42",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6849,7 +6849,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "11:54",
+      "startTime": "11:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -6890,7 +6890,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "12:03",
+      "startTime": "12:06",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -6969,7 +6969,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "12:18",
+      "startTime": "12:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7010,7 +7010,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "12:26",
+      "startTime": "12:30",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7089,7 +7089,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "12:42",
+      "startTime": "12:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7130,7 +7130,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "12:51",
+      "startTime": "12:53",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7209,7 +7209,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "13:06",
+      "startTime": "13:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7250,7 +7250,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "13:15",
+      "startTime": "13:17",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7329,7 +7329,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "13:30",
+      "startTime": "13:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7370,7 +7370,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "13:40",
+      "startTime": "13:41",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7449,7 +7449,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "13:54",
+      "startTime": "13:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7490,7 +7490,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "14:04",
+      "startTime": "14:05",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7569,7 +7569,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "14:18",
+      "startTime": "14:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7610,7 +7610,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "14:28",
+      "startTime": "14:29",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7689,7 +7689,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "14:42",
+      "startTime": "14:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7730,7 +7730,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "14:52",
+      "startTime": "14:53",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7809,7 +7809,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "15:06",
+      "startTime": "15:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7850,7 +7850,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "15:16",
+      "startTime": "15:18",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -7929,7 +7929,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "15:30",
+      "startTime": "15:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -7970,7 +7970,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "15:41",
+      "startTime": "15:42",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8049,7 +8049,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "15:54",
+      "startTime": "15:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -8169,7 +8169,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "16:18",
+      "startTime": "16:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -8210,7 +8210,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "16:17",
+      "startTime": "16:18",
       "stations": [
         "gift_city",
         "pdpu",
@@ -8269,7 +8269,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "16:30",
+      "startTime": "16:29",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8348,7 +8348,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "16:54",
+      "startTime": "16:53",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8427,7 +8427,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "17:06",
+      "startTime": "17:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -8468,7 +8468,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "17:08",
+      "startTime": "17:06",
       "stations": [
         "gift_city",
         "pdpu",
@@ -8527,7 +8527,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "17:19",
+      "startTime": "17:17",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8606,7 +8606,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "17:44",
+      "startTime": "17:41",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8685,7 +8685,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "17:54",
+      "startTime": "17:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -8726,7 +8726,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "18:08",
+      "startTime": "18:06",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8805,7 +8805,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "18:18",
+      "startTime": "18:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -8846,7 +8846,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "18:21",
+      "startTime": "18:19",
       "stations": [
         "gift_city",
         "pdpu",
@@ -8905,7 +8905,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "18:32",
+      "startTime": "18:29",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -8984,7 +8984,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "18:56",
+      "startTime": "18:53",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -9063,7 +9063,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:06",
+      "startTime": "19:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9104,7 +9104,7 @@
       "line": "purple",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:13",
+      "startTime": "19:18",
       "stations": [
         "gift_city",
         "pdpu",
@@ -9163,7 +9163,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:20",
+      "startTime": "19:17",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -9242,7 +9242,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:30",
+      "startTime": "19:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9283,7 +9283,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:44",
+      "startTime": "19:41",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -9362,7 +9362,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "19:54",
+      "startTime": "19:52",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9403,7 +9403,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "20:09",
+      "startTime": "20:05",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -9482,7 +9482,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "20:18",
+      "startTime": "20:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9523,7 +9523,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "20:42",
+      "startTime": "20:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9564,7 +9564,7 @@
       "line": "green",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "21:00",
+      "startTime": "21:05",
       "stations": [
         "mahatma_mandir",
         "sector_24",
@@ -9643,7 +9643,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "21:06",
+      "startTime": "21:04",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9684,7 +9684,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "21:18",
+      "startTime": "21:16",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9725,7 +9725,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "21:30",
+      "startTime": "21:28",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9766,7 +9766,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "21:42",
+      "startTime": "21:40",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9807,7 +9807,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "22:22",
+      "startTime": "22:24",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9848,7 +9848,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "22:42",
+      "startTime": "22:44",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
@@ -9889,7 +9889,7 @@
       "line": "red",
       "direction": "backward",
       "dayType": "Mon-Fri",
-      "startTime": "23:02",
+      "startTime": "22:44",
       "stations": [
         "koteshwar_road",
         "motera_stadium",
