@@ -234,12 +234,12 @@ export const BottomPanel = ({
                     className="px-2 py-0.5 rounded text-xs font-medium text-white capitalize"
                     style={{ backgroundColor: LINE_COLORS[line] }}
                   >
-                    {line} Line
+                    {t(`route.${line}Line` as any, language)}
                   </span>
                 ))}
                 {station.isInterchange && (
                   <span className="px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
-                    🔄 Interchange
+                    {t('panel.interchange', language)}
                   </span>
                 )}
               </div>
@@ -261,8 +261,8 @@ export const BottomPanel = ({
           ) : (
             <div className="text-center py-3">
               <Train className="w-10 h-10 mx-auto mb-2 opacity-50 text-muted-foreground" />
-              <h2 className="text-base font-semibold mb-1">Welcome to AhmMetro</h2>
-              <p className="text-xs text-muted-foreground">Tap a station or enable location</p>
+              <h2 className="text-base font-semibold mb-1">{t('panel.welcome', language)}</h2>
+              <p className="text-xs text-muted-foreground">{t('panel.tapStation', language)}</p>
             </div>
           )}
         </div>
@@ -281,8 +281,8 @@ export const BottomPanel = ({
                     >
                       <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
                       <span className="text-sm text-amber-700 dark:text-amber-400">
-                        <span className="font-medium">Last Metro</span> to {warning.destination} departs in{' '}
-                        <span className="font-semibold">{warning.minutesRemaining} min</span>
+                        <span className="font-medium">{t('panel.lastMetro', language)}</span> {t('panel.to', language)} {warning.destination} {t('panel.departsIn', language)}{' '}
+                        <span className="font-semibold">{warning.minutesRemaining} {t('commute.min', language)}</span>
                       </span>
                     </div>
                   ))}
@@ -293,14 +293,14 @@ export const BottomPanel = ({
               <div>
                 <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
                   <Train className="w-4 h-4" />
-                  Upcoming Metros
+                  {t('panel.upcomingMetros', language)}
                   {upcomingMetros.length > 0 && new Set(upcomingMetros.map(t => t.line)).size === 1 && (
                     <>
                       <span className="text-xs text-muted-foreground font-normal">
-                        · every {getCurrentHeadway(upcomingMetros[0].line).label}
+                        · {t('panel.every', language)} {getCurrentHeadway(upcomingMetros[0].line).label}
                       </span>
                       <span className="ml-auto text-xs text-muted-foreground font-normal flex items-center">
-                        Live
+                        {t('panel.live', language)}
                         <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full ml-1 animate-pulse" />
                       </span>
                     </>
@@ -327,10 +327,10 @@ export const BottomPanel = ({
                             />
                             <div className="min-w-0">
                               <div className="text-sm font-semibold truncate">
-                                {train.remainingStations.length === 0 ? 'Terminates Here' : train.destination}
+                                {train.remainingStations.length === 0 ? t('panel.terminatesHere', language) : train.destination}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {train.remainingStations.length === 0 ? 'Arrival Only' : train.direction}
+                                {train.remainingStations.length === 0 ? t('panel.arrivalOnly', language) : train.direction}
                               </div>
                             </div>
                           </div>
@@ -347,7 +347,7 @@ export const BottomPanel = ({
                             <div className="flex flex-col items-end">
                               <div className="text-sm font-semibold">{train.arrivalTime}</div>
                               <div className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${liveMinutes === 0 ? 'bg-green-500/20 text-green-600' : liveMinutes <= 2 ? 'bg-green-500/10 text-green-700' : liveMinutes <= 5 ? 'bg-yellow-500/10 text-yellow-700' : 'bg-muted text-muted-foreground'}`}>
-                                {liveMinutes === 0 ? 'Now' : `${liveMinutes}m`}
+                                {liveMinutes === 0 ? t('panel.now', language) : `${liveMinutes}m`}
                               </div>
                             </div>
                           </div>
@@ -357,7 +357,7 @@ export const BottomPanel = ({
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-                    No upcoming metros (End of service)
+                    {t('panel.noUpcomingMetros', language)}
                   </div>
                 )}
               </div>

@@ -3,6 +3,8 @@ import { X, Clock, MapPin, Train, Zap } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
 import { cn, getISTDate } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 interface TrainDetailsDialogProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export const TrainDetailsDialog = ({
   trainId,
   line
 }: TrainDetailsDialogProps) => {
+  const { language } = useLanguage();
   const [currentTime, setCurrentTime] = useState<number>(0);
 
   // Update current time every second
@@ -83,8 +86,8 @@ export const TrainDetailsDialog = ({
             <div className="flex items-center gap-3">
               <Train size={24} />
               <div>
-                <h2 className="font-bold text-lg">{line.charAt(0).toUpperCase() + line.slice(1)} Line Timetable</h2>
-                <p className="text-sm text-white/80">Departs {schedule.startTime}</p>
+                <h2 className="font-bold text-lg">{t(`route.${line}Line` as any, language)} {t('dialog.timetable', language)}</h2>
+                <p className="text-sm text-white/80">{t('dialog.departs', language)} {schedule.startTime}</p>
               </div>
             </div>
             <button 
@@ -102,7 +105,7 @@ export const TrainDetailsDialog = ({
           <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Current Time</p>
+                <p className="text-sm text-muted-foreground">{t('dialog.currentTime', language)}</p>
                 <p className="text-2xl font-bold">{minutesToTime(currentTime)}</p>
               </div>
               <Clock size={32} className="text-primary" />
@@ -113,14 +116,14 @@ export const TrainDetailsDialog = ({
           {!hasStarted && (
             <div className="mb-6 p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/50">
               <p className="text-sm text-yellow-600 font-medium">
-                Metro departs at {schedule.startTime}
+                {t('dialog.metroDepartsAt', language)} {schedule.startTime}
               </p>
             </div>
           )}
 
           {/* Stations List */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">Station Schedule</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">{t('dialog.stationSchedule', language)}</h3>
             
             {schedule.stations.map((stationId, idx) => {
               const relativeMinutes = schedule.stationTimes[idx];
@@ -172,16 +175,16 @@ export const TrainDetailsDialog = ({
                           isCurrent && 'text-primary',
                           isPassed && !isCurrent && 'text-muted-foreground',
                         )}>
-                          {station?.name || stationId}
+                          {getStationName(station, language) || stationId}
                         </p>
                         {isPassed && !isCurrent && (
-                          <p className="text-xs text-muted-foreground">Departed</p>
+                          <p className="text-xs text-muted-foreground">{t('dialog.departed', language)}</p>
                         )}
                         {isCurrent && (
-                          <p className="text-xs text-primary font-semibold">Currently here</p>
+                          <p className="text-xs text-primary font-semibold">{t('dialog.currentlyHere', language)}</p>
                         )}
                         {isNext && (
-                          <p className="text-xs text-primary">Next stop</p>
+                          <p className="text-xs text-primary">{t('dialog.nextStop', language)}</p>
                         )}
                       </div>
                     </div>
@@ -206,7 +209,7 @@ export const TrainDetailsDialog = ({
           {isCompleted && (
             <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted text-center">
               <p className="text-sm text-muted-foreground">
-                Service for this metro has ended for today.
+                {t('dialog.serviceEnded', language)}
               </p>
             </div>
           )}

@@ -4,6 +4,8 @@ import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
 import L from 'leaflet';
 import { cn, getISTDate } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 interface LiveTrainTrackingDialogProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export const LiveTrainTrackingDialog = ({
   trainId,
   line
 }: LiveTrainTrackingDialogProps) => {
+  const { language } = useLanguage();
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const trainMarkerRef = useRef<L.Marker | null>(null);
@@ -143,8 +146,8 @@ export const LiveTrainTrackingDialog = ({
   const handleShare = async () => {
     const originStation = schedule.stations[0];
     const destStation = schedule.stations[schedule.stations.length - 1];
-    const originName = stations[originStation]?.name || originStation;
-    const destName = stations[destStation]?.name || destStation;
+    const originName = getStationName(stations[originStation], language) || originStation;
+    const destName = getStationName(stations[destStation], language) || destStation;
     
     // Parse start time to get departure minutes
     const [hours, mins] = schedule.startTime.split(':').map(Number);
@@ -197,9 +200,9 @@ export const LiveTrainTrackingDialog = ({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
               </span>
-              Live Tracking
+              {t('dialog.liveTracking', language)}
             </h2>
-            <p className="text-sm text-white/80">{line.charAt(0).toUpperCase() + line.slice(1)} Line</p>
+            <p className="text-sm text-white/80">{t(`route.${line}Line` as any, language)}</p>
           </div>
           <button 
             onClick={onClose}
@@ -221,18 +224,18 @@ export const LiveTrainTrackingDialog = ({
           {/* Current Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-xs text-muted-foreground">From</p>
-              <p className="font-semibold">{originStation?.name || 'Unknown'}</p>
+              <p className="text-xs text-muted-foreground">{t('common.from', language).replace('...', '')}</p>
+              <p className="font-semibold">{originStation ? getStationName(originStation, language) : t('dialog.unknown', language)}</p>
             </div>
             <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-xs text-muted-foreground">To</p>
-              <p className="font-semibold">{destStation?.name || 'Unknown'}</p>
+              <p className="text-xs text-muted-foreground">{t('common.to', language).replace('...', '')}</p>
+              <p className="font-semibold">{destStation ? getStationName(destStation, language) : t('dialog.unknown', language)}</p>
             </div>
           </div>
 
           {/* Current Time */}
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-            <p className="text-xs text-muted-foreground">Metro Tracking Time</p>
+            <p className="text-xs text-muted-foreground">{t('dialog.metroTrackingTime', language)}</p>
             <p className="text-2xl font-bold text-primary">{minutesToTime(currentTime)}</p>
           </div>
 
@@ -244,7 +247,7 @@ export const LiveTrainTrackingDialog = ({
               style={{ backgroundColor: LINE_COLORS[line as keyof typeof LINE_COLORS] }}
             >
               <Share2 size={18} />
-              Share Live Location
+              {t('dialog.shareLiveLocation', language)}
             </button>
             <button
               onClick={handleCopyLink}
@@ -256,7 +259,7 @@ export const LiveTrainTrackingDialog = ({
               )}
             >
               {copied ? <Check size={18} /> : <Copy size={18} />}
-              {copied ? 'Copied!' : 'Copy Link'}
+              {copied ? t('dialog.copied', language) : t('dialog.copyLink', language)}
             </button>
           </div>
         </div>

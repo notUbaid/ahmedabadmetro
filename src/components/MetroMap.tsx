@@ -18,6 +18,8 @@ import { JoinRideDialog } from './JoinRideDialog';
 import { CommuteCard } from './CommuteCard';
 import { TrainDetailsDialog } from './TrainDetailsDialog';
 import { LiveTrainTrackingDialog } from './LiveTrainTrackingDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getStationName } from '@/lib/i18n';
 
 const CENTER: [number, number] = [23.0700, 72.5900];
 const DEFAULT_ZOOM = 12;
@@ -44,7 +46,9 @@ export const MetroMap = () => {
   // Cache route geometry plus precomputed distances to avoid per-frame recomputation
   const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(new Map());
   const latestPositionsRef = useRef<Map<string, TrainPosition>>(new Map());
+  const stationLabelsRef = useRef<Map<string, L.Marker>>(new Map());
 
+  const { language } = useLanguage();
   const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [searchedLocation, setSearchedLocation] = useState<[number, number] | null>(null);
@@ -189,6 +193,22 @@ export const MetroMap = () => {
       }
     }
   }, []);
+
+  // Update station labels when language changes
+  useEffect(() => {
+    stationLabelsRef.current.forEach((marker, stationId) => {
+      const station = stations[stationId];
+      if (station) {
+        const labelIcon = L.divIcon({
+          className: 'station-label',
+          html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${getStationName(station, language)}</div>`,
+          iconSize: [100, 20],
+          iconAnchor: [50, -8],
+        });
+        marker.setIcon(labelIcon);
+      }
+    });
+  }, [language]);
 
   // Update nearest station with real walking route
   const updateNearestStation = useCallback(async (lat: number, lng: number) => {
@@ -1315,16 +1335,18 @@ longPressTimer = setTimeout(() => {
       // Station label
       const labelIcon = L.divIcon({
         className: 'station-label',
-        html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${station.name}</div>`,
+        html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${getStationName(station, language)}</div>`,
         iconSize: [100, 20],
         iconAnchor: [50, -8],
       });
 
-      L.marker(station.coordinates, {
+      const labelMarker = L.marker(station.coordinates, {
         pane: 'labels',
         icon: labelIcon,
         interactive: false,
       }).addTo(map);
+
+      stationLabelsRef.current.set(station.id, labelMarker);
 
       // Click handler
       marker.on('click', (e) => {
