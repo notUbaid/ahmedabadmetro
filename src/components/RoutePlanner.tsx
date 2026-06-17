@@ -606,9 +606,9 @@ export const RoutePlanner = ({
                     <Clock className="w-4 h-4 text-primary mt-0.5" />
                     <div>
                       <p className="text-xs font-semibold text-foreground">
-                        Depart {route.origin.name} at exactly <span className="text-primary font-black bg-primary/10 px-1 py-0.5 rounded">{route.departureTime}</span>
+                        {t('route.departAt', language)} {getStationName(stations[route.origin.id], language)} {t('route.atExactly', language)} <span className="text-primary font-black bg-primary/10 px-1 py-0.5 rounded">{route.departureTime}</span>
                       </p>
-                      <p className="text-[10px] text-muted-foreground">To reach the interchange station on time</p>
+                      <p className="text-[10px] text-muted-foreground">{t('route.reachInterchangeOnTime', language)}</p>
                     </div>
                   </div>
                 )}
