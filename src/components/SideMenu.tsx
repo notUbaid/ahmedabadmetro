@@ -113,18 +113,18 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const menuItems = [
     {
       icon: Route,
-      label: 'Plan Route',
+      label: t('menu.planRoute', language),
       onClick: handleRoutePlanner,
-      description: 'Find your metro journey'
+      description: t('menu.planRouteDesc', language)
     },
     {
       icon: ArrowLeftRight,
-      label: 'Daily Commute',
+      label: t('menu.dailyCommute', language),
       onClick: () => {
         setIsOpen(false);
         setIsCommuteOpen(true);
       },
-      description: commuteSettings ? 'Commute configured' : 'Set up home ↔ work route',
+      description: commuteSettings ? t('menu.commuteConfigured', language) : t('menu.dailyCommuteDesc', language),
       customIconColor: commuteSettings ? 'text-purple-600 dark:text-purple-400' : 'text-muted-foreground',
       customBgColor: commuteSettings ? 'bg-purple-500/15' : 'bg-muted',
       isToggle: commuteSettings !== null,
@@ -132,9 +132,9 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
     },
     {
       icon: CreditCard,
-      label: 'Metro Card',
+      label: t('menu.metroCard', language),
       onClick: () => setHasMetroCard(!hasMetroCard),
-      description: hasMetroCard ? '10% discount applied' : 'Enable for 10% fare discount',
+      description: hasMetroCard ? t('menu.metroCardApplied', language) : t('menu.metroCardDesc', language),
       customIconColor: hasMetroCard ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground',
       customBgColor: hasMetroCard ? 'bg-green-500/15' : 'bg-muted',
       isToggle: true,
@@ -142,9 +142,9 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
     },
     {
       icon: isDark ? Sun : Moon,
-      label: isDark ? 'Light Mode' : 'Dark Mode',
+      label: isDark ? t('menu.lightMode', language) : t('menu.darkMode', language),
       onClick: toggleTheme,
-      description: 'Switch appearance'
+      description: t('menu.themeDesc', language)
     },
     {
       icon: Languages,
@@ -164,27 +164,27 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
     },
     {
       icon: Coffee,
-      label: 'Buy me a coffee',
+      label: t('menu.buyCoffee', language),
       onClick: () => window.open('https://buymeacoffee.com/notUbaid', '_blank'),
-      description: 'Support the developer',
+      description: t('menu.buyCoffeeDesc', language),
       customIconColor: 'text-yellow-600 dark:text-yellow-400',
       customBgColor: 'bg-yellow-500/15'
     },
     {
       icon: Lightbulb,
-      label: 'Tips',
+      label: t('menu.tips', language),
       onClick: () => {
         setIsOpen(false);
         setIsTipsOpen(true);
       },
-      description: 'Travel tips',
+      description: t('menu.tipsDesc', language),
       disabled: false
     },
     ...(isInstallable ? [{
       icon: Download,
-      label: 'Install App',
+      label: t('menu.installApp', language),
       onClick: handleInstallClick,
-      description: 'Add to home screen',
+      description: t('menu.installAppDesc', language),
       customIconColor: 'text-blue-600 dark:text-blue-400',
       customBgColor: 'bg-blue-500/15'
     }] : []),
@@ -215,7 +215,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="font-semibold text-lg">Menu</h2>
+          <h2 className="font-semibold text-lg">{t('menu.title', language)}</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -258,8 +258,8 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background safe-p-bottom">
           <div className="flex flex-col items-center text-center gap-2">
             <div className="bg-muted/50 p-2 rounded-lg text-[10px] text-muted-foreground leading-relaxed w-full border border-border/50">
-              <span className="font-semibold block mb-1">Disclaimer</span>
-              This app does not represent a government entity. Timings and fares are sourced from the official <a href="https://www.gujaratmetrorail.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Gujarat Metro Rail Corporation (GMRC)</a>.
+              <span className="font-semibold block mb-1">{t('menu.disclaimer', language)}</span>
+              {t('menu.disclaimerGovt', language)} {t('menu.disclaimerSource', language)} <a href="https://www.gujaratmetrorail.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{t('menu.gmrc', language)}</a>.
             </div>
             
             <div className="flex items-center justify-between w-full px-1 mt-1">
