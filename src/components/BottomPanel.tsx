@@ -140,7 +140,7 @@ export const BottomPanel = ({
       {selectedStation && onPlanRoute && (
         <button
           onClick={() => onPlanRoute(selectedStation.id)}
-          className="absolute -top-14 left-4 p-3 bg-primary text-primary-foreground rounded-xl shadow-lg hover:bg-primary/90 transition-colors flex items-center gap-2 animate-fade-in pointer-events-auto"
+          className="absolute -top-16 left-4 p-3.5 bg-primary text-primary-foreground rounded-2xl shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-fade-in pointer-events-auto"
           aria-label="Plan journey"
         >
           <Route className="w-5 h-5" />
@@ -162,7 +162,7 @@ export const BottomPanel = ({
             }
             window.open(url, '_blank');
           }}
-          className="absolute -top-14 left-4 p-3 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2 animate-fade-in pointer-events-auto"
+          className="absolute -top-16 left-4 p-3.5 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/25 hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-fade-in pointer-events-auto"
           aria-label="Navigate to station"
         >
           <Navigation className="w-5 h-5 fill-current" />
@@ -173,18 +173,18 @@ export const BottomPanel = ({
       <button
         onClick={handleLocate}
         disabled={isLocating}
-        className="absolute -top-14 right-4 p-3 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors disabled:opacity-50 pointer-events-auto"
+        className="absolute -top-16 right-4 p-3.5 bg-background/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/5 border border-border/50 hover:bg-background/90 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 pointer-events-auto"
         aria-label="Locate me"
       >
         {isLocating ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
         ) : (
-          <Locate className="w-5 h-5" />
+          <Locate className="w-5 h-5 text-primary" />
         )}
       </button>
 
       {/* Panel container */}
-      <div className="bg-background/95 backdrop-blur-md rounded-t-2xl shadow-2xl border-t border-border pointer-events-auto safe-p-bottom">
+      <div className="bg-background/85 backdrop-blur-2xl rounded-t-3xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)] border-t border-border/50 pointer-events-auto safe-p-bottom transition-all duration-300">
         {/* Always visible header - clickable to expand/collapse */}
         <div
           className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"

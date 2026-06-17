@@ -531,12 +531,12 @@ export const RoutePlanner = ({
     <div className="fixed inset-0 z-[1002] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-md"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md max-h-[90vh] bg-background rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col safe-p-bottom">
+      <div className="relative w-full max-w-md max-h-[90vh] bg-background/85 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden flex flex-col safe-p-bottom">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">

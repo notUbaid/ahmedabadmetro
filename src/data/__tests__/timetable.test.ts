@@ -47,7 +47,7 @@ describe('Timetable Deduplication Logic', () => {
   beforeEach(() => {
     // Set system time to 08:10 AM on a Wednesday (Mon-Fri)
     vi.useFakeTimers();
-    const mockDate = new Date(2024, 0, 3, 8, 10, 0); // Jan 3, 2024 is a Wednesday
+    const mockDate = new Date('2024-01-03T08:10:00+05:30'); // Jan 3, 2024 is a Wednesday
     vi.setSystemTime(mockDate);
   });
 
@@ -74,7 +74,7 @@ describe('Timetable Deduplication Logic', () => {
     // Train 1 left APMC at 08:00. At 08:07 it is between jivraj_park (08:05) and rajiv_nagar (08:10).
     // Train 2 left APMC at 08:01. At 08:07 it is between jivraj_park (08:06) and rajiv_nagar (08:11).
     // They are physically on the same segment!
-    vi.setSystemTime(new Date(2024, 0, 3, 8, 7, 0));
+    vi.setSystemTime(new Date('2024-01-03T08:07:00+05:30'));
 
     const positions = getCurrentTrainPositions();
     
@@ -103,15 +103,15 @@ describe('Timetable Utility Functions', () => {
   it('getCurrentHeadway calculates peak and off-peak headways correctly for Blue line', () => {
     // Wednesday 09:00 AM (Peak)
     vi.useFakeTimers();
-    vi.setSystemTime(new Date(2024, 0, 3, 9, 0, 0));
+    vi.setSystemTime(new Date('2024-01-03T09:00:00+05:30'));
     expect(getCurrentHeadway('blue').minutes).toBe(7);
 
     // Wednesday 13:00 PM (Off-Peak)
-    vi.setSystemTime(new Date(2024, 0, 3, 13, 0, 0));
+    vi.setSystemTime(new Date('2024-01-03T13:00:00+05:30'));
     expect(getCurrentHeadway('blue').minutes).toBe(10);
 
     // Sunday 13:00 PM (Always 12 mins)
-    vi.setSystemTime(new Date(2024, 0, 7, 13, 0, 0)); // Jan 7 is Sunday
+    vi.setSystemTime(new Date('2024-01-07T13:00:00+05:30')); // Jan 7 is Sunday
     expect(getCurrentHeadway('blue').minutes).toBe(12);
 
     vi.useRealTimers();

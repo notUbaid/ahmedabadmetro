@@ -73,7 +73,7 @@ export const CommuteCard = ({
 
   return (
     <div className="fixed top-20 left-4 right-4 z-[1500] max-w-sm mx-auto animate-in slide-in-from-top duration-300">
-      <div className="bg-background/80 backdrop-blur-md rounded-2xl shadow-2xl border border-border overflow-hidden">
+      <div className="bg-background/85 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden">
         <div 
           className="px-4 py-3 text-white flex items-center justify-between"
           style={{ background: `linear-gradient(90deg, ${LINE_COLORS[primaryLine as keyof typeof LINE_COLORS]}33, ${LINE_COLORS[primaryLine as keyof typeof LINE_COLORS]}88)` }}
@@ -116,7 +116,7 @@ export const CommuteCard = ({
                 return (
                   <div 
                     key={`${train.departureTime}-${idx}`}
-                    className="flex items-center justify-between p-2.5 bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl shadow-sm"
+                    className="flex items-center justify-between p-3 bg-gradient-to-r from-muted/50 to-muted/30 rounded-2xl shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default border border-border/30"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -158,7 +158,7 @@ export const CommuteCard = ({
           <div className="flex gap-2 pt-1">
             <button
               onClick={onPlanRoute}
-              className="flex-1 py-2.5 px-4 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
+              className="flex-1 py-3 px-4 rounded-2xl font-semibold text-white flex items-center justify-center gap-2 shadow-md transition-all hover:opacity-90 hover:shadow-lg hover:scale-[1.02] active:scale-95"
               style={{ backgroundColor: LINE_COLORS[primaryLine as keyof typeof LINE_COLORS] || '#3B82F6' }}
             >
               <ArrowRight className="w-4 h-4" />
@@ -166,7 +166,7 @@ export const CommuteCard = ({
             </button>
             <button
               onClick={onDismiss}
-              className="py-2.5 px-6 rounded-xl font-medium border border-border bg-muted/50 transition-all hover:bg-muted active:scale-[0.98]"
+              className="py-3 px-6 rounded-2xl font-semibold border border-border/50 bg-muted/50 transition-all hover:bg-muted hover:shadow-md hover:scale-[1.02] active:scale-95"
             >
               OK
             </button>
