@@ -1,6 +1,7 @@
 import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules, TrainSchedule, lineStations } from '@/data/timetable';
 import { CORRIDOR_TIMINGS, REVERSE_CORRIDOR_TIMINGS, LINE_TIMINGS } from '@/data/segmentTimings';
+import { getISTDate } from '@/lib/utils';
 
 export interface RouteStep {
   type: 'board' | 'interchange' | 'travel' | 'alight' | 'bus';
@@ -41,7 +42,7 @@ export interface PlannedRoute {
 }
 
 // Define station order for each line (terminal to terminal)
-const getDayType = (date: Date = new Date()) => {
+const getDayType = (date: Date = getISTDate()) => {
   const day = date.getDay();
   return day === 0 ? 'Sunday' : day === 6 ? 'Saturday' : 'Mon-Fri';
 };
@@ -133,7 +134,7 @@ export const calculateFare = (originId: string, destId: string, stationCount: nu
 
 // Get current time in minutes from midnight
 const getCurrentTimeMinutes = (): number => {
-  const now = new Date();
+  const now = getISTDate();
   return now.getHours() * 60 + now.getMinutes();
 };
 
@@ -889,7 +890,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
   let isTomorrow = false;
   if (possible.length === 0) {
     // If no more departures today, show the first available departure for tomorrow morning
-    const tomorrow = new Date();
+    const tomorrow = getISTDate();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowDayType = getDayType(tomorrow);
     
@@ -918,7 +919,7 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 
   const best = sorted[0];
 
-  const targetDayType = isTomorrow ? getDayType(new Date(Date.now() + 86400000)) : currentDayType;
+  const targetDayType = isTomorrow ? (() => { const d = getISTDate(); d.setDate(d.getDate() + 1); return getDayType(d); })() : currentDayType;
   const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, targetDayType);
   if (!route) return null;
 

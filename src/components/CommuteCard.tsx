@@ -1,3 +1,4 @@
+import { getISTDate } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 import { X, Train, Clock, Users, Navigation, ArrowRight } from 'lucide-react';
 import { Station, LINE_COLORS } from '@/data/metroData';
@@ -20,13 +21,13 @@ export const CommuteCard = ({
   onDismiss, 
   onPlanRoute 
 }: CommuteCardProps) => {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(getISTDate());
 
   const [departures, setDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(getISTDate()), 1000);
     return () => clearInterval(timer);
   }, []);
 

@@ -2,6 +2,7 @@
 // NOTE: This file must not contain any git merge conflict markers.
 
 import { INTERCHANGE_STATIONS, NORMAL_STOP, INTERCHANGE_STOP, LINE_TIMINGS } from './segmentTimings';
+import { getISTDate } from '@/lib/utils';
 import timetableFromExcelData from './timetableFromExcel.generated.json';
 
 import { stations } from './metroData';
@@ -101,7 +102,7 @@ export const lineInfo = {
 } as const;
 
 export const getCurrentHeadway = (line: string): { minutes: number; label: string } => {
-  const now = new Date();
+  const now = getISTDate();
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
   const isSunday = dayOfWeek === 0;
@@ -154,7 +155,7 @@ export const getDirectionStr = (destinationId: string): string => {
 
 // Returns trains arriving within next 120 minutes for stationIndex visualization
 export const getUpcomingTrains = (stationId: string, limit = 3) => {
-  const now = new Date();
+  const now = getISTDate();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
@@ -232,7 +233,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
 export const getAllTrainsForStation = (stationId: string) => {
   const trains: { time: string; destination: string; line: string; minutes: number; direction: string; remainingCount: number }[] = [];
-  const now = new Date();
+  const now = getISTDate();
   const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
@@ -282,7 +283,7 @@ export const getAllTrainsForStation = (stationId: string) => {
 };
 
 export const getLastTrainWarnings = (stationId: string) => {
-  const now = new Date();
+  const now = getISTDate();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   const destinationLastTrains = new Map<string, { line: string; arrivalMinutes: number }>();
@@ -347,7 +348,7 @@ export interface TrainPosition {
 }
 
 export const getCurrentTrainPositions = (): TrainPosition[] => {
-  const now = new Date();
+  const now = getISTDate();
   const currentMinutes =
     now.getHours() * 60 +
     now.getMinutes() +

@@ -3,7 +3,7 @@ import { X, Share2, Copy, Check } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
 import L from 'leaflet';
-import { cn } from '@/lib/utils';
+import { cn, getISTDate } from '@/lib/utils';
 
 interface LiveTrainTrackingDialogProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export const LiveTrainTrackingDialog = ({
     if (!isOpen) return;
 
     const updateTime = () => {
-      const now = new Date();
+      const now = getISTDate();
       setCurrentTime(now.getHours() * 60 + now.getMinutes());
     };
 

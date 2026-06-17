@@ -9,6 +9,8 @@
  * 5. Dynamic crowding: Trains get more crowded as they progress along their route
  */
 
+import { getISTDate } from '@/lib/utils';
+
 export type CrowdLevel = 'low' | 'moderate' | 'heavy';
 
 export interface CrowdInfo {
@@ -20,7 +22,7 @@ export interface CrowdInfo {
 }
 
 // Peak hours: 8:00-11:00 and 17:00-20:00 on weekdays
-export const isPeakHour = (date: Date = new Date()): boolean => {
+export const isPeakHour = (date: Date = getISTDate()): boolean => {
   const hour = date.getHours();
   const day = date.getDay();
   const isWeekday = day >= 1 && day <= 5;
@@ -31,7 +33,7 @@ export const isPeakHour = (date: Date = new Date()): boolean => {
   return (hour >= 8 && hour < 11) || (hour >= 17 && hour < 20);
 };
 
-export const isWeekend = (date: Date = new Date()): boolean => {
+export const isWeekend = (date: Date = getISTDate()): boolean => {
   const day = date.getDay();
   return day === 0 || day === 6;
 };
@@ -137,7 +139,7 @@ export const getCrowdLevel = (
     originStationId?: string;
   }
 ): CrowdInfo => {
-  const now = new Date();
+  const now = getISTDate();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
   
@@ -247,7 +249,7 @@ export const getSimpleCrowdLevel = (
   line: string,
   trainId: string = ''
 ): CrowdInfo => {
-  const now = new Date();
+  const now = getISTDate();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
   

@@ -1,3 +1,4 @@
+import { getISTDate } from '@/lib/utils';
 import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTriangle, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
@@ -47,14 +48,14 @@ export const BottomPanel = ({
   const [upcomingMetros, setUpcomingMetros] = useState<ReturnType<typeof getUpcomingTrains>>([]);
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
   const [isLocating, setIsLocating] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(getISTDate());
 
   const station = selectedStation || nearestStation;
 
   // Auto-refresh current time every second for live feel
   useEffect(() => {
     const timeInterval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(getISTDate());
     }, 1000);
     return () => clearInterval(timeInterval);
   }, []);

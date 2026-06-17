@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { X, Route, Share2, ArrowRight, Train, Clock, MapPin, Check } from 'lucide-react';
 import { stations } from '@/data/metroData';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
-import { cn } from '@/lib/utils';
+import { cn, getISTDate } from '@/lib/utils';
 
 interface FriendsJourneyViewerProps {
     isOpen: boolean;
@@ -58,7 +58,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
     useEffect(() => {
         if (route) {
             const updateProgress = () => {
-                const now = new Date();
+                const now = getISTDate();
                 const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
                 setJourneyProgress(calculateJourneyProgress(route, currentMins));
             };

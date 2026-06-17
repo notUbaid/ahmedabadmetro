@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
-import { cn } from '@/lib/utils';
+import { cn, getISTDate } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
 
 // Parse time string "HH:MM" to minutes since midnight
@@ -554,7 +554,7 @@ export const RoutePlanner = ({
         </div>
 
         {/* Late Night Alert */}
-        {new Date().getHours() >= 23 || new Date().getHours() < 6 ? (
+        {getISTDate().getHours() >= 23 || getISTDate().getHours() < 6 ? (
           <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-start gap-3">
             <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>

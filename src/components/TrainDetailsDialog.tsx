@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { X, Clock, MapPin, Train, Zap } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
-import { cn } from '@/lib/utils';
+import { cn, getISTDate } from '@/lib/utils';
 
 interface TrainDetailsDialogProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export const TrainDetailsDialog = ({
     if (!isOpen) return;
 
     const updateTime = () => {
-      const now = new Date();
+      const now = getISTDate();
       setCurrentTime(now.getHours() * 60 + now.getMinutes());
     };
 

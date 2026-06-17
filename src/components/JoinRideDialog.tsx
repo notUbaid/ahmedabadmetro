@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
-import { cn } from '@/lib/utils';
+import { cn, getISTDate } from '@/lib/utils';
 
 interface JoinRideDialogProps {
     isOpen: boolean;
@@ -59,7 +59,7 @@ export const JoinRideDialog = ({
         const arrivalMinutes = startMinutes + sharedTrain.stationTimes[stationIdx];
 
         // Check if metro has already passed (simplified check against current time)
-        const now = new Date();
+        const now = getISTDate();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
         if (arrivalMinutes < currentMinutes) {
