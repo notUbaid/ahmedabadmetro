@@ -3,7 +3,10 @@ import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowL
 import { TipsDialog } from './TipsDialog';
 import { CommuteSetup } from './CommuteSetup';
 import { useMetroCard } from '@/contexts/MetroCardContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { getCommuteSettings } from '@/lib/commuteStorage';
+import { Languages } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -26,6 +29,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const { hasMetroCard, setHasMetroCard } = useMetroCard();
+  const { language, setLanguage } = useLanguage();
   const commuteSettings = getCommuteSettings();
 
   useEffect(() => {
@@ -141,6 +145,22 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       label: isDark ? 'Light Mode' : 'Dark Mode',
       onClick: toggleTheme,
       description: 'Switch appearance'
+    },
+    {
+      icon: Languages,
+      label: t('menu.language', language),
+      onClick: () => {
+        const nextLang = language === 'en' ? 'gu' : language === 'gu' ? 'hi' : 'en';
+        setLanguage(nextLang);
+      },
+      description: language === 'en' 
+        ? 'English (Click to switch to ગુજરાતી)' 
+        : language === 'gu' 
+          ? 'ગુજરાતી (हिंदी में बदलने के लिए क्लिक करें)' 
+          : 'हिंदी (Click to switch to English)',
+      customIconColor: 'text-blue-600 dark:text-blue-400',
+      customBgColor: 'bg-blue-500/15',
+      isToggle: false,
     },
     {
       icon: Coffee,

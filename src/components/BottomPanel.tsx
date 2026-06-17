@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
 import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
 import { getCrowdLevel } from '@/lib/crowding';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 
 interface BottomPanelProps {
@@ -49,6 +51,7 @@ export const BottomPanel = ({
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
   const [isLocating, setIsLocating] = useState(false);
   const [currentTime, setCurrentTime] = useState(getISTDate());
+  const { language } = useLanguage();
 
   const station = selectedStation || nearestStation;
 
@@ -144,7 +147,7 @@ export const BottomPanel = ({
           aria-label="Plan journey"
         >
           <Route className="w-5 h-5" />
-          <span className="font-semibold text-sm">Plan Route</span>
+          <span className="font-semibold text-sm">{t('panel.planRoute', language)}</span>
         </button>
       )}
 
@@ -166,7 +169,7 @@ export const BottomPanel = ({
           aria-label="Navigate to station"
         >
           <Navigation className="w-5 h-5 fill-current" />
-          <span className="font-semibold text-sm">Directions</span>
+          <span className="font-semibold text-sm">{t('panel.directions', language)}</span>
         </button>
       )}
 
@@ -198,12 +201,15 @@ export const BottomPanel = ({
                   {!selectedStation && nearestStation && distance !== null && !isNaN(distance) && (
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                       <Navigation className="w-3 h-3" />
-                      <span>Nearest Station</span>
+                      <span>{t('panel.nearestStation', language)}</span>
                     </div>
                   )}
-                  <h2 className="text-lg font-semibold">{station.name}</h2>
-                  {station.nameGu && (
+                  <h2 className="text-lg font-semibold">{getStationName(station, language)}</h2>
+                  {language === 'en' && station.nameGu && (
                     <p className="text-sm text-muted-foreground">{station.nameGu}</p>
+                  )}
+                  {language === 'gu' && (
+                    <p className="text-sm text-muted-foreground">{station.name}</p>
                   )}
                 </div>
                 {selectedStation && (
@@ -247,7 +253,7 @@ export const BottomPanel = ({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{formatWalkingTime(walkingTime)} walk</span>
+                    <span className="text-sm">{formatWalkingTime(walkingTime)} {t('panel.walk', language)}</span>
                   </div>
                 </div>
               )}

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -88,11 +90,11 @@ const searchCache = new Map<string, { results: SearchResult[]; timestamp: number
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Convert metro stations to search results
-const getMetroStationResults = (): SearchResult[] => {
+const getMetroStationResults = (language: 'en' | 'gu'): SearchResult[] => {
   return Object.values(stations).map(station => ({
     id: station.id,
-    name: station.name,
-    description: `Metro Station • ${station.lines.map(l => l.charAt(0).toUpperCase() + l.slice(1)).join(', ')} Line`,
+    name: getStationName(station, language),
+    description: `${t('search.metroStation', language)} • ${station.lines.map(l => l.charAt(0).toUpperCase() + l.slice(1)).join(', ')} ${t('route.line', language)}`,
     lat: station.coordinates[0],
     lng: station.coordinates[1],
     type: 'station' as const,
@@ -239,6 +241,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const isSelectedRef = useRef(false);
   const activeSearchIdRef = useRef(0);
   const [isOfflineExpanded, setIsOfflineExpanded] = useState(!navigator.onLine);
+  const { language } = useLanguage();
 
   useEffect(() => {
     let timeout: number | undefined;
@@ -266,7 +269,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     };
   }, []);
 
-  const metroStations = getMetroStationResults();
+  const metroStations = getMetroStationResults(language);
 
   // Load recent searches on mount
   useEffect(() => {
@@ -476,7 +479,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     if (recent.type === 'station' && onStationSelect) {
       // Find station ID from name
       const stationEntry = Object.entries(stations).find(
-        ([_, s]) => s.name.toLowerCase() === recent.name.toLowerCase()
+        ([_, s]) => getStationName(s, language).toLowerCase() === recent.name.toLowerCase() || s.name.toLowerCase() === recent.name.toLowerCase()
       );
       if (stationEntry) {
         onStationSelect(stationEntry[0]);
@@ -527,13 +530,13 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const getTypeLabel = (type: SearchResult['type']) => {
     switch (type) {
       case 'station':
-        return 'Metro Station';
+        return t('search.metroStation', language);
       case 'landmark':
-        return 'Landmark';
+        return t('search.landmark', language);
       case 'address':
-        return 'Address';
+        return t('search.address', language);
       default:
-        return 'Place';
+        return t('search.place', language);
     }
   };
 
@@ -554,7 +557,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
               setShowRecent(false);
             }}
             onFocus={handleFocus}
-            placeholder="Search stations, places, landmarks..."
+            placeholder={t('search.placeholder', language)}
             enterKeyHint="search"
             className="flex-1 px-3 py-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
@@ -573,7 +576,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         {showRecent && recentSearches.length > 0 && !query && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
             <div className="px-4 py-2 text-xs text-muted-foreground font-medium border-b border-border">
-              Recent Searches
+              {t('search.recentSearches', language)}
             </div>
             {recentSearches.map((recent, index) => (
               <button
@@ -613,7 +616,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
                   <p className="text-xs text-muted-foreground truncate">{result.description}</p>
                   {result.nearestStationName && (
                     <p className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1.5 bg-primary/5 w-max px-1.5 py-0.5 rounded border border-primary/10">
-                      <Train className="w-3 h-3" /> Nearest Metro: {result.nearestStationName} ({(result.nearestStationDist || 0).toFixed(1)} km)
+                      <Train className="w-3 h-3" /> {t('search.nearestMetro', language)}: {result.nearestStationName} ({(result.nearestStationDist || 0).toFixed(1)} km)
                     </p>
                   )}
                 </div>
@@ -644,8 +647,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
               <SearchX className="w-6 h-6 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">No places found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for a different landmark or area.</p>
+              <p className="text-sm font-semibold text-foreground">{t('search.noPlacesFound', language)}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('search.tryDifferent', language)}</p>
             </div>
           </div>
         )}

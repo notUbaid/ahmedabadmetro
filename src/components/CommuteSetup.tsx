@@ -8,6 +8,8 @@ import {
   clearCommuteSettings,
   CommuteSettings 
 } from '@/lib/commuteStorage';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 interface CommuteSetupProps {
   isOpen: boolean;
@@ -23,24 +25,26 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const [showWorkDropdown, setShowWorkDropdown] = useState(false);
   const [homeSelectedIndex, setHomeSelectedIndex] = useState(-1);
   const [workSelectedIndex, setWorkSelectedIndex] = useState(-1);
+  const { language } = useLanguage();
   
   const existingSettings = getCommuteSettings();
   const organizedStations = useMemo(() => getOrganizedStations(), []);
   const allStations = useMemo(() => Object.values(stations), []);
 
-  useState(() => {
+  useEffect(() => {
     if (existingSettings) {
       setHomeStation(existingSettings.homeStation);
       setWorkStation(existingSettings.workStation);
-      setHomeSearch(stations[existingSettings.homeStation]?.name || '');
-      setWorkSearch(stations[existingSettings.workStation]?.name || '');
+      setHomeSearch(getStationName(stations[existingSettings.homeStation], language) || '');
+      setWorkSearch(getStationName(stations[existingSettings.workStation], language) || '');
     }
-  });
+  }, [language]);
 
   const filteredHomeStations = useMemo(() => {
     if (!homeSearch) return [];
     return allStations.filter(s => 
-      s.name.toLowerCase().includes(homeSearch.toLowerCase())
+      s.name.toLowerCase().includes(homeSearch.toLowerCase()) ||
+      (s.nameGu && s.nameGu.includes(homeSearch))
     ).slice(0, 8);
   }, [allStations, homeSearch]);
 
@@ -51,7 +55,8 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const filteredWorkStations = useMemo(() => {
     if (!workSearch) return [];
     return allStations.filter(s => 
-      s.name.toLowerCase().includes(workSearch.toLowerCase())
+      s.name.toLowerCase().includes(workSearch.toLowerCase()) ||
+      (s.nameGu && s.nameGu.includes(workSearch))
     ).slice(0, 8);
   }, [allStations, workSearch]);
 
@@ -82,13 +87,13 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
   const selectHome = (stationId: string) => {
     setHomeStation(stationId);
-    setHomeSearch(stations[stationId]?.name || '');
+    setHomeSearch(getStationName(stations[stationId], language) || '');
     setShowHomeDropdown(false);
   };
 
   const selectWork = (stationId: string) => {
     setWorkStation(stationId);
-    setWorkSearch(stations[stationId]?.name || '');
+    setWorkSearch(getStationName(stations[stationId], language) || '');
     setShowWorkDropdown(false);
   };
 
@@ -137,7 +142,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-lg">Daily Commute</h2>
+            <h2 className="font-semibold text-lg">{t('commute.dailyCommute', language)}</h2>
           </div>
           <button 
             onClick={onClose}
@@ -183,7 +188,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                         }`}
                       >
                         <Train className="w-3 h-3 text-muted-foreground" />
-                        <span>{s.name}</span>
+                        <span>{getStationName(s, language)}</span>
                         <div className="flex gap-1 ml-auto">
                           {s.lines.map(l => (
                             <span
@@ -232,7 +237,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                         }`}
                       >
                         <Train className="w-3 h-3 text-muted-foreground" />
-                        <span>{s.name}</span>
+                        <span>{getStationName(s, language)}</span>
                         <div className="flex gap-1 ml-auto">
                           {s.lines.map(l => (
                             <span
@@ -256,7 +261,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
               <p className="text-xs text-muted-foreground mb-1">Current commute:</p>
               <p className="text-sm font-medium">
-                {stations[existingSettings.homeStation]?.name} ↔ {stations[existingSettings.workStation]?.name}
+                {getStationName(stations[existingSettings.homeStation], language)} ↔ {getStationName(stations[existingSettings.workStation], language)}
               </p>
             </div>
           )}

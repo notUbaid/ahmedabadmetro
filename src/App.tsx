@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { WelcomeOverlay } from "@/components/WelcomeOverlay";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -40,24 +41,26 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <MetroCardProvider>
-      <TooltipProvider>
-        <WelcomeOverlay />
-        <OfflineIndicator />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-        <Analytics />
-      </TooltipProvider>
-    </MetroCardProvider>
+    <LanguageProvider>
+      <MetroCardProvider>
+        <TooltipProvider>
+          <WelcomeOverlay />
+          <OfflineIndicator />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+          <Analytics />
+        </TooltipProvider>
+      </MetroCardProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

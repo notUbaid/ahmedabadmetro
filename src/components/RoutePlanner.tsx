@@ -8,6 +8,8 @@ import { stations, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
 import { cn, getISTDate } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 // Parse time string "HH:MM" to minutes since midnight
 const parseTimeToMinutes = (time: string): number => {
@@ -36,28 +38,28 @@ export const RoutePlanner = ({
   friendDepMins
 }: RoutePlannerProps) => {
   const { getDiscountedFare, hasMetroCard } = useMetroCard();
+  const { language } = useLanguage();
   const [origin, setOrigin] = useState(initialOrigin || '');
   const [destination, setDestination] = useState(initialDestination || '');
-  const [originSearch, setOriginSearch] = useState(() => initialOrigin ? (stations[initialOrigin]?.name || '') : '');
-  const [destSearch, setDestSearch] = useState(() => initialDestination ? (stations[initialDestination]?.name || '') : '');
+  const [originSearch, setOriginSearch] = useState(() => initialOrigin ? (getStationName(stations[initialOrigin], language) || '') : '');
+  const [destSearch, setDestSearch] = useState(() => initialDestination ? (getStationName(stations[initialDestination], language) || '') : '');
   const [internalIsCoordinating, setInternalIsCoordinating] = useState(isCoordinating);
   const activeTrainRef = useRef<HTMLButtonElement>(null);
 
 
-  // Sync initial props if they change after mount
   useEffect(() => {
     if (initialOrigin) {
       setOrigin(initialOrigin);
-      setOriginSearch(stations[initialOrigin]?.name || '');
+      setOriginSearch(getStationName(stations[initialOrigin], language) || '');
     }
-  }, [initialOrigin]);
+  }, [initialOrigin, language]);
 
   useEffect(() => {
     if (initialDestination) {
       setDestination(initialDestination);
-      setDestSearch(stations[initialDestination]?.name || '');
+      setDestSearch(getStationName(stations[initialDestination], language) || '');
     }
-  }, [initialDestination]);
+  }, [initialDestination, language]);
 
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestDropdown, setShowDestDropdown] = useState(false);
@@ -157,14 +159,16 @@ export const RoutePlanner = ({
   const filteredOriginStations = useMemo(() => {
     if (!originSearch) return stationOptions;
     return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(originSearch.toLowerCase())
+      s.name.toLowerCase().includes(originSearch.toLowerCase()) || 
+      (s.nameGu && s.nameGu.includes(originSearch))
     );
   }, [stationOptions, originSearch]);
 
   const filteredDestStations = useMemo(() => {
     if (!destSearch) return stationOptions;
     return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(destSearch.toLowerCase())
+      s.name.toLowerCase().includes(destSearch.toLowerCase()) || 
+      (s.nameGu && s.nameGu.includes(destSearch))
     );
   }, [stationOptions, destSearch]);
 
@@ -209,8 +213,8 @@ export const RoutePlanner = ({
 
       if (sharedStations.length < 2) return null;
 
-      const firstStationName = stations[sharedStations[0]]?.name;
-      const lastStationName = stations[sharedStations[sharedStations.length - 1]]?.name;
+      const firstStationName = getStationName(stations[sharedStations[0]], language);
+      const lastStationName = getStationName(stations[sharedStations[sharedStations.length - 1]], language);
 
       if (!firstStationName || !lastStationName) return null;
 
@@ -224,7 +228,7 @@ export const RoutePlanner = ({
       console.error("Error calculating overlap info:", e);
       return null;
     }
-  }, [internalIsCoordinating, sharedSegments, route]);
+  }, [internalIsCoordinating, sharedSegments, route, language]);
 
   // Notify parent when route changes
   useEffect(() => {
@@ -235,17 +239,17 @@ export const RoutePlanner = ({
   useEffect(() => {
     if (initialDestination) {
       setDestination(initialDestination);
-      setDestSearch(stations[initialDestination]?.name || '');
+      setDestSearch(getStationName(stations[initialDestination], language) || '');
     }
-  }, [initialDestination]);
+  }, [initialDestination, language]);
 
   // Update origin when initialOrigin prop changes
   useEffect(() => {
     if (initialOrigin) {
       setOrigin(initialOrigin);
-      setOriginSearch(stations[initialOrigin]?.name || '');
+      setOriginSearch(getStationName(stations[initialOrigin], language) || '');
     }
-  }, [initialOrigin]);
+  }, [initialOrigin, language]);
 
   // Reset selected departure when stations change
   useEffect(() => {
@@ -255,8 +259,8 @@ export const RoutePlanner = ({
   const swapStations = () => {
     setOrigin(destination);
     setDestination(origin);
-    setOriginSearch(stations[destination]?.name || '');
-    setDestSearch(stations[origin]?.name || '');
+    setOriginSearch(getStationName(stations[destination], language) || '');
+    setDestSearch(getStationName(stations[origin], language) || '');
     setSelectedDepartureIdx(null);
   };
 
@@ -291,13 +295,13 @@ export const RoutePlanner = ({
 
   const selectOrigin = (id: string) => {
     setOrigin(id);
-    setOriginSearch(stations[id]?.name || '');
+    setOriginSearch(getStationName(stations[id], language) || '');
     setShowOriginDropdown(false);
   };
 
   const selectDestination = (id: string) => {
     setDestination(id);
-    setDestSearch(stations[id]?.name || '');
+    setDestSearch(getStationName(stations[id], language) || '');
     setShowDestDropdown(false);
   };
 
@@ -357,15 +361,15 @@ export const RoutePlanner = ({
               />
             </div>
             <div className="flex-1 pb-4">
-              <p className="font-semibold">{step.station.name}</p>
+              <p className="font-semibold">{getStationName(step.station, language)}</p>
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-sm text-muted-foreground">
-                  Board{' '}
+                  {t('route.board', language)}{' '}
                   <span
                     className="font-medium px-1.5 py-0.5 rounded text-white text-xs"
                     style={{ backgroundColor: getLineColor(step.line) }}
                   >
-                    {step.line?.toUpperCase()} LINE
+                    {step.line?.toUpperCase()} {t('route.line', language)}
                   </span>
                 </p>
                 {step.trainTime && (
@@ -375,7 +379,7 @@ export const RoutePlanner = ({
                 )}
                 {step.isDirect && (
                   <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
-                    ✓ Direct Metro
+                    ✓ {t('route.directMetro', language)}
                   </span>
                 )}
               </div>
@@ -401,14 +405,14 @@ export const RoutePlanner = ({
                   {step.stations.map((s, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Circle className="w-2 h-2" style={{ color: getLineColor(step.line) }} />
-                      <span>{s.name}</span>
+                      <span>{getStationName(s, language)}</span>
                     </div>
                   ))}
                 </div>
               )}
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Train className="w-3 h-3" />
-                <span>{step.stationCount} station{step.stationCount !== 1 ? 's' : ''}</span>
+                <span>{step.stationCount} {t(step.stationCount === 1 ? 'route.station' : 'route.stations', language)}</span>
                 <span>•</span>
                 <span>~{Math.round((step.stationCount || 1) * 2.5)} min</span>
               </div>
@@ -427,15 +431,15 @@ export const RoutePlanner = ({
               />
             </div>
             <div className="flex-1 pb-4">
-              <p className="font-semibold">{step.station.name}</p>
+              <p className="font-semibold">{getStationName(step.station, language)}</p>
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                  🔄 Change to{' '}
+                  🔄 {t('route.changeTo', language)}{' '}
                   <span
                     className="px-1.5 py-0.5 rounded text-white text-xs"
                     style={{ backgroundColor: getLineColor(step.line) }}
                   >
-                    {step.line?.toUpperCase()} LINE
+                    {step.line?.toUpperCase()} {t('route.line', language)}
                   </span>
                 </p>
                 {step.trainTime && (
@@ -446,7 +450,7 @@ export const RoutePlanner = ({
               </div>
               {step.arrivalTime && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Arrive at {step.arrivalTime}
+                  {t('route.arriveAt', language)} {step.arrivalTime}
                 </p>
               )}
               {step.direction && (
@@ -462,10 +466,10 @@ export const RoutePlanner = ({
                       : "text-muted-foreground"
                 )}>
                   <Clock className="w-3 h-3" />
-                  {step.waitTime} min wait
+                  {step.waitTime} min {t('route.wait', language)}
                   {step.waitTime <= 3 && (
                     <span className="ml-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
-                      Hurry!
+                      {t('route.hurry', language)}
                     </span>
                   )}
                 </p>
@@ -484,16 +488,16 @@ export const RoutePlanner = ({
               <div className="w-1 h-12 mt-1 rounded-full bg-emerald-500" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 4px, hsl(var(--background)) 4px, hsl(var(--background)) 8px)' }} />
             </div>
             <div className="flex-1 pb-4">
-              <p className="font-semibold">{step.station.name}</p>
+              <p className="font-semibold">{getStationName(step.station, language)}</p>
               <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 mt-2">
                 <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
-                  🚌 Take Bus to {step.busDestination}
+                  🚌 {t('route.takeBus', language)} {step.busDestination}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Bus stop is just below the metro station. Buses run frequently.
+                  {t('route.busDesc', language)}
                 </p>
                 <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                  ~{step.busDestination === 'PDPU' ? '8' : '15'} min • Faster than waiting for metro
+                  ~{step.busDestination === 'PDPU' ? '8' : '15'} min • {t('route.fasterThanMetro', language)}
                 </p>
               </div>
             </div>
@@ -507,13 +511,13 @@ export const RoutePlanner = ({
               {renderStepIcon(step, index, steps.length)}
             </div>
             <div className="flex-1">
-              <p className="font-semibold">{step.station.name}</p>
+              <p className="font-semibold">{getStationName(step.station, language)}</p>
               <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                🎯 Exit here
+                🎯 {t('route.exitHere', language)}
               </p>
               {step.arrivalTime && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Arrive at {step.arrivalTime}
+                  {t('route.arriveAt', language)} {step.arrivalTime}
                 </p>
               )}
             </div>
@@ -542,7 +546,7 @@ export const RoutePlanner = ({
           <div className="flex items-center gap-2">
             <Route className="w-5 h-5 text-primary" />
             <h2 className="font-semibold text-lg">
-              {internalIsCoordinating ? "Coordinate with Friend" : "Plan Your Journey"}
+              {internalIsCoordinating ? t('route.coordinateFriend', language) : t('route.planJourney', language)}
             </h2>
           </div>
           <button
@@ -558,9 +562,9 @@ export const RoutePlanner = ({
           <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-start gap-3">
             <Clock className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Outside Operating Hours</p>
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">{t('route.outsideHours', language)}</p>
               <p className="text-xs text-amber-600/90 dark:text-amber-500/90 mt-0.5">
-                Service hours are 6:20 AM - 11:00 PM (Ahmedabad) and 6:20 AM - 10:00 PM (Gandhinagar). Routes shown now are estimated for tomorrow morning.
+                {t('route.outsideHoursDesc', language)}
               </p>
             </div>
           </div>
@@ -572,13 +576,13 @@ export const RoutePlanner = ({
             <div className="px-4 py-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span className="text-[10px] font-black text-primary uppercase tracking-wider">Syncing with Friend's Journey</span>
+                <span className="text-[10px] font-black text-primary uppercase tracking-wider">{t('route.syncing', language)}</span>
               </div>
               <button
                 onClick={() => setInternalIsCoordinating(false)}
                 className="text-[10px] font-bold text-primary hover:underline bg-primary/5 px-2 py-1 rounded"
               >
-                Exit Sync
+                {t('route.exitSync', language)}
               </button>
             </div>
             {overlapInfo ? (
@@ -588,13 +592,13 @@ export const RoutePlanner = ({
                     <Train className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase leading-tight">Travel Together For</p>
+                    <p className="text-[11px] font-bold text-muted-foreground uppercase leading-tight">{t('route.travelTogetherFor', language)}</p>
                     <p className="text-sm font-black text-foreground">
-                      {overlapInfo.count} stops <span className="text-muted-foreground font-medium">({overlapInfo.first} → {overlapInfo.last})</span>
+                      {overlapInfo.count} {t('route.stops', language)} <span className="text-muted-foreground font-medium">({overlapInfo.first} → {overlapInfo.last})</span>
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-black bg-green-500 text-white px-2 py-1 rounded-md uppercase">Synced</span>
+                    <span className="text-[9px] font-black bg-green-500 text-white px-2 py-1 rounded-md uppercase">{t('route.synced', language)}</span>
                   </div>
                 </div>
                 {route && route.departureTime && (
@@ -616,7 +620,7 @@ export const RoutePlanner = ({
                     <Info className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium italic leading-tight">
-                    You cannot reach the shared metro in time from this origin. Try a closer station.
+                    {t('route.cannotReach', language)}
                   </p>
                 </div>
               </div>
@@ -632,7 +636,7 @@ export const RoutePlanner = ({
               <CircleDot className="w-4 h-4 text-green-500 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="From station..."
+                placeholder={t('common.from', language)}
                 value={originSearch}
                 onChange={(e) => {
                   setOriginSearch(e.target.value);
@@ -684,7 +688,7 @@ export const RoutePlanner = ({
                             )}
                           >
                             <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{s.name}</span>
+                            <span>{getStationName(s, language)}</span>
                             <div className="flex gap-1 ml-auto">
                               {s.lines.map(l => (
                                 <span
@@ -719,7 +723,7 @@ export const RoutePlanner = ({
                             )}
                           >
                             <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{s.name}</span>
+                            <span>{getStationName(s, language)}</span>
                           </button>
                         ))}
                       </div>
@@ -747,7 +751,7 @@ export const RoutePlanner = ({
               <MapPin className="w-4 h-4 text-red-500 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="To station..."
+                placeholder={t('common.to', language)}
                 value={destSearch}
                 onChange={(e) => {
                   setDestSearch(e.target.value);
@@ -770,7 +774,7 @@ export const RoutePlanner = ({
                       )}
                     >
                       <Train className="w-3 h-3 text-muted-foreground" />
-                      <span>{s.name}</span>
+                      <span>{getStationName(s, language)}</span>
                       <div className="flex gap-1 ml-auto">
                         {s.lines.map(l => (
                           <span
@@ -799,7 +803,7 @@ export const RoutePlanner = ({
                             )}
                           >
                             <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{s.name}</span>
+                            <span>{getStationName(s, language)}</span>
                             <div className="flex gap-1 ml-auto">
                               {s.lines.map(l => (
                                 <span
@@ -834,7 +838,7 @@ export const RoutePlanner = ({
                             )}
                           >
                             <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{s.name}</span>
+                            <span>{getStationName(s, language)}</span>
                           </button>
                         ))}
                       </div>

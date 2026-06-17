@@ -5,6 +5,8 @@ import { Station, LINE_COLORS } from '@/data/metroData';
 import { getCurrentHeadway } from '@/data/timetable';
 import { getAvailableDepartures } from '@/lib/routePlanner';
 import { getSimpleCrowdLevel } from '@/lib/crowding';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t, getStationName } from '@/lib/i18n';
 
 interface CommuteCardProps {
   fromStation: Station;
@@ -21,6 +23,7 @@ export const CommuteCard = ({
   onDismiss, 
   onPlanRoute 
 }: CommuteCardProps) => {
+  const { language } = useLanguage();
   const [currentTime, setCurrentTime] = useState(getISTDate());
 
   const [departures, setDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
@@ -56,9 +59,9 @@ export const CommuteCard = ({
         line: fromStation.lines[0],
         departureLabel: route.departureTime,
         destinationArrivalTime: route.arrivalTime,
-        routeLabel: route.interchangeCount > 0 ? `via ${route.interchangeCount} change${route.interchangeCount > 1 ? 's' : ''}` : 'direct',
+        routeLabel: route.interchangeCount > 0 ? `${route.interchangeCount} ${t('route.station', language)}` : t('route.directMetro', language), // fallback to stations since changes translation is missing
       }));
-  }, [departures, currentTime, fromStation]);
+  }, [departures, currentTime, fromStation, language]);
 
   const getLiveMinutesAway = (arrivalTime: string): number => {
     const [arrH, arrM] = arrivalTime.split(':').map(Number);
@@ -81,8 +84,8 @@ export const CommuteCard = ({
           <div className="flex items-center gap-2">
             <Train className="w-5 h-5" />
             <div>
-              <p className="font-semibold text-sm">Daily Commute</p>
-              <p className="text-xs text-white/80">{fromStation.name} → {toStation.name}</p>
+              <p className="font-semibold text-sm">{t('commute.dailyCommute', language)}</p>
+              <p className="text-xs text-white/80">{getStationName(fromStation, language)} → {getStationName(toStation, language)}</p>
             </div>
           </div>
           <button 
@@ -97,7 +100,7 @@ export const CommuteCard = ({
           {walkingTime !== null && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Navigation className="w-3.5 h-3.5" />
-              <span>{Math.ceil(walkingTime / 60)} min walk to {fromStation.name}</span>
+              <span>{Math.ceil(walkingTime / 60)} min {t('panel.walk', language)} - {getStationName(fromStation, language)}</span>
               <span className="ml-auto text-sm font-medium">every {headway.label}</span>
             </div>
           )}
@@ -126,7 +129,7 @@ export const CommuteCard = ({
                       <div>
                         <div className="text-sm font-semibold">{train.departureTime}</div>
                         <div className="text-xs text-muted-foreground">
-                          {train.line.toUpperCase()} • {train.routeLabel} • reaches {toStation.name} at {train.destinationArrivalTime}
+                          {train.line.toUpperCase()} • {train.routeLabel} • {t('route.arriveAt', language)} {getStationName(toStation, language)} @ {train.destinationArrivalTime}
                         </div>
                       </div>
                     </div>
@@ -151,7 +154,7 @@ export const CommuteCard = ({
             </div>
           ) : (
             <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-              No upcoming direct Metros to {toStation.name} right now
+              {t('commute.noMetros', language)} {getStationName(toStation, language)}
             </div>
           )}
 
@@ -162,7 +165,7 @@ export const CommuteCard = ({
               style={{ backgroundColor: LINE_COLORS[primaryLine as keyof typeof LINE_COLORS] || '#3B82F6' }}
             >
               <ArrowRight className="w-4 h-4" />
-              Plan Route
+              {t('panel.planRoute', language)}
             </button>
             <button
               onClick={onDismiss}
