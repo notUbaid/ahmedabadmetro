@@ -211,9 +211,6 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
     // Check if the route has an 'alight' and 'board' at Old High Court for the exact same Red Line train
     // Check if the route has an 'interchange' at Old High Court for the exact same Red Line train
     const interchangeAtOHC = route.steps.find(s => s.type === 'interchange' && s.station?.id === 'old_high_court');
-    if (!interchangeAtOHC) {
-      console.log(JSON.stringify(route.steps, null, 2));
-    }
     expect(interchangeAtOHC).toBeDefined();
     expect(interchangeAtOHC?.trainId).toBe(redLineTrain.id);
   });
