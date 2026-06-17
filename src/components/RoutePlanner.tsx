@@ -659,7 +659,7 @@ export const RoutePlanner = ({
                       )}
                     >
                       <Train className="w-3 h-3 text-muted-foreground" />
-                      <span>{s.name}</span>
+                      <span>{getStationName(s, language)}</span>
                       <div className="flex gap-1 ml-auto">
                         {s.lines.map(l => (
                           <span
@@ -676,7 +676,7 @@ export const RoutePlanner = ({
                     {organizedStations.interchanges.length > 0 && (
                       <>
                         <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
-                          Interchange Stations
+                          {t('route.interchangeStations', language)}
                         </div>
                         {organizedStations.interchanges.map(s => (
                           <button
@@ -711,7 +711,7 @@ export const RoutePlanner = ({
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
                           />
-                          {group.lineName}
+                          {t(('line.' + group.line) as any, language) || group.lineName}
                         </div>
                         {group.stations.map(s => (
                           <button
@@ -791,7 +791,7 @@ export const RoutePlanner = ({
                     {organizedStations.interchanges.length > 0 && (
                       <>
                         <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
-                          Interchange Stations
+                          {t('route.interchangeStations', language)}
                         </div>
                         {organizedStations.interchanges.map(s => (
                           <button
@@ -826,7 +826,7 @@ export const RoutePlanner = ({
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
                           />
-                          {group.lineName}
+                          {t(('line.' + group.line) as any, language) || group.lineName}
                         </div>
                         {group.stations.map(s => (
                           <button

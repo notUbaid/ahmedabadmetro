@@ -126,6 +126,12 @@ const translations = {
     'route.blueLine': 'Blue Line',
     'route.greenLine': 'Green Line',
     'route.purpleLine': 'Purple Line',
+    
+    // Line names for dropdowns
+    'line.blue': 'Blue Line (Thaltej ↔ Vastral)',
+    'line.red': 'Red Line (APMC ↔ Koteshwar)',
+    'line.green': 'Green Line (Koteshwar ↔ Mahatma Mandir)',
+    'line.purple': 'Purple Line (GNLU ↔ GIFT City)',
 
     // Commute Card
     'commute.dailyCommute': 'Daily Commute',
@@ -291,6 +297,12 @@ const translations = {
     'route.greenLine': 'ગ્રીન લાઇન',
     'route.purpleLine': 'પર્પલ લાઇન',
 
+    // Line names for dropdowns
+    'line.blue': 'બ્લુ લાઇન (થલતેજ ↔ વસ્ત્રાલ)',
+    'line.red': 'રેડ લાઇન (APMC ↔ કોટેશ્વર)',
+    'line.green': 'ગ્રીન લાઇન (કોટેશ્વર ↔ મહાત્મા મંદિર)',
+    'line.purple': 'પર્પલ લાઇન (GNLU ↔ GIFT સિટી)',
+
     // Commute Card
     'commute.dailyCommute': 'દૈનિક મુસાફરી',
     'commute.walkTo': 'સુધી ચાલીને',
@@ -454,6 +466,12 @@ const translations = {
     'route.blueLine': 'ब्लू लाइन',
     'route.greenLine': 'ग्रीन लाइन',
     'route.purpleLine': 'पर्पल लाइन',
+
+    // Line names for dropdowns
+    'line.blue': 'ब्लू लाइन (थलतेज ↔ वस्त्राल)',
+    'line.red': 'रेड लाइन (APMC ↔ कोटेश्वर)',
+    'line.green': 'ग्रीन लाइन (कोटेश्वर ↔ महात्मा मंदिर)',
+    'line.purple': 'पर्पल लाइन (GNLU ↔ GIFT सिटी)',
 
     // Commute Card
     'commute.dailyCommute': 'दैनिक यात्रा',
