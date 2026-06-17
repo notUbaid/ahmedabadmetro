@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import rawTimetable from '../timetableFromExcel.generated.json';
-import { TrainSchedule } from '../../types';
+import { TrainSchedule } from '../timetable';
 
 const timetable = rawTimetable as {
   trainSchedules: TrainSchedule[];
