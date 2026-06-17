@@ -11,6 +11,8 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Lightbulb, Clock, CreditCard, Users, MapPin, Train, Info } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t } from "@/lib/i18n";
 
 interface TipsDialogProps {
     isOpen: boolean;
@@ -18,89 +20,76 @@ interface TipsDialogProps {
 }
 
 export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
+    const { language } = useLanguage();
+
     const networkInfo = [
         {
             icon: Train,
-            title: "Network Overview",
-            content:
-                "4 metro lines covering 45 stations. Blue Line (Vastral–Thaltej), Red Line (APMC–Koteshwar), Green Line (Koteshwar–Mahatma Mandir), and Purple Line (GNLU–GIFT City).",
+            title: t('tips.net1Title', language),
+            content: t('tips.net1Desc', language),
         },
         {
             icon: MapPin,
-            title: "Interchange Stations",
-            content:
-                "Old High Court connects Blue Line with the North-South corridor. Koteshwar Road connects Red Line (south) with Green Line (north). Some Metros run through without transfer.",
+            title: t('tips.net2Title', language),
+            content: t('tips.net2Desc', language),
         },
         {
             icon: Clock,
-            title: "Operating Hours",
-            content:
-                "Blue Line: 6:20 AM – 11:00 PM. Red Line: 6:16 AM – 10:11 PM. Green Line: 7:33 AM – 8:09 PM. Purple Line: 7:36 AM – 7:13 PM (with midday gap 10:18 AM – 4:06 PM).",
+            title: t('tips.net3Title', language),
+            content: t('tips.net3Desc', language),
         },
     ];
 
     const tips = [
         {
-            title: "Corridor Through-Running Metros",
-            content:
-                "Some metros run directly from APMC to Mahatma Mandir or GIFT City without requiring a change at Koteshwar Road. Check the metro destination display before boarding.",
+            title: t('tips.tip1Title', language),
+            content: t('tips.tip1Desc', language),
         },
         {
-            title: "Board Before the Interchange",
-            content:
-                "If changing at Old High Court or Koteshwar Road, board one station earlier when possible. You'll get a seat and avoid the rush at interchange stations.",
-        },
-
-        {
-            title: "Purple Line Has Limited Service",
-            content:
-                "GNLU ↔ GIFT City runs only morning and evening services with no metros from ~10 AM to 4 PM. Always check the schedule before planning trips to GIFT City.",
+            title: t('tips.tip2Title', language),
+            content: t('tips.tip2Desc', language),
         },
         {
-            title: "Peak Hours to Avoid",
-            content:
-                "Metros are most crowded 8–11 AM and 5–8 PM on weekdays. If flexible, travel just before or after these windows for a more comfortable journey.",
+            title: t('tips.tip3Title', language),
+            content: t('tips.tip3Desc', language),
         },
         {
-            title: "Stand Near Middle of Platform",
-            content:
-                "At major stations, middle coaches stop closest to stairs and exits. This saves walking time and gets you out faster.",
+            title: t('tips.tip4Title', language),
+            content: t('tips.tip4Desc', language),
         },
         {
-            title: "For Stadium Events, Plan Ahead",
-            content:
-                "Going to Motera Stadium? Reach early for empty metros. After the event, wait 20–30 minutes for crowds to thin out before heading to the metro.",
+            title: t('tips.tip5Title', language),
+            content: t('tips.tip5Desc', language),
         },
         {
-            title: "Weekend Frequency is Lower",
-            content:
-                "Metros run less frequently on Sundays (every 12 min on Blue Line vs 7 min on weekday peak). Factor in extra waiting time for weekend trips.",
+            title: t('tips.tip6Title', language),
+            content: t('tips.tip6Desc', language),
         },
         {
-            title: "First/Last Coach for Less Crowd",
-            content:
-                "First and last coaches are usually less crowded than middle ones. Good option if you don't mind a slightly longer walk to exits.",
+            title: t('tips.tip7Title', language),
+            content: t('tips.tip7Desc', language),
+        },
+        {
+            title: t('tips.tip8Title', language),
+            content: t('tips.tip8Desc', language),
         },
     ];
 
     const practicalInfo = [
         {
             icon: CreditCard,
-            title: "Metro Smart Card",
-            content:
-                "Get a rechargeable metro card for ~10% fare discount and skip ticket counter queues. Available at any station counter. Worth it even for occasional riders.",
+            title: t('tips.prac1Title', language),
+            content: t('tips.prac1Desc', language),
         },
         {
             icon: Info,
-            title: "Fares & Tokens",
-            content:
-                "Fare is distance-based (₹5 to ₹25). Keep your token/card until exit — you need it to open exit gates. Lost token penalty applies.",
+            title: t('tips.prac2Title', language),
+            content: t('tips.prac2Desc', language),
         },
         {
             icon: Users,
-            title: "Ask Metro Staff",
-            content:
-                "Station staff in uniform know exact platforms and timings. Look for them near entry gates or platform ends. Don't rely on fellow passengers who might be guessing.",
+            title: t('tips.prac3Title', language),
+            content: t('tips.prac3Desc', language),
         },
     ];
 
@@ -110,7 +99,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                 <DialogHeader className="p-6 pb-4 border-b">
                     <DialogTitle className="flex items-center gap-2 text-xl">
                         <Lightbulb className="w-5 h-5 text-yellow-500" />
-                        Passenger Guide
+                        {t('tips.title', language)}
                     </DialogTitle>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto p-2 sm:p-6">
@@ -121,7 +110,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                                     <div className="p-2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
                                         <MapPin className="w-5 h-5" />
                                     </div>
-                                    <span className="font-semibold text-base">Network Information</span>
+                                    <span className="font-semibold text-base">{t('tips.networkTitle', language)}</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pt-2 pb-4 space-y-4">
@@ -147,7 +136,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                                     <div className="p-2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                         <Lightbulb className="w-5 h-5" />
                                     </div>
-                                    <span className="font-semibold text-base">Pro Travel Tips</span>
+                                    <span className="font-semibold text-base">{t('tips.proTipsTitle', language)}</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pt-2 pb-4 grid grid-cols-1 gap-4">
@@ -171,7 +160,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                                     <div className="p-2 rounded-md bg-green-500/10 text-green-600 dark:text-green-400">
                                         <CreditCard className="w-5 h-5" />
                                     </div>
-                                    <span className="font-semibold text-base">Practical Advice</span>
+                                    <span className="font-semibold text-base">{t('tips.practicalTitle', language)}</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pt-2 pb-4 space-y-4">
@@ -196,10 +185,10 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                             <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-4 border border-orange-200 dark:border-orange-900">
                                 <h3 className="font-semibold text-orange-700 dark:text-orange-400 text-sm flex items-center gap-2">
                                     <Train className="w-4 h-4" />
-                                    Live Metro Tracking
+                                    {t('tips.liveTrackingTitle', language)}
                                 </h3>
                                 <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
-                                    Tap any orange metro icon on the map to see its details and share your journey with friends so they can track you in real-time.
+                                    {t('tips.liveTrackingDesc', language)}
                                 </p>
                             </div>
                     </div>
