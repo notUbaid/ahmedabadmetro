@@ -792,10 +792,10 @@ export const MetroMap = () => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Gujarat bounds - restrict panning and zooming to this region
-    const gujaratBounds = L.latLngBounds(
-      [20.0, 68.0],   // Southwest corner
-      [24.7, 74.5]    // Northeast corner
+    // Ahmedabad & Gandhinagar bounds - restrict panning to this specific region to prevent loading unnecessary black chunks
+    const ahmedabadBounds = L.latLngBounds(
+      [22.8, 72.4],   // Southwest corner (South of APMC/Ahmedabad)
+      [23.3, 72.75]   // Northeast corner (North of GIFT City/Gandhinagar)
     );
 
     const map = L.map(mapContainerRef.current, {
@@ -803,8 +803,8 @@ export const MetroMap = () => {
       zoom: DEFAULT_ZOOM,
       zoomControl: false,
       scrollWheelZoom: true,
-      minZoom: 10,
-      maxBounds: gujaratBounds,
+      minZoom: 11,
+      maxBounds: ahmedabadBounds,
       maxBoundsViscosity: 1.0
     });
 
@@ -884,7 +884,9 @@ longPressTimer = setTimeout(() => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
       maxNativeZoom: 19,
-      maxZoom: 22
+      maxZoom: 22,
+      updateWhenIdle: false, // Loads tiles instantly while scrolling instead of waiting
+      keepBuffer: 12 // Keeps tiles in memory so they never go black again when panning back
     }).addTo(map);
 
     // Fetch and draw metro routes
