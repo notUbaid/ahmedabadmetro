@@ -1206,7 +1206,7 @@ const buildRouteFromLegs = (
     if (!lineStationsList || lineStationsList.indexOf(currentStation) === -1 || lineStationsList.indexOf(leg.toId) === -1) {
       for (const [l, stations] of Object.entries(LINE_STATIONS)) {
         if (stations.includes(currentStation) && stations.includes(leg.toId)) {
-          physicalLine = l;
+          physicalLine = l as "blue" | "red" | "green" | "purple";
           break;
         }
       }
