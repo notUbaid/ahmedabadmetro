@@ -74,7 +74,7 @@ export const BottomPanel = ({
       }, 10000);
       return () => clearInterval(interval);
     }
-  }, [station]);
+  }, [station, language]);
 
   // Calculate live "minutes away" based on current time
   const getLiveMinutesAway = (arrivalTime: string): number => {
