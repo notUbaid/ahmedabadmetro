@@ -1217,7 +1217,7 @@ const buildRouteFromLegs = (
       station: stations[leg.toId],
       line: physicalLine as any,
       stationCount,
-      stations: getStationsBetween(physicalLine, currentStation, leg.toId).map(id => stations[id]).filter(Boolean),
+      stations: betweenIds.map(id => stations[id]).filter(Boolean),
       isDirect: mergedLegs.length === 1,
       trainId: leg.schedule.id,
       allStations: getStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx)
