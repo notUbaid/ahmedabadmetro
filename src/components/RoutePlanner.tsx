@@ -540,7 +540,7 @@ export const RoutePlanner = ({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md max-h-[90vh] bg-background/85 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden flex flex-col safe-p-bottom">
+      <div className="relative w-full max-w-md max-h-[90vh] bg-background/65 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden flex flex-col safe-p-bottom">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -587,7 +587,7 @@ export const RoutePlanner = ({
             </div>
             {overlapInfo ? (
               <div className="px-4 pb-3">
-                <div className="bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-primary/20 shadow-sm flex items-center gap-3 mb-2">
+                <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-primary/20 shadow-sm flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Train className="w-5 h-5 text-primary" />
                   </div>
@@ -675,7 +675,7 @@ export const RoutePlanner = ({
                   <>
                     {organizedStations.interchanges.length > 0 && (
                       <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
+                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
                           {t('route.interchangeStations', language)}
                         </div>
                         {organizedStations.interchanges.map(s => (
@@ -705,7 +705,7 @@ export const RoutePlanner = ({
                     {organizedStations.byLine.map(group => (
                       <div key={group.line}>
                         <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
+                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
                         >
                           <span
                             className="w-2 h-2 rounded-full"
@@ -790,7 +790,7 @@ export const RoutePlanner = ({
                   <>
                     {organizedStations.interchanges.length > 0 && (
                       <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
+                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
                           {t('route.interchangeStations', language)}
                         </div>
                         {organizedStations.interchanges.map(s => (
@@ -820,7 +820,7 @@ export const RoutePlanner = ({
                     {organizedStations.byLine.map(group => (
                       <div key={group.line}>
                         <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/95 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
+                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
                         >
                           <span
                             className="w-2 h-2 rounded-full"

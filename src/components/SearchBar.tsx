@@ -3,7 +3,7 @@ import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX 
 import { stations } from '@/data/metroData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { t, getStationName } from '@/lib/i18n';
+import { t, getStationName, Language } from '@/lib/i18n';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -90,7 +90,7 @@ const searchCache = new Map<string, { results: SearchResult[]; timestamp: number
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Convert metro stations to search results
-const getMetroStationResults = (language: 'en' | 'gu'): SearchResult[] => {
+const getMetroStationResults = (language: Language): SearchResult[] => {
   return Object.values(stations).map(station => ({
     id: station.id,
     name: getStationName(station, language),
@@ -546,7 +546,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       isOfflineExpanded ? "top-12" : "top-4"
     )}>
       <div className="relative pointer-events-auto">
-        <div className="flex items-center bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
+        <div className="flex items-center bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
           <Search className="w-5 h-5 text-muted-foreground ml-3 flex-shrink-0" />
           <input
             ref={inputRef}
@@ -574,7 +574,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
         {/* Recent searches dropdown */}
         {showRecent && recentSearches.length > 0 && !query && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
             <div className="px-4 py-2 text-xs text-muted-foreground font-medium border-b border-border">
               {t('search.recentSearches', language)}
             </div>
@@ -596,7 +596,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
         {/* Results dropdown */}
         {showResults && (results.length > 0 || isLoading) && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden max-h-80 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden max-h-80 overflow-y-auto">
             {results.map((result) => (
               <button
                 key={result.id}
@@ -642,7 +642,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
         {/* Empty State */}
         {showResults && query.length >= 2 && results.length === 0 && !isLoading && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border p-8 text-center flex flex-col items-center gap-3">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border p-8 text-center flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
               <SearchX className="w-6 h-6 text-muted-foreground" />
             </div>

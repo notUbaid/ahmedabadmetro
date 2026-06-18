@@ -948,24 +948,22 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 };
 
 // Get all stations as options for selection
-export const getStationOptions = (): { id: string; name: string; lines: string[]; isInterchange?: boolean }[] => {
+export const getStationOptions = (): Station[] => {
   return Object.values(stations)
     .filter(s => !s.isWIP)
-    .map(s => ({ id: s.id, name: s.name, lines: s.lines, isInterchange: s.isInterchange }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
 // Get stations organized by category: interchanges first, then by line
 export const getOrganizedStations = (): {
-  interchanges: { id: string; name: string; lines: string[] }[];
-  byLine: { line: string; lineName: string; stations: { id: string; name: string; lines: string[] }[] }[];
+  interchanges: Station[];
+  byLine: { line: string; lineName: string; stations: Station[] }[];
 } => {
   const allStations = Object.values(stations).filter(s => !s.isWIP);
   
   // Get interchange stations
   const interchanges = allStations
     .filter(s => s.isInterchange)
-    .map(s => ({ id: s.id, name: s.name, lines: s.lines }))
     .sort((a, b) => a.name.localeCompare(b.name));
   
   // Define line order and names
@@ -982,7 +980,6 @@ export const getOrganizedStations = (): {
   const byLine = lineOrder.map(({ line, name }) => {
     const lineStations = allStations
       .filter((s: typeof allStations[number]) => (s.lines as string[]).includes(line as string) && !interchangeIds.has(s.id))
-      .map(s => ({ id: s.id, name: s.name, lines: s.lines }))
       .sort((a, b) => a.name.localeCompare(b.name));
     
     return { line, lineName: name, stations: lineStations };

@@ -1576,7 +1576,7 @@ longPressTimer = setTimeout(() => {
 
       {/* Active Metros indicator */}
       {activeTrainCount > 0 && (
-        <div className="fixed top-20 left-4 z-[1000] bg-background/95 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg border border-border flex items-center gap-2 animate-fade-in pointer-events-none">
+        <div className="fixed top-20 left-4 z-[1000] bg-background/70 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg border border-border flex items-center gap-2 animate-fade-in pointer-events-none">
           <div className="relative">
             <div className="w-3 h-3 bg-green-500 rounded-full" />
             <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />

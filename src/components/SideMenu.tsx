@@ -195,7 +195,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 right-4 z-[1001] p-3 bg-background/95 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top"
+        className="fixed top-4 right-4 z-[1001] p-3 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top"
       >
         <Menu className="w-5 h-5" />
       </button>

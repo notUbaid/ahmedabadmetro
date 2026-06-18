@@ -76,7 +76,7 @@ export const CommuteCard = ({
 
   return (
     <div className="fixed top-20 left-4 right-4 z-[1500] max-w-sm mx-auto animate-in slide-in-from-top duration-300">
-      <div className="bg-background/85 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden">
+      <div className="bg-background/65 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden">
         <div 
           className="px-4 py-3 text-white flex items-center justify-between"
           style={{ background: `linear-gradient(90deg, ${LINE_COLORS[primaryLine as keyof typeof LINE_COLORS]}33, ${LINE_COLORS[primaryLine as keyof typeof LINE_COLORS]}88)` }}

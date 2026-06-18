@@ -176,7 +176,7 @@ export const BottomPanel = ({
       <button
         onClick={handleLocate}
         disabled={isLocating}
-        className="absolute -top-16 right-4 p-3.5 bg-background/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/5 border border-border/50 hover:bg-background/90 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 pointer-events-auto"
+        className="absolute -top-16 right-4 p-3.5 bg-background/60 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/5 border border-border/50 hover:bg-background/70 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 pointer-events-auto"
         aria-label="Locate me"
       >
         {isLocating ? (
@@ -187,7 +187,7 @@ export const BottomPanel = ({
       </button>
 
       {/* Panel container */}
-      <div className="bg-background/85 backdrop-blur-2xl rounded-t-3xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)] border-t border-border/50 pointer-events-auto safe-p-bottom transition-all duration-300">
+      <div className="bg-background/65 backdrop-blur-2xl rounded-t-3xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)] border-t border-border/50 pointer-events-auto safe-p-bottom transition-all duration-300">
         {/* Always visible header - clickable to expand/collapse */}
         <div
           className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
