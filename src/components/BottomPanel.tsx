@@ -66,11 +66,11 @@ export const BottomPanel = ({
   // Auto-refresh upcoming metros and Last Metro warnings every 10 seconds
   useEffect(() => {
     if (station) {
-      setUpcomingMetros(getUpcomingTrains(station.id, 3));
-      setLastTrainWarnings(getLastTrainWarnings(station.id));
+      setUpcomingMetros(getUpcomingTrains(station.id, 3, language));
+      setLastTrainWarnings(getLastTrainWarnings(station.id, language));
       const interval = setInterval(() => {
-        setUpcomingMetros(getUpcomingTrains(station.id, 3));
-        setLastTrainWarnings(getLastTrainWarnings(station.id));
+        setUpcomingMetros(getUpcomingTrains(station.id, 3, language));
+        setLastTrainWarnings(getLastTrainWarnings(station.id, language));
       }, 10000);
       return () => clearInterval(interval);
     }

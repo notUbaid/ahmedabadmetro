@@ -11,6 +11,11 @@ const translations = {
     'common.search': 'Search stations...',
     'common.from': 'From station...',
     'common.to': 'To station...',
+    'direction.southbound': 'Southbound',
+    'direction.northbound': 'Northbound',
+    'direction.eastbound': 'Eastbound',
+    'direction.westbound': 'Westbound',
+    'direction.towards': 'towards {station}',
     
     // Search Bar
     'search.placeholder': 'Search stations, places, landmarks...',
@@ -185,6 +190,11 @@ const translations = {
     'common.search': 'સ્ટેશન શોધો...',
     'common.from': 'ક્યાંથી...',
     'common.to': 'ક્યાં સુધી...',
+    'direction.southbound': 'દક્ષિણ તરફ',
+    'direction.northbound': 'ઉત્તર તરફ',
+    'direction.eastbound': 'પૂર્વ તરફ',
+    'direction.westbound': 'પશ્ચિમ તરફ',
+    'direction.towards': '{station} તરફ',
     
     // Search Bar
     'search.placeholder': 'સ્ટેશન, સ્થળ, લેન્ડમાર્ક શોધો...',
@@ -359,6 +369,11 @@ const translations = {
     'common.search': 'स्टेशन खोजें...',
     'common.from': 'कहाँ से...',
     'common.to': 'कहाँ तक...',
+    'direction.southbound': 'दक्षिण की ओर',
+    'direction.northbound': 'उत्तर की ओर',
+    'direction.eastbound': 'पूर्व की ओर',
+    'direction.westbound': 'पश्चिम की ओर',
+    'direction.towards': '{station} की ओर',
     
     // Search Bar
     'search.placeholder': 'स्टेशन, स्थान, लैंडमार्क खोजें...',

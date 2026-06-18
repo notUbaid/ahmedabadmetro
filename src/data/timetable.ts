@@ -6,6 +6,7 @@ import { getISTDate } from '@/lib/utils';
 import timetableFromExcelData from './timetableFromExcel.generated.json';
 
 import { stations } from './metroData';
+import { t, Language, getStationName } from '@/lib/i18n';
 
 export interface TrainSchedule {
   id: string;
@@ -138,23 +139,24 @@ const formatStationName = (stationId: string): string => {
 
 // getTrainLineAtStation was removed.
 
-export const getDirectionStr = (destinationId: string): string => {
+export const getDirectionStr = (destinationId: string, language: Language = 'en'): string => {
   const dest = destinationId.toLowerCase();
   if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas', 'gnlu'].includes(dest)) {
-    return 'Southbound';
+    return t('direction.southbound', language);
   } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec', 'gift_city'].includes(dest)) {
-    return 'Northbound';
+    return t('direction.northbound', language);
   } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony'].includes(dest)) {
-    return 'Eastbound';
+    return t('direction.eastbound', language);
   } else if (['thaltej_gam', 'thaltej', 'doordarshan_kendra'].includes(dest)) {
-    return 'Westbound';
+    return t('direction.westbound', language);
   } else {
-    return `towards ${formatStationName(destinationId)}`;
+    const stationName = stations[destinationId] ? getStationName(stations[destinationId], language) : formatStationName(destinationId);
+    return t('direction.towards', language).replace('{station}', stationName);
   }
 };
 
 // Returns trains arriving within next 120 minutes for stationIndex visualization
-export const getUpcomingTrains = (stationId: string, limit = 3) => {
+export const getUpcomingTrains = (stationId: string, limit = 3, language: Language = 'en') => {
   const now = getISTDate();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const dayOfWeek = now.getDay();
@@ -195,14 +197,14 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
 
       const destinationId = schedule.stations[schedule.stations.length - 1];
       const currentLine = schedule.line;
-      const directionStr = getDirectionStr(destinationId);
+      const directionStr = getDirectionStr(destinationId, language);
 
       upcoming.push({
         arrivalTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
         direction: directionStr,
         line: currentLine,
         minutesAway: Math.round(minutesAway),
-        destination: formatStationName(destinationId),
+        destination: stations[destinationId] ? getStationName(stations[destinationId], language) : formatStationName(destinationId),
         trainId: schedule.id,
         remainingStations: schedule.stations.slice(stationIndex + 1),
         stationIndex: stationIndex,
@@ -231,7 +233,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3) => {
   return deduplicated.slice(0, limit);
 };
 
-export const getAllTrainsForStation = (stationId: string) => {
+export const getAllTrainsForStation = (stationId: string, language: Language = 'en') => {
   const trains: { time: string; destination: string; line: string; minutes: number; direction: string; remainingCount: number }[] = [];
   const now = getISTDate();
   const dayOfWeek = now.getDay();
@@ -254,10 +256,10 @@ export const getAllTrainsForStation = (stationId: string) => {
 
     trains.push({
       time: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
-      destination: formatStationName(destinationId),
+      destination: stations[destinationId] ? getStationName(stations[destinationId], language) : formatStationName(destinationId),
       line: currentLine,
       minutes: arrivalMinutes,
-      direction: getDirectionStr(destinationId),
+      direction: getDirectionStr(destinationId, language),
       remainingCount: schedule.stations.length - 1 - stationIndex,
     });
   }
@@ -282,7 +284,7 @@ export const getAllTrainsForStation = (stationId: string) => {
   return deduplicated.map(({ time, destination, line }) => ({ time, destination, line }));
 };
 
-export const getLastTrainWarnings = (stationId: string) => {
+export const getLastTrainWarnings = (stationId: string, language: Language = 'en') => {
   const now = getISTDate();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -322,7 +324,7 @@ export const getLastTrainWarnings = (stationId: string) => {
 
       warnings.push({
         line: data.line,
-        destination: formatStationName(destinationId),
+        destination: stations[destinationId] ? getStationName(stations[destinationId], language) : formatStationName(destinationId),
         lastTrainTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMin.toString().padStart(2, '0')}`,
         minutesRemaining: Math.round(minutesRemaining),
       });

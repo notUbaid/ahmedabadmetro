@@ -334,24 +334,39 @@ const getStationsBetweenFromSchedule = (schedule: TrainSchedule, fromId: string,
 };
 
 // Get all stations between two stations on a line (exclusive of endpoints)
-const getStationsBetween = (line: string, fromId: string, toId: string): Station[] => {
-  const lineStationsList = LINE_STATIONS[line];
+export const getStationsBetween = (line: string, fromId: string, toId: string): string[] => {
+  // If the line is purple but the stations are not on the physical purple line,
+  // we should find the correct physical line to get the intermediate stations.
+  let targetLine = line;
+  let lineStationsList = LINE_STATIONS[targetLine as keyof typeof LINE_STATIONS];
+  
+  if (!lineStationsList || lineStationsList.indexOf(fromId) === -1 || lineStationsList.indexOf(toId) === -1) {
+    // Find the physical line that contains both stations
+    for (const [l, stations] of Object.entries(LINE_STATIONS)) {
+      if (stations.includes(fromId) && stations.includes(toId)) {
+        targetLine = l;
+        lineStationsList = stations as string[];
+        break;
+      }
+    }
+  }
+
   if (!lineStationsList) return [];
 
-  const fromIdx = lineStationsList.indexOf(fromId);
-  const toIdx = lineStationsList.indexOf(toId);
+  const fromIndex = lineStationsList.indexOf(fromId);
+  const toIndex = lineStationsList.indexOf(toId);
 
-  if (fromIdx === -1 || toIdx === -1) return [];
+  if (fromIndex === -1 || toIndex === -1) return [];
 
-  const start = Math.min(fromIdx, toIdx);
-  const end = Math.max(fromIdx, toIdx);
+  const start = Math.min(fromIndex, toIndex);
+  const end = Math.max(fromIndex, toIndex);
 
   const stationIds = lineStationsList.slice(start + 1, end);
-  if (fromIdx > toIdx) {
+  if (fromIndex > toIndex) {
     stationIds.reverse();
   }
 
-  return stationIds.map(id => stations[id]).filter(Boolean);
+  return stationIds;
 };
 
 // Get station index on a line
@@ -569,7 +584,7 @@ const buildTimeAwareRoute = (
         station: toStation,
         line: seg.line as keyof typeof LINE_COLORS,
         stationCount,
-        stations: stationsBetween
+        stations: stationsBetween.map(id => stations[id]).filter(Boolean)
       });
 
       // Estimate time
@@ -811,7 +826,7 @@ const buildDirectRoute = (
 
   const stationIds = schedule.stations.slice(originIdx + 1, destIdx);
   const stationsBetween = stationIds.map(id => stations[id]).filter(Boolean);
-  const stationCount = stationsBetween.length + 1;
+  const stationCount = stationIds.length + 1;
 
   const finalStation = schedule.stations[schedule.stations.length - 1];
   const finalStationName = stations[finalStation]?.name || finalStation.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -1077,13 +1092,6 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
     if (r.arrivalMinutes < bestArrival) {
       pruned.push(r);
       bestArrival = r.arrivalMinutes;
-    } else if (r.arrivalMinutes === bestArrival && r.interchangeCount < pruned[pruned.length - 1].interchangeCount) {
-      // If it arrives at the exact same time but has FEWER interchanges, we might prefer it,
-      // but usually an earlier departure with fewer interchanges means it's a slower direct train.
-      // However, typically a later departure is strictly better. So we discard earlier departures
-      // unless we want to offer the user a slower direct train instead of a faster interchange train.
-      // For now, if you leave earlier and arrive at the same time, it's dominated.
-      // We strictly discard it.
     }
   }
 
@@ -1189,16 +1197,27 @@ const buildRouteFromLegs = (
   for (let i = 0; i < mergedLegs.length; i++) {
     const leg = mergedLegs[i];
 
+    const currentStation = (i === 0) ? originId : mergedLegs[i-1].toId;
     const betweenIds = getBetweenStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx);
-    const betweenStations = betweenIds.map(id => stations[id]).filter(Boolean);
     const stationCount = betweenIds.length + 1;
+
+    let physicalLine = leg.schedule.line;
+    let lineStationsList = LINE_STATIONS[physicalLine as keyof typeof LINE_STATIONS];
+    if (!lineStationsList || lineStationsList.indexOf(currentStation) === -1 || lineStationsList.indexOf(leg.toId) === -1) {
+      for (const [l, stations] of Object.entries(LINE_STATIONS)) {
+        if (stations.includes(currentStation) && stations.includes(leg.toId)) {
+          physicalLine = l;
+          break;
+        }
+      }
+    }
 
     steps.push({
       type: 'travel',
       station: stations[leg.toId],
-      line: leg.schedule.line as keyof typeof LINE_COLORS,
+      line: physicalLine as any,
       stationCount,
-      stations: betweenStations,
+      stations: getStationsBetween(physicalLine, currentStation, leg.toId).map(id => stations[id]).filter(Boolean),
       isDirect: mergedLegs.length === 1,
       trainId: leg.schedule.id,
       allStations: getStationsSlice(leg.schedule, leg.fromIdx, leg.toIdx)
@@ -1654,7 +1673,7 @@ export const findCommonTrainRoute = (
     const travelTimeA = a.routeToInterchange ? a.routeToInterchange.totalTime : 0;
     const travelTimeB = b.routeToInterchange ? b.routeToInterchange.totalTime : 0;
     
-    if (Math.abs(travelTimeA - travelTimeB) > 5) {
+    if (travelTimeA !== travelTimeB) {
       return travelTimeA - travelTimeB;
     }
     
