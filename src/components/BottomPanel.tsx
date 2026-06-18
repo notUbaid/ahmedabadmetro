@@ -6,7 +6,7 @@ import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/da
 import { getCrowdLevel } from '@/lib/crowding';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface BottomPanelProps {
   selectedStation: Station | null;
@@ -34,7 +34,7 @@ const formatWalkingTime = (seconds: number): string => {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 };
 
-export const BottomPanel = ({
+export const BottomPanel = React.memo(({
   selectedStation,
   nearestStation,
   distance,
@@ -143,7 +143,7 @@ export const BottomPanel = ({
       {selectedStation && onPlanRoute && (
         <button
           onClick={() => onPlanRoute(selectedStation.id)}
-          className="absolute -top-16 left-4 p-3.5 bg-primary text-primary-foreground rounded-2xl shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-fade-in pointer-events-auto"
+          className="absolute -top-16 right-4 p-3.5 bg-background text-foreground border border-border rounded-2xl shadow-xl shadow-black/5 hover:bg-muted transition-all hover:scale-105 active:scale-95 animate-fade-in pointer-events-auto will-change-transform transform-gpu"
           aria-label="Plan journey"
         >
           <Route className="w-5 h-5" />
@@ -187,7 +187,7 @@ export const BottomPanel = ({
       </button>
 
       {/* Panel container */}
-      <div className="bg-background/65 backdrop-blur-2xl rounded-t-3xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)] border-t border-border/50 pointer-events-auto safe-p-bottom transition-all duration-300">
+      <div className="bg-background/80 backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t border-border pointer-events-auto safe-p-bottom transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1) will-change-transform transform-gpu">
         {/* Always visible header - clickable to expand/collapse */}
         <div
           className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
@@ -367,6 +367,6 @@ export const BottomPanel = ({
       </div>
     </div>
   );
-};
+});
 
 export default BottomPanel;

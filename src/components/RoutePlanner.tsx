@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
@@ -27,7 +27,7 @@ interface RoutePlannerProps {
   friendDepMins?: number; // Friend's departure time in minutes for coordination
 }
 
-export const RoutePlanner = ({
+export const RoutePlanner = React.memo(({
   isOpen,
   onClose,
   initialOrigin,
@@ -1072,6 +1072,6 @@ export const RoutePlanner = ({
       </div>
     </div >
   );
-};
+});
 
 export default RoutePlanner;

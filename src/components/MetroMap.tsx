@@ -1,5 +1,5 @@
 import { X, Route, Share2, ArrowRight, Train, Clock, MapPin, Check, Users } from 'lucide-react';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -516,8 +516,9 @@ export const MetroMap = () => {
 
   // Train animation - smooth real-time movement
   useEffect(() => {
-    // Update at a reasonable rate and reuse DOM to reduce CPU/DOM churn
-    const interval = setInterval(() => {
+    let animationFrameId: number;
+
+    const animateTrains = () => {
       if (!mapRef.current) return;
 
       const positions = getCurrentTrainPositions();
@@ -675,7 +676,7 @@ export const MetroMap = () => {
         const trainColor = '#FFB347'; // Light orange for all Metros
         const isMoving = pos.status === 'moving';
         const trainIconHtml = `
-          <div class="train-icon-wrapper" style="padding: 6px;">
+          <div class="train-icon-wrapper" style="padding: 6px; will-change: transform; transform: translateZ(0);">
             <svg width="44" height="22" viewBox="0 0 44 22" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="g${pos.id}" x1="0" x2="1">
@@ -708,7 +709,7 @@ export const MetroMap = () => {
           const el = marker.getElement();
           if (el) {
             const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-            if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
+            if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg) translateZ(0)`;
           }
           existingIds.delete(pos.id);
         } else {
@@ -763,7 +764,7 @@ export const MetroMap = () => {
               el.style.cursor = 'pointer';
               el.style.pointerEvents = 'auto';
               const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-              if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
+              if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg) translateZ(0)`;
               el.onclick = handleClick;
             }
           });
@@ -777,9 +778,15 @@ export const MetroMap = () => {
         trainMarkersRef.current.get(id)?.remove();
         trainMarkersRef.current.delete(id);
       });
-    }, 150); // Update every 150ms (~7fps) to reduce CPU/DOM churn
+      
+      // Keep loop running
+      animationFrameId = requestAnimationFrame(animateTrains);
+    };
+    
+    // Start loop
+    animationFrameId = requestAnimationFrame(animateTrains);
 
-    return () => clearInterval(interval);
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   useEffect(() => {
@@ -1772,4 +1779,4 @@ longPressTimer = setTimeout(() => {
   );
 };
 
-export default MetroMap;
+export default React.memo(MetroMap);
