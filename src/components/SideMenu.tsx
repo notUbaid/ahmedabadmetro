@@ -210,7 +210,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
 
       {/* Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 z-[1003] bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-out will-change-transform transform-gpu ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 h-full w-72 z-[1003] bg-background border-l border-border shadow-2xl transition-transform duration-300 ease-out will-change-transform transform-gpu ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         {/* Header */}
