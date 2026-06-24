@@ -101,7 +101,21 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "osm-tiles",
               expiration: {
-                maxEntries: 1000,
+                maxEntries: 5000,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/.*\.basemaps\.cartocdn\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "carto-tiles",
+              expiration: {
+                maxEntries: 5000,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
               cacheableResponse: {

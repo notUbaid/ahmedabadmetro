@@ -4,6 +4,7 @@ import { stations } from '@/data/metroData';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName, Language } from '@/lib/i18n';
+import { findNearestByWalking } from '@/lib/walkingRoute';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -412,15 +413,38 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
       const finalResults = [...stations, ...others].slice(0, 8);
 
+      // Fetch actual walking distance for top 3 non-station results to match map behavior
+      let apiCallCount = 0;
+      const resultsWithRealNearest = await Promise.all(finalResults.map(async (result) => {
+        if (result.type === 'station') return result;
+        if (apiCallCount >= 3) return result;
+        apiCallCount++;
+        
+        try {
+          const walkingRoute = await findNearestByWalking(result.lat, result.lng);
+          if (walkingRoute) {
+            return {
+              ...result,
+              nearestStationId: walkingRoute.station.id,
+              nearestStationName: walkingRoute.station.name,
+              nearestStationDist: walkingRoute.distance / 1000, 
+            };
+          }
+        } catch (e) {
+          console.error("Failed to fetch real nearest station for search result", e);
+        }
+        return result;
+      }));
+
       // Cache results
       searchCache.set(normalizedQuery, {
-        results: finalResults,
+        results: resultsWithRealNearest,
         timestamp: Date.now()
       });
 
       if (searchId !== activeSearchIdRef.current) return;
 
-      setResults(finalResults);
+      setResults(resultsWithRealNearest);
       setShowResults(true);
     } catch (error) {
       console.error('Search failed:', error);

@@ -881,13 +881,22 @@ longPressTimer = setTimeout(() => {
     map.getPane('labels')!.style.zIndex = '460';
     map.getPane('labels')!.style.pointerEvents = 'none'; // Labels shouldn't block clicks
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
       maxNativeZoom: 19,
       maxZoom: 22,
       updateWhenIdle: false, // Loads tiles instantly while scrolling instead of waiting
       keepBuffer: 12 // Keeps tiles in memory so they never go black again when panning back
     }).addTo(map);
+
+    tileLayer.on('tileerror', (e: any) => {
+      const originalSrc = e.tile.src;
+      // Fallback to Carto Voyager tiles if OSM fails to load (prevents black chunks)
+      const fallbackUrl = originalSrc.replace('tile.openstreetmap.org', 'basemaps.cartocdn.com/rastertiles/voyager');
+      if (originalSrc !== fallbackUrl) {
+        e.tile.src = fallbackUrl;
+      }
+    });
 
     // Fetch and draw metro routes
     Promise.all([
