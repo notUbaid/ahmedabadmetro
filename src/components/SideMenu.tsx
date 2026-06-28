@@ -195,7 +195,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 right-4 z-[1001] p-3 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top"
+        className="fixed top-4 right-4 z-[1001] p-3 glass-panel rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top hover-scale"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -210,7 +210,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
 
       {/* Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 z-[1003] bg-background border-l border-border shadow-2xl transition-transform duration-300 ease-out will-change-transform transform-gpu ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 h-full w-72 z-[1003] glass-panel border-l shadow-2xl transition-transform duration-300 ease-out will-change-transform transform-gpu ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         {/* Header */}
@@ -255,7 +255,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background safe-p-bottom">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50 bg-background/50 safe-p-bottom">
           <div className="flex flex-col items-center text-center gap-2">
             <div className="bg-muted/50 p-2 rounded-lg text-[10px] text-muted-foreground leading-relaxed w-full border border-border/50">
               <span className="font-semibold block mb-1">{t('menu.disclaimer', language)}</span>

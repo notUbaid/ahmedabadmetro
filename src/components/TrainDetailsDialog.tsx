@@ -86,7 +86,7 @@ export const TrainDetailsDialog = ({
             <div className="flex items-center gap-3">
               <Train size={24} />
               <div>
-                <h2 className="font-bold text-lg">{t(`route.${line}Line` as any, language)} {t('dialog.timetable', language)}</h2>
+                <h2 className="font-bold text-lg">{t(`route.${line}Line` as Parameters<typeof t>[0], language)} {t('dialog.timetable', language)}</h2>
                 <p className="text-sm text-white/80">{t('dialog.departs', language)} {schedule.startTime}</p>
               </div>
             </div>

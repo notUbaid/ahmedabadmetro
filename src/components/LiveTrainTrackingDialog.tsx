@@ -202,7 +202,7 @@ export const LiveTrainTrackingDialog = ({
               </span>
               {t('dialog.liveTracking', language)}
             </h2>
-            <p className="text-sm text-white/80">{t(`route.${line}Line` as any, language)}</p>
+            <p className="text-sm text-white/80">{t(`route.${line}Line` as Parameters<typeof t>[0], language)}</p>
           </div>
           <button 
             onClick={onClose}

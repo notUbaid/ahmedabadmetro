@@ -540,7 +540,7 @@ export const RoutePlanner = React.memo(({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md max-h-[90vh] bg-background/65 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border/50 overflow-hidden flex flex-col safe-p-bottom">
+      <div className="relative w-full max-w-md max-h-[90vh] glass-panel rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden flex flex-col safe-p-bottom">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -711,7 +711,7 @@ export const RoutePlanner = React.memo(({
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
                           />
-                          {t(('line.' + group.line) as any, language) || group.lineName}
+                          {t(('line.' + group.line) as Parameters<typeof t>[0], language) || group.lineName}
                         </div>
                         {group.stations.map(s => (
                           <button
@@ -826,7 +826,7 @@ export const RoutePlanner = React.memo(({
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
                           />
-                          {t(('line.' + group.line) as any, language) || group.lineName}
+                          {t(('line.' + group.line) as Parameters<typeof t>[0], language) || group.lineName}
                         </div>
                         {group.stations.map(s => (
                           <button

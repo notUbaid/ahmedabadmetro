@@ -889,7 +889,7 @@ longPressTimer = setTimeout(() => {
       keepBuffer: 12 // Keeps tiles in memory so they never go black again when panning back
     }).addTo(map);
 
-    tileLayer.on('tileerror', (e: any) => {
+    tileLayer.on('tileerror', (e: { tile: HTMLImageElement }) => {
       const originalSrc = e.tile.src;
       // Fallback to Carto Voyager tiles if OSM fails to load (prevents black chunks)
       const fallbackUrl = originalSrc.replace('tile.openstreetmap.org', 'basemaps.cartocdn.com/rastertiles/voyager');
@@ -1479,7 +1479,7 @@ longPressTimer = setTimeout(() => {
         mapRef.current = null;
       }
     };
-  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast]);
+  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast, language]);
 
   const handleClosePanel = () => {
     setSelectedStation(null);

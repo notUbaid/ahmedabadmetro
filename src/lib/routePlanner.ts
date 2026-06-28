@@ -1195,7 +1195,7 @@ const buildRouteFromLegs = (
     const stationCount = betweenIds.length + 1;
 
     let physicalLine = leg.schedule.line;
-    let lineStationsList = LINE_STATIONS[physicalLine as keyof typeof LINE_STATIONS];
+    const lineStationsList = LINE_STATIONS[physicalLine as keyof typeof LINE_STATIONS];
     if (!lineStationsList || lineStationsList.indexOf(currentStation) === -1 || lineStationsList.indexOf(leg.toId) === -1) {
       for (const [l, stations] of Object.entries(LINE_STATIONS)) {
         if (stations.includes(currentStation) && stations.includes(leg.toId)) {
@@ -1208,7 +1208,7 @@ const buildRouteFromLegs = (
     steps.push({
       type: 'travel',
       station: stations[leg.toId],
-      line: physicalLine as any,
+      line: physicalLine as keyof typeof LINE_COLORS,
       stationCount,
       stations: betweenIds.map(id => stations[id]).filter(Boolean),
       isDirect: mergedLegs.length === 1,

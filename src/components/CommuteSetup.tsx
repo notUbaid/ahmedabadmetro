@@ -27,7 +27,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const [workSelectedIndex, setWorkSelectedIndex] = useState(-1);
   const { language } = useLanguage();
   
-  const existingSettings = getCommuteSettings();
+  const existingSettings = useMemo(() => getCommuteSettings(), []);
   const organizedStations = useMemo(() => getOrganizedStations(), []);
   const allStations = useMemo(() => Object.values(stations), []);
 
@@ -38,7 +38,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
       setHomeSearch(getStationName(stations[existingSettings.homeStation], language) || '');
       setWorkSearch(getStationName(stations[existingSettings.workStation], language) || '');
     }
-  }, [language]);
+  }, [language, existingSettings]);
 
   const filteredHomeStations = useMemo(() => {
     if (!homeSearch) return [];

@@ -182,7 +182,7 @@ export const BottomPanel = React.memo(({
       <button
         onClick={handleLocate}
         disabled={isLocating}
-        className="absolute -top-16 right-4 p-3.5 bg-background/60 backdrop-blur-xl rounded-2xl shadow-xl shadow-black/5 border border-border/50 hover:bg-background/70 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 pointer-events-auto"
+        className="absolute -top-16 right-4 p-3.5 glass-panel rounded-2xl shadow-xl shadow-black/5 hover:bg-background/70 transition-all hover-scale disabled:opacity-50 pointer-events-auto"
         aria-label="Locate me"
       >
         {isLocating ? (
@@ -193,7 +193,7 @@ export const BottomPanel = React.memo(({
       </button>
 
       {/* Panel container */}
-      <div className="bg-background/80 backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t border-border pointer-events-auto safe-p-bottom transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1) will-change-transform transform-gpu">
+      <div className="glass-panel rounded-t-3xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t pointer-events-auto safe-p-bottom transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1) will-change-transform transform-gpu">
         {/* Always visible header - clickable to expand/collapse */}
         <div
           className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
@@ -238,9 +238,8 @@ export const BottomPanel = React.memo(({
                   <span
                     key={line}
                     className="px-2 py-0.5 rounded text-xs font-medium text-white capitalize"
-                    style={{ backgroundColor: LINE_COLORS[line] }}
                   >
-                    {t(`route.${line}Line` as any, language)}
+                    {t(`route.${line}Line` as Parameters<typeof t>[0], language)}
                   </span>
                 ))}
                 {station.isInterchange && (

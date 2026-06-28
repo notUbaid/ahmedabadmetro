@@ -121,6 +121,12 @@ All colors MUST be HSL.
   .safe-m-bottom {
     margin-bottom: env(safe-area-inset-bottom);
   }
+  .glass-panel {
+    @apply bg-background/75 backdrop-blur-xl border border-border/50 shadow-2xl;
+  }
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out hover:scale-105 active:scale-95;
+  }
 }
 
 /* Leaflet map styles */
