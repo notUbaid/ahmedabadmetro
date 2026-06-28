@@ -98,6 +98,12 @@ export const BottomPanel = React.memo(({
       return;
     }
 
+    // If we already have a location from watchPosition, use it immediately
+    if (userLocation) {
+      onLocate(userLocation[0], userLocation[1]);
+      return;
+    }
+
     setIsLocating(true);
     
     const requestPosition = (highAccuracy: boolean, fallback: boolean) => {
@@ -143,7 +149,7 @@ export const BottomPanel = React.memo(({
       {selectedStation && onPlanRoute && (
         <button
           onClick={() => onPlanRoute(selectedStation.id)}
-          className="absolute -top-16 right-4 p-3.5 bg-background text-foreground border border-border rounded-2xl shadow-xl shadow-black/5 hover:bg-muted transition-all hover:scale-105 active:scale-95 animate-fade-in pointer-events-auto will-change-transform transform-gpu"
+          className="absolute -top-16 left-4 p-3.5 flex items-center gap-2 bg-background text-foreground border border-border rounded-2xl shadow-xl shadow-black/5 hover:bg-muted transition-all hover:scale-105 active:scale-95 animate-fade-in pointer-events-auto will-change-transform transform-gpu"
           aria-label="Plan journey"
         >
           <Route className="w-5 h-5" />
