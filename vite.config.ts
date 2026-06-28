@@ -101,7 +101,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "osm-tiles",
               expiration: {
-                maxEntries: 5000,
+                maxEntries: 2000,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
               cacheableResponse: {
@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "carto-tiles",
               expiration: {
-                maxEntries: 5000,
+                maxEntries: 2000,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
               cacheableResponse: {

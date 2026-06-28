@@ -21,7 +21,14 @@ export interface TrainSchedule {
 
 // Source of truth from Excel-generated JSON
 const parsed = timetableFromExcelData as { trainSchedules: TrainSchedule[] };
-export const trainSchedules: TrainSchedule[] = parsed.trainSchedules;
+
+// Fix missing weekend schedules for Red/Green/Purple lines which run the same schedule every day
+export const trainSchedules: TrainSchedule[] = parsed.trainSchedules.map(schedule => {
+  if (schedule.line !== 'blue' && schedule.dayType === 'Mon-Fri') {
+    return { ...schedule, dayType: undefined };
+  }
+  return schedule;
+});
 
 // Station definitions per line — uses the verified segment-timing station lists.
 // DO NOT use trainSchedules.find() here: through-running trains (e.g. green line

@@ -188,15 +188,22 @@ const searchNominatim = async (query: string): Promise<SearchResult[]> => {
       q,
       format: 'jsonv2',
       addressdetails: '1',
-      limit: '5'
+      limit: '5',
+      email: 'contact@ahmedabadmetro.site'
     });
 
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`
     );
 
+    if (response.status === 429) {
+      console.warn('Nominatim rate limit exceeded');
+      return [];
+    }
+
     if (!response.ok) {
-      throw new Error(`Nominatim API error: ${response.status}`);
+      console.error(`Nominatim API error: ${response.status}`);
+      return [];
     }
 
     const data = await response.json();

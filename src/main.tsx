@@ -3,14 +3,21 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import "./index.css";
 
+import { toast } from "sonner";
+
 // Register service worker for offline support
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      if (confirm('New version available! Reload to update?')) {
-        updateSW(true);
-      }
+      toast("New version available!", {
+        description: "An update is ready.",
+        action: {
+          label: "Update",
+          onClick: () => updateSW(true),
+        },
+        duration: Infinity,
+      });
     },
     onRegisterError(error) {
       console.error('Service Worker registration error:', error);
