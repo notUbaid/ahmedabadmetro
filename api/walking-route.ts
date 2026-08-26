@@ -1,8 +1,19 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Restrict CORS to the deployed app origin (localhost for dev)
+const ALLOWED_ORIGINS = [
+  'https://www.ahmedabadmetro.site',
+  'https://ahmedabadmetro.site',
+  'http://localhost:5173',
+  'http://localhost:4173',
+];
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -16,36 +27,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { startLng, startLat, endLng, endLat, apiKey: clientApiKey } = req.query;
+  const { startLng, startLat, endLng, endLat } = req.query;
 
-  // Validate parameters
-  if (!startLng || !startLat || !endLng || !endLat) {
-    return res.status(400).json({ error: 'Missing required parameters: startLng, startLat, endLng, endLat' });
+  // Validate parameters — numeric coordinates only
+  const coords = [startLng, startLat, endLng, endLat];
+  if (coords.some(c => typeof c !== 'string' || !/^-?\d+(\.\d+)?$/.test(c))) {
+    return res.status(400).json({ error: 'Missing or invalid parameters: startLng, startLat, endLng, endLat' });
   }
 
-  // Use client API key if provided, otherwise use server-side key
-  const apiKey = clientApiKey || process.env.ORS_API_KEY;
-  
+  const apiKey = process.env.ORS_API_KEY;
+
   if (!apiKey) {
-    console.error('No ORS_API_KEY available (neither from client nor server environment)');
-    return res.status(500).json({ 
-      error: 'ORS API key not configured',
-      message: 'Please set ORS_API_KEY environment variable or provide apiKey in request'
+    console.error('No ORS_API_KEY configured in server environment');
+    return res.status(500).json({
+      error: 'ORS API key not configured'
     });
   }
 
   try {
-    const url = `https://api.openrouteservice.org/v2/directions/foot-walking?api_key=${apiKey}&start=${startLng},${startLat}&end=${endLng},${endLat}`;
+    const url = `https://api.openrouteservice.org/v2/directions/foot-walking?api_key=${encodeURIComponent(apiKey)}&start=${coords[0]},${coords[1]}&end=${coords[2]},${coords[3]}`;
 
     const response = await fetch(url);
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error('ORS API error response:', response.status, errorData);
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: 'ORS API error',
-        status: response.status,
-        details: errorData
+        status: response.status
       });
     }
 
@@ -53,9 +62,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json(data);
   } catch (error) {
     console.error('Walking route API error:', error);
-    return res.status(500).json({ 
-      error: 'Failed to fetch walking route',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    return res.status(500).json({
+      error: 'Failed to fetch walking route'
     });
   }
 }

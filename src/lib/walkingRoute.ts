@@ -1,12 +1,5 @@
 import { Station, stations } from '@/data/metroData';
 
-const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY || '';
-
-// Warn if API key is missing
-if (!ORS_API_KEY) {
-  console.warn('VITE_ORS_API_KEY not set. Using fallback walking route estimation. Please set the environment variable for accurate routing.');
-}
-
 export interface WalkingRoute {
   station: Station;
   distance: number; // meters
@@ -49,24 +42,17 @@ export const fetchWalkingRoute = async (
   station: Station
 ): Promise<WalkingRoute | null> => {
   try {
-    const apiKey = ORS_API_KEY;
-    
-    // Always use the API proxy to avoid CORS issues
-    // The proxy will use the server-side ORS_API_KEY on production
-    // For local dev, we'll add the API key as a query parameter that gets passed through
-    let orsUrl: string;
-    
-    if (apiKey) {
-      orsUrl = `/api/walking-route?startLng=${userLng}&startLat=${userLat}&endLng=${station.coordinates[1]}&endLat=${station.coordinates[0]}&apiKey=${encodeURIComponent(apiKey)}`;
-    } else {
-      orsUrl = `/api/walking-route?startLng=${userLng}&startLat=${userLat}&endLng=${station.coordinates[1]}&endLat=${station.coordinates[0]}`;
-    }
-    
+    // Serverless proxy holds the ORS key server-side; never send keys from the client.
+    const orsUrl = `/api/walking-route?startLng=${userLng}&startLat=${userLat}&endLng=${station.coordinates[1]}&endLat=${station.coordinates[0]}`;
+
     const response = await fetch(orsUrl);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('ORS API error:', response.status, errorData);
+      return null;
+    }
+
+    const contentType = response.headers?.get?.('content-type');
+    if (contentType && !contentType.includes('application/json')) {
       return null;
     }
     
