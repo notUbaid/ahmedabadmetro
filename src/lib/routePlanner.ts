@@ -1016,6 +1016,7 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
   arrivalMinutes: number;
   isDirect: boolean;
   interchangeCount: number;
+  line?: 'blue' | 'red' | 'green' | 'purple';
 }[] => {
   if (departureCacheDayType !== dayType) {
     departureCache.clear();
@@ -1053,6 +1054,7 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
     arrivalMinutes: number;
     isDirect: boolean;
     interchangeCount: number;
+    line?: 'blue' | 'red' | 'green' | 'purple';
   }[] = [];
 
   for (const depMin of departureMinutesList) {
@@ -1060,6 +1062,7 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
     if (!route?.departureTime || !route.arrivalTime) continue;
 
     const arrMin = parseTimeToMinutes(route.arrivalTime);
+    const trainLine = (route.steps[0]?.line || stations[originId]?.lines[0]) as 'blue' | 'red' | 'green' | 'purple';
 
     results.push({
       departureTime: route.departureTime,
@@ -1068,6 +1071,7 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
       arrivalMinutes: arrMin,
       isDirect: !!route.isDirect,
       interchangeCount: route.interchangeCount,
+      line: trainLine,
     });
   }
 
@@ -1114,11 +1118,43 @@ const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: num
     const startMinutes = parseTimeToMinutes(schedule.startTime);
     const depMin = startMinutes + schedule.stationTimes[stationIdx];
 
-    // Exact match - departure times must match precisely
-    if (depMin === departureMinutes) {
+    // Check exact or sub-minute match (in case departureMinutes was rounded or fractional)
+    if (Math.abs(depMin - departureMinutes) < 0.01) {
       matches.push({ schedule, stationIdx, departMinutes: depMin });
     }
   }
+
+  // Fallback 1: match within 1 minute on same dayType
+  if (matches.length === 0) {
+    for (const schedule of trainSchedules) {
+      if (schedule.dayType && schedule.dayType !== dayType) continue;
+      const stationIdx = schedule.stations.indexOf(stationId);
+      if (stationIdx === -1 || stationIdx === schedule.stations.length - 1) continue;
+
+      const startMinutes = parseTimeToMinutes(schedule.startTime);
+      const depMin = startMinutes + schedule.stationTimes[stationIdx];
+
+      if (Math.abs(depMin - departureMinutes) <= 1.0) {
+        matches.push({ schedule, stationIdx, departMinutes: depMin });
+      }
+    }
+  }
+
+  // Fallback 2: search across any dayType if still no match
+  if (matches.length === 0) {
+    for (const schedule of trainSchedules) {
+      const stationIdx = schedule.stations.indexOf(stationId);
+      if (stationIdx === -1 || stationIdx === schedule.stations.length - 1) continue;
+
+      const startMinutes = parseTimeToMinutes(schedule.startTime);
+      const depMin = startMinutes + schedule.stationTimes[stationIdx];
+
+      if (Math.abs(depMin - departureMinutes) <= 1.5) {
+        matches.push({ schedule, stationIdx, departMinutes: depMin });
+      }
+    }
+  }
+
   return matches;
 };
 
@@ -1790,30 +1826,56 @@ export const findCommonTrainRoute = (
   return result;
 };
 
-/**
- * Calculates current progress along a route based on current time (minutes since midnight)
- */
-export const calculateJourneyProgress = (
-  route: PlannedRoute,
-  currentTimeMins: number
-): {
+export interface JourneyProgress {
   progress: number; // 0 to 1
   status: 'upcoming' | 'ongoing' | 'completed';
   currentStationId?: string;
   nextStationId?: string;
   isAtStation: boolean;
   statusText: string;
-} => {
-  const depTime = parseTimeToMinutes(route.departureTime || '00:00');
-  const arrTime = parseTimeToMinutes(route.arrivalTime || '00:00');
+  subStatusText?: string;
+  passedStationIds: string[];
+}
+
+/**
+ * Calculates current progress along a route based on current time (minutes since midnight)
+ * with precise timetable synchronisation and station-level dwell awareness.
+ */
+export const calculateJourneyProgress = (
+  route: PlannedRoute,
+  currentTimeMins: number
+): JourneyProgress => {
+  const depTime = route.departureMinutes ?? parseTimeToMinutes(route.departureTime || '00:00');
+  const arrTime = route.arrivalMinutes ?? parseTimeToMinutes(route.arrivalTime || '00:00');
+
+  // Collect all unique station IDs in the entire journey
+  const allRouteStationIds: string[] = [];
+  route.steps.forEach(step => {
+    if (step.allStations) {
+      step.allStations.forEach(id => {
+        if (!allRouteStationIds.includes(id)) allRouteStationIds.push(id);
+      });
+    } else if (step.station && !allRouteStationIds.includes(step.station.id)) {
+      allRouteStationIds.push(step.station.id);
+    }
+  });
 
   if (currentTimeMins < depTime) {
+    const minsUntil = Math.max(0, Math.ceil(depTime - currentTimeMins));
+    const firstTravel = route.steps.find(s => s.type === 'travel');
+    const firstNext = firstTravel?.allStations?.[1] || firstTravel?.station?.id || route.destination.id;
+
     return {
       progress: 0,
       status: 'upcoming',
       isAtStation: true,
       currentStationId: route.origin.id,
-      statusText: `Starting from ${route.origin.name} at ${route.departureTime}`
+      nextStationId: firstNext,
+      statusText: minsUntil <= 0
+        ? `Departing from ${route.origin.name}`
+        : `Starting from ${route.origin.name} in ${minsUntil} min${minsUntil > 1 ? 's' : ''}`,
+      subStatusText: `Scheduled departure: ${route.departureTime || formatMinutesToTime(depTime)}`,
+      passedStationIds: []
     };
   }
 
@@ -1823,108 +1885,208 @@ export const calculateJourneyProgress = (
       status: 'completed',
       isAtStation: true,
       currentStationId: route.destination.id,
-      statusText: `Arrived at ${route.destination.name}`
+      statusText: `Arrived at ${route.destination.name}`,
+      subStatusText: `Trip completed at ${route.arrivalTime || formatMinutesToTime(arrTime)}`,
+      passedStationIds: allRouteStationIds
     };
   }
 
-  const duration = arrTime - depTime;
-  const elapsed = currentTimeMins - depTime;
-  const overallProgress = elapsed / duration;
+  const duration = Math.max(1, arrTime - depTime);
+  const elapsed = Math.max(0, currentTimeMins - depTime);
+  const overallProgress = Math.min(1, elapsed / duration);
 
-  let currentPos: { currentStationId?: string; nextStationId?: string; isAtStation: boolean; statusText: string } = {
-    isAtStation: false,
-    statusText: 'Traveling...'
-  };
+  const passedStationIds: string[] = [];
+  let found = false;
+  let resultPos: Partial<JourneyProgress> = {};
 
-  let accumulatedTime = depTime;
+  let currentAccumulatedTime = depTime;
+
   for (let i = 0; i < route.steps.length; i++) {
+    if (found) break;
     const step = route.steps[i];
 
     if (step.type === 'board') {
-      // Board step - skip to next step, but update accumulated time for the train departure
       const trainDepartureTime = route.departureMinutes ?? parseTimeToMinutes(step.trainTime || route.departureTime || '00:00');
-      accumulatedTime = trainDepartureTime;
+      currentAccumulatedTime = trainDepartureTime;
       continue;
     }
-    
+
     if (step.type === 'travel') {
-      let stepDuration = 0;
+      const schedule = step.trainId ? trainSchedules.find(s => s.id === step.trainId) : null;
+      const stationsInLeg = (step.allStations && step.allStations.length > 0)
+        ? step.allStations
+        : (() => {
+            const prevStation = (() => {
+              for (let j = i - 1; j >= 0; j--) {
+                const s = route.steps[j];
+                if (s.type === 'travel') return s.station;
+                if (s.type === 'board') return route.origin;
+              }
+              return route.origin;
+            })();
+            return [prevStation.id, ...(step.stations?.map(s => s.id) || []), step.station.id].filter((v, idx, arr) => arr.indexOf(v) === idx);
+          })();
 
-      // Determine previous station for this travel leg reliably.
-      // For a travel step, the previous physical stop should be:
-      // - the last station from the prior travel step (if any)
-      // - otherwise route.origin
-      const prevTravelStation = (() => {
-        for (let j = i - 1; j >= 0; j--) {
-          const s = route.steps[j];
-          if (s.type === 'travel') return route.steps[j].station;
-          if (s.type === 'board') return route.origin;
+      if (schedule && stationsInLeg.length >= 2) {
+        const startMinutes = parseTimeToMinutes(schedule.startTime);
+
+        for (let j = 0; j < stationsInLeg.length; j++) {
+          const sId = stationsInLeg[j];
+          const sIdx = schedule.stations.indexOf(sId);
+          if (sIdx === -1) continue;
+
+          const arrJ = startMinutes + schedule.stationTimes[sIdx];
+          const dwellJ = (sIdx === 0 ? 0 : (stations[sId]?.isInterchange ? 0.75 : 0.5));
+          const depJ = arrJ + dwellJ;
+
+          if (j < stationsInLeg.length - 1) {
+            const nextSId = stationsInLeg[j + 1];
+            const nextIdx = schedule.stations.indexOf(nextSId);
+            const arrNext = nextIdx !== -1 ? startMinutes + schedule.stationTimes[nextIdx] : depJ + 2.5;
+
+            // 1. Train stopped / dwelling at station j
+            if (currentTimeMins >= arrJ && currentTimeMins < depJ) {
+              resultPos = {
+                currentStationId: sId,
+                nextStationId: nextSId,
+                isAtStation: true,
+                statusText: j === 0 ? `Boarding at ${stations[sId]?.name || sId}` : `At ${stations[sId]?.name || sId}`,
+                subStatusText: `Next stop: ${stations[nextSId]?.name || nextSId}`
+              };
+              for (let k = 0; k < j; k++) {
+                if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
+              }
+              found = true;
+              break;
+            }
+
+            // 2. Train moving between station j and next station
+            if (currentTimeMins >= depJ && currentTimeMins < arrNext) {
+              const minsToNext = Math.max(0, Math.ceil(arrNext - currentTimeMins));
+              resultPos = {
+                currentStationId: sId,
+                nextStationId: nextSId,
+                isAtStation: false,
+                statusText: `En route to ${stations[nextSId]?.name || nextSId}`,
+                subStatusText: minsToNext <= 1
+                  ? `Approaching ${stations[nextSId]?.name || nextSId}`
+                  : `Departed ${stations[sId]?.name || sId} • ~${minsToNext}m to next stop`
+              };
+              for (let k = 0; k <= j; k++) {
+                if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
+              }
+              found = true;
+              break;
+            }
+          } else {
+            // Reached final station of this leg
+            if (currentTimeMins >= arrJ) {
+              for (let k = 0; k <= j; k++) {
+                if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
+              }
+            }
+          }
         }
-        return route.origin;
-      })();
 
-      const prevStation = prevTravelStation;
-      const accurateTime = getAccurateTravelTime(prevStation.id, step.station.id);
-      stepDuration = accurateTime || (step.stationCount || 1) * 2.5;
+        // Set accumulated time to the end of this schedule leg
+        const lastIdx = schedule.stations.indexOf(stationsInLeg[stationsInLeg.length - 1]);
+        if (lastIdx !== -1) {
+          currentAccumulatedTime = startMinutes + schedule.stationTimes[lastIdx];
+        }
+      } else {
+        // Fallback for non-scheduled or walking steps
+        const prevStation = (() => {
+          for (let j = i - 1; j >= 0; j--) {
+            const s = route.steps[j];
+            if (s.type === 'travel') return s.station;
+            if (s.type === 'board') return route.origin;
+          }
+          return route.origin;
+        })();
 
-      const stepEndTime = accumulatedTime + stepDuration;
+        const accurateTime = getAccurateTravelTime(prevStation.id, step.station.id);
+        const stepDuration = accurateTime || (step.stationCount || 1) * 2.5;
+        const stepEndTime = currentAccumulatedTime + stepDuration;
 
-      if (currentTimeMins >= accumulatedTime && currentTimeMins < stepEndTime) {
-        const stepProgress = (currentTimeMins - accumulatedTime) / stepDuration;
-        const stationsInStep = [
-          prevStation,
-          ...(step.stations || []),
-          step.station
-        ];
+        if (currentTimeMins >= currentAccumulatedTime && currentTimeMins < stepEndTime) {
+          const stepProgress = (currentTimeMins - currentAccumulatedTime) / stepDuration;
+          const segmentCount = Math.max(1, stationsInLeg.length - 1);
+          const segmentIdx = Math.max(0, Math.min(segmentCount - 1, Math.floor(stepProgress * segmentCount)));
+          const progressInSegment = (stepProgress * segmentCount) % 1;
 
-        const segmentCount = stationsInStep.length - 1;
-        const segmentIdx = Math.max(0, Math.min(segmentCount - 1, Math.floor(stepProgress * segmentCount)));
-        const progressInSegment = (stepProgress * segmentCount) % 1;
+          const s1 = stationsInLeg[segmentIdx];
+          const s2 = stationsInLeg[segmentIdx + 1] || s1;
 
-        const s1 = stationsInStep[segmentIdx];
-        const s2 = stationsInStep[segmentIdx + 1];
+          const atStation = progressInSegment < 0.15;
+          const activeStation = atStation ? s1 : (progressInSegment > 0.85 ? s2 : s1);
 
-        currentPos = {
-          currentStationId: s1?.id,
-          nextStationId: s2?.id,
-          isAtStation: progressInSegment < 0.1 || progressInSegment > 0.9,
-          statusText: (progressInSegment < 0.1 || progressInSegment > 0.9)
-            ? `At ${progressInSegment < 0.1 ? s1?.name : s2?.name}`
-            : `Between ${s1?.name} and ${s2?.name}`
-        };
-        break;
+          resultPos = {
+            currentStationId: activeStation,
+            nextStationId: s2,
+            isAtStation: atStation,
+            statusText: atStation ? `At ${stations[activeStation]?.name || activeStation}` : `En route to ${stations[s2]?.name || s2}`,
+            subStatusText: atStation ? `Next: ${stations[s2]?.name || s2}` : `Departed ${stations[s1]?.name || s1}`
+          };
+
+          for (let k = 0; k <= segmentIdx; k++) {
+            if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
+          }
+          found = true;
+          break;
+        } else if (currentTimeMins >= stepEndTime) {
+          for (const sId of stationsInLeg) {
+            if (!passedStationIds.includes(sId)) passedStationIds.push(sId);
+          }
+        }
+        currentAccumulatedTime = stepEndTime;
       }
-      accumulatedTime = stepEndTime;
     } else if (step.type === 'interchange') {
-      const stepEndTime = accumulatedTime + (step.waitTime || 5);
-      if (currentTimeMins >= accumulatedTime && currentTimeMins < stepEndTime) {
-        currentPos = {
+      const waitTime = step.waitTime || 5;
+      const stepEndTime = currentAccumulatedTime + waitTime;
+      const nextStep = route.steps[i + 1];
+      const nextDest = nextStep?.allStations?.[1] || nextStep?.station?.id;
+
+      if (currentTimeMins >= currentAccumulatedTime && currentTimeMins < stepEndTime) {
+        const waitRemaining = Math.max(0, Math.ceil(stepEndTime - currentTimeMins));
+        resultPos = {
           currentStationId: step.station.id,
+          nextStationId: nextDest,
           isAtStation: true,
-          statusText: `Interchanging at ${step.station.name}`
+          statusText: `Interchanging at ${step.station.name}`,
+          subStatusText: step.trainTime
+            ? `Next train at ${step.trainTime} (~${waitRemaining} min)`
+            : `Connecting to ${step.line} line`
         };
+        if (!passedStationIds.includes(step.station.id)) passedStationIds.push(step.station.id);
+        found = true;
         break;
       }
-      accumulatedTime = stepEndTime;
+      currentAccumulatedTime = stepEndTime;
     } else if (step.type === 'bus') {
-      // Bus step - use estimated time (8 or 15 minutes)
       const busDuration = step.busDestination === 'PDPU' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
-      const stepEndTime = accumulatedTime + busDuration;
-      if (currentTimeMins >= accumulatedTime && currentTimeMins < stepEndTime) {
-        currentPos = {
+      const stepEndTime = currentAccumulatedTime + busDuration;
+      if (currentTimeMins >= currentAccumulatedTime && currentTimeMins < stepEndTime) {
+        resultPos = {
           currentStationId: step.station.id,
-          isAtStation: true,
-          statusText: `Traveling by bus to ${step.busDestination}`
+          isAtStation: false,
+          statusText: `Traveling by bus to ${step.busDestination}`,
+          subStatusText: `Feeder bus connection`
         };
+        found = true;
         break;
       }
-      accumulatedTime = stepEndTime;
+      currentAccumulatedTime = stepEndTime;
     }
   }
 
   return {
     progress: overallProgress,
     status: 'ongoing',
-    ...currentPos
+    isAtStation: resultPos.isAtStation ?? false,
+    currentStationId: resultPos.currentStationId ?? route.origin.id,
+    nextStationId: resultPos.nextStationId,
+    statusText: resultPos.statusText ?? `En route to ${route.destination.name}`,
+    subStatusText: resultPos.subStatusText,
+    passedStationIds
   };
 };

@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
+import { popularPlaces, POPULAR_PLACE_LABELS } from '@/data/popularPlaces';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName, Language } from '@/lib/i18n';
 import { findNearestByWalking } from '@/lib/walkingRoute';
+import { fetchNominatimSearch } from '@/hooks/useNominatimSearch';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -103,33 +105,40 @@ const getMetroStationResults = (language: Language): SearchResult[] => {
   }));
 };
 
-// ORS Pelias API search
+// Curated popular places — always searched locally, no API needed.
+const getPopularPlaceResults = (): SearchResult[] => {
+  return popularPlaces.map((p, i) => {
+    const isLandmark = ['monument', 'temple', 'mosque', 'museum'].includes(p.t);
+    return {
+      id: `pop_${i}`,
+      name: p.n,
+      description: POPULAR_PLACE_LABELS[p.t],
+      lat: p.c[0],
+      lng: p.c[1],
+      type: isLandmark ? ('landmark' as const) : ('place' as const),
+      // Above API results (~≤20), below metro stations (90-100)
+      importance: 45,
+    };
+  });
+};
+
+const matchPopularPlaces = (popular: SearchResult[], normalizedQuery: string): SearchResult[] =>
+  popular
+    .filter((p, i) => {
+      const entry = popularPlaces[i];
+      return p.name.toLowerCase().includes(normalizedQuery) || !!entry.k?.includes(normalizedQuery);
+    })
+    .sort((a, b) => a.name.toLowerCase().indexOf(normalizedQuery) - b.name.toLowerCase().indexOf(normalizedQuery))
+    .slice(0, 5);
+
+// ORS Pelias API search (via serverless proxy — key stays server-side)
 const searchPelias = async (query: string): Promise<SearchResult[]> => {
-  const apiKey = import.meta.env.VITE_ORS_API_KEY;
-
-  if (!apiKey) {
-    console.warn('ORS API key not configured');
-    return [];
-  }
-
   try {
-    const params = new URLSearchParams({
-      text: query,
-      'boundary.circle.lat': '23.0225',
-      'boundary.circle.lon': '72.5714',
-      'boundary.circle.radius': '20',
-      size: '8'
-    });
+    const params = new URLSearchParams({ text: query });
 
-    const response = await fetch(
-      `https://api.openrouteservice.org/geocode/search?${params}`,
-      {
-        headers: {
-          'Authorization': apiKey,
-          'Accept': 'application/json'
-        }
-      }
-    );
+    const response = await fetch(`/api/ors-geocode?${params}`, {
+      signal: AbortSignal.timeout(8000)
+    });
 
     if (!response.ok) {
       throw new Error(`Pelias API error: ${response.status}`);
@@ -183,32 +192,9 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 // Nominatim fallback search
 const searchNominatim = async (query: string): Promise<SearchResult[]> => {
   try {
-    const q = query.toLowerCase().includes('ahmedabad') ? query : `${query} Ahmedabad`;
-    const params = new URLSearchParams({
-      q,
-      format: 'jsonv2',
-      addressdetails: '1',
-      limit: '5',
-      email: 'contact@ahmedabadmetro.site'
-    });
+    const data = await fetchNominatimSearch(query);
 
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?${params}`
-    );
-
-    if (response.status === 429) {
-      console.warn('Nominatim rate limit exceeded');
-      return [];
-    }
-
-    if (!response.ok) {
-      console.error(`Nominatim API error: ${response.status}`);
-      return [];
-    }
-
-    const data = await response.json();
-
-    return data.map((item: { name?: string; display_name: string; osm_id?: number; address?: Record<string, string>; lat?: string; lon?: string; importance?: number }, i: number) => {
+    return data.map((item, i: number) => {
       const name = item.name || item.display_name.split(',')[0];
       const address = item.address || {};
       const parts = [address.suburb, address.city_district, address.city].filter(Boolean);
@@ -277,7 +263,12 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     };
   }, []);
 
-  const metroStations = getMetroStationResults(language);
+  // Stable identity per language — recreating this each render would give
+  // performSearch a new identity and restart the debounce on every parent re-render.
+  const metroStations = useMemo(() => getMetroStationResults(language), [language]);
+
+  // Static curated data — computed once
+  const popularResults = useMemo(() => getPopularPlaceResults(), []);
 
   // Load recent searches on mount
   useEffect(() => {
@@ -326,9 +317,12 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         station.name.toLowerCase().includes(normalizedQuery)
       ).sort((a, b) => (b.importance || 0) - (a.importance || 0));
 
-      // Show instant results for metro stations while APIs load
-      if (matchingStations.length > 0) {
-        setResults(matchingStations.slice(0, 5));
+      // Curated popular places — local match, no API needed
+      const matchingPopular = matchPopularPlaces(popularResults, normalizedQuery);
+
+      // Show instant results while APIs load
+      if (matchingStations.length > 0 || matchingPopular.length > 0) {
+        setResults([...matchingStations.slice(0, 3), ...matchingPopular].slice(0, 8));
         setShowResults(true);
       }
 
@@ -353,6 +347,15 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         if (!seenKeys.has(key)) {
           seenKeys.add(key);
           mergedResults.push(station);
+        }
+      }
+
+      // Add curated popular places (rank above API noise via importance)
+      for (const place of matchingPopular) {
+        const key = `${place.name.toLowerCase()}|${place.type}`;
+        if (!seenKeys.has(key) && mergedResults.length < 10) {
+          seenKeys.add(key);
+          mergedResults.push(place);
         }
       }
 
@@ -456,10 +459,14 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     } catch (error) {
       console.error('Search failed:', error);
       if (searchId !== activeSearchIdRef.current) return;
-      // Fallback to metro stations only
-      const localResults = metroStations.filter(station =>
-        station.name.toLowerCase().includes(normalizedQuery)
-      ).slice(0, 5);
+      // Fallback to local data only
+      const matchingPopular = matchPopularPlaces(popularResults, normalizedQuery);
+      const localResults = [
+        ...metroStations.filter(station =>
+          station.name.toLowerCase().includes(normalizedQuery)
+        ).slice(0, 3),
+        ...matchingPopular,
+      ].slice(0, 8);
       setResults(localResults);
       setShowResults(true);
     } finally {
@@ -467,7 +474,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         setIsLoading(false);
       }
     }
-  }, [metroStations]);
+  }, [metroStations, popularResults]);
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
@@ -596,7 +603,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
           {query && !isLoading && (
             <button
               onClick={clearSearch}
-              className="p-2 mr-1 hover:bg-muted rounded-lg transition-colors"
+              className="p-2 mr-1 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted rounded-lg transition-colors"
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>

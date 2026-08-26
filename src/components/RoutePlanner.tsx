@@ -76,7 +76,11 @@ export const RoutePlanner = React.memo(({
   const stationOptions = useMemo(() => getStationOptions(), []);
   const organizedStations = useMemo(() => getOrganizedStations(), []);
 
-  const [isCalculating, setIsCalculating] = useState(false);
+  // Start in calculating state when opened with a full O/D pair so the result
+  // area never paints "No route found" before the first computation runs.
+  const [isCalculating, setIsCalculating] = useState(
+    () => !!(initialOrigin && initialDestination && initialOrigin !== initialDestination)
+  );
   const [availableDepartures, setAvailableDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
   const [route, setRoute] = useState<PlannedRoute | null>(null);
 
@@ -235,28 +239,13 @@ export const RoutePlanner = React.memo(({
     onRouteChange?.(route);
   }, [route, onRouteChange]);
 
-  // Update destination when initialDestination prop changes
-  useEffect(() => {
-    if (initialDestination) {
-      setDestination(initialDestination);
-      setDestSearch(getStationName(stations[initialDestination], language) || '');
-    }
-  }, [initialDestination, language]);
-
-  // Update origin when initialOrigin prop changes
-  useEffect(() => {
-    if (initialOrigin) {
-      setOrigin(initialOrigin);
-      setOriginSearch(getStationName(stations[initialOrigin], language) || '');
-    }
-  }, [initialOrigin, language]);
-
   // Reset selected departure when stations change
   useEffect(() => {
     setSelectedDepartureIdx(null);
   }, [origin, destination]);
 
   const swapStations = () => {
+    if (origin && destination && origin !== destination) setIsCalculating(true);
     setOrigin(destination);
     setDestination(origin);
     setOriginSearch(getStationName(stations[destination], language) || '');
@@ -294,12 +283,16 @@ export const RoutePlanner = React.memo(({
   };
 
   const selectOrigin = (id: string) => {
+    // Flip to skeleton synchronously — the calc effect runs post-paint, and
+    // without this the "No route found" state flashes for a frame.
+    if (destination && id !== destination) setIsCalculating(true);
     setOrigin(id);
     setOriginSearch(getStationName(stations[id], language) || '');
     setShowOriginDropdown(false);
   };
 
   const selectDestination = (id: string) => {
+    if (origin && id !== origin) setIsCalculating(true);
     setDestination(id);
     setDestSearch(getStationName(stations[id], language) || '');
     setShowDestDropdown(false);
@@ -323,6 +316,19 @@ export const RoutePlanner = React.memo(({
     } catch (err) {
       console.error('Failed to copy link', err);
     }
+  };
+
+  const handleWhatsAppShare = () => {
+    if (!route || !route.departureTime) return;
+    const depMins = route.departureMinutes ?? parseTimeToMinutes(route.departureTime);
+    const url = new URL(window.location.href);
+    url.searchParams.set('orig', origin);
+    url.searchParams.set('dest', destination);
+    url.searchParams.set('depMins', depMins.toString());
+    const originName = getStationName(stations[origin], language) || origin;
+    const destName = getStationName(stations[destination], language) || destination;
+    const text = `🚆 Track my Ahmedabad Metro journey: ${originName} ➔ ${destName} (Departing ${route.departureTime})\n${url.toString()}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const getLineColor = (line?: keyof typeof LINE_COLORS) => {
@@ -551,7 +557,7 @@ export const RoutePlanner = React.memo(({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-muted transition-colors"
+            className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -738,7 +744,7 @@ export const RoutePlanner = React.memo(({
           <div className="flex justify-center">
             <button
               onClick={swapStations}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
               disabled={!origin && !destination}
             >
               <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
@@ -890,12 +896,12 @@ export const RoutePlanner = React.memo(({
                   <span className="text-sm font-medium">{route.destination.name}</span>
                   {route.isDirect && (
                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium ml-2">
-                      Direct Metro
+                      {t('route.directMetro', language)}
                     </span>
                   )}
                   {route.hasBusSegment && (
                     <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium ml-2">
-                      🚌 Includes Bus
+                      🚌 {t('route.includesBus', language)}
                     </span>
                   )}
                 </div>
@@ -904,7 +910,7 @@ export const RoutePlanner = React.memo(({
               {/* Available Departures (Modern Chips) */}
               {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && !internalIsCoordinating && (
                 <div className="mb-4">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Available Metros</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{t('route.availableMetros', language)}</p>
                   <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                     {uniqueDepartureTimes.map((dep, idx) => {
                       const isSelected = route.departureTime === dep.departureTime;
@@ -914,7 +920,7 @@ export const RoutePlanner = React.memo(({
                           ref={isSelected ? activeTrainRef : null}
                           onClick={() => handleSelectDeparture(dep.departureTime)}
                           className={cn(
-                            "flex-shrink-0 flex flex-col items-center justify-center min-w-[90px] p-2.5 rounded-2xl border transition-all",
+                            "flex-shrink-0 flex flex-col items-center justify-center min-w-[90px] min-h-[44px] p-2.5 rounded-2xl border transition-all",
                             isSelected 
                               ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-[1.02]" 
                               : "bg-background border-border hover:border-primary/50 hover:bg-muted/50"
@@ -922,7 +928,7 @@ export const RoutePlanner = React.memo(({
                         >
                           <span className="font-black text-lg leading-none mb-1">{dep.departureTime}</span>
                           <span className={cn("text-[9px] uppercase tracking-wider font-bold mb-1.5", isSelected ? "text-primary-foreground/90" : "text-muted-foreground")}>
-                            Arr {dep.arrivalTime}
+                            {t('route.arrShort', language)} {dep.arrivalTime}
                           </span>
                           <div className={cn(
                             "text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full", 
@@ -932,7 +938,7 @@ export const RoutePlanner = React.memo(({
                                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
                                 : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
                           )}>
-                            {dep.interchangeCount === 0 ? "Direct" : `${dep.interchangeCount} Change`}
+                            {dep.interchangeCount === 0 ? t('commute.direct', language) : `${dep.interchangeCount} ${t('commute.changes', language)}`}
                           </div>
                         </button>
                       );
@@ -960,70 +966,81 @@ export const RoutePlanner = React.memo(({
                       )}
                     >
                       {route.routeConfidence === 'timetable'
-                        ? 'Official Timetable'
+                        ? t('route.confTimetable', language)
                         : route.routeConfidence === 'mixed'
-                          ? 'Timetable + Estimates'
-                          : 'Estimates'
+                          ? t('route.confMixed', language)
+                          : t('common.estimated', language)
                       }
                     </span>
                   </div>
                 )}
 
                 <div className="text-xs text-muted-foreground w-full bg-muted/50 p-2 rounded border border-border mt-1">
-                  <p className="font-medium text-foreground mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Note: Planning & visuals are approximate</p>
+                  <p className="font-medium text-foreground mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> {t('route.noteApprox', language)}</p>
                   {route.routeConfidence === 'timetable'
-                    ? 'Times shown are computed from the official timetable, but real-world delays may occur.'
+                    ? t('route.noteTimetable', language)
                     : route.routeConfidence === 'mixed'
-                      ? 'Part of this route uses official timetable data; the rest uses standard travel estimates.'
-                      : 'This route uses standard travel estimates. Real-world times may vary.'}
+                      ? t('route.noteMixed', language)
+                      : t('route.noteEstimates', language)}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Train className="w-4 h-4 text-primary" />
-                  <span>{route.totalStations} stations</span>
+                  <span>{route.totalStations} {t(route.totalStations === 1 ? 'route.station' : 'route.stations', language)}</span>
                 </div>
                 {route.interchangeCount > 0 && (
                   <div className="flex items-center gap-1.5">
                     <ArrowDownUp className="w-4 h-4 text-amber-500" />
-                    <span>{route.interchangeCount} change{route.interchangeCount > 1 ? 's' : ''}</span>
+                    <span>{route.interchangeCount} {t('commute.changes', language)}</span>
                   </div>
                 )}
                 {route.hasBusSegment && (
                   <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                     <Bus className="w-4 h-4" />
-                    <span>+ Bus</span>
+                    <span>{t('route.plusBus', language)}</span>
                   </div>
                 )}
                 {route.interchangeCount === 0 && (
                   <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                    <span>No interchange needed</span>
+                    <span>{t('route.noInterchange', language)}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-bold border-l border-border pl-4">
-                  <span className="text-sm">
+                <div className="flex items-center gap-1.5 text-primary font-bold border-l border-border pl-4">
+                  <span className="text-sm flex items-center gap-1">
                     ₹{getDiscountedFare(route.fare)}
                     {hasMetroCard && (
-                      <span className="text-[10px] text-green-600 dark:text-green-400 ml-1">(-10%)</span>
+                      <span className="text-[10px] bg-green-500/15 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-md font-semibold">
+                        {t('route.cardDiscount', language)}
+                      </span>
                     )}
                   </span>
                 </div>
               </div>
 
-              {/* Share Button */}
+              {/* Share Buttons */}
               {route.steps[0].trainId && (
-                <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  <button
+                    onClick={handleWhatsAppShare}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#20ba59] px-2.5 py-1.5 rounded-lg transition-colors shadow-xs"
+                  >
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.586 1.761.88 2.79.88 3.182 0 5.768-2.587 5.768-5.766.001-3.187-2.575-5.766-5.767-5.766zm9.969 5.766c0 5.517-4.483 10-10 10-1.812 0-3.513-.485-4.981-1.328l-5.019 1.39 1.416-4.891c-.961-1.536-1.516-3.344-1.516-5.171 0-5.517 4.483-10 10-10 5.517 0 10 4.483 10 10z"/>
+                    </svg>
+                    WhatsApp
+                  </button>
                   <button
                     onClick={handleShareRide}
-                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 px-2.5 py-1.5 rounded-lg transition-colors"
                   >
                     {isCopied ? (
                       <>
                         <Check className="w-3.5 h-3.5" />
-                        Link Copied!
+                        {t('dialog.copied', language)}
                       </>
                     ) : (
                       <>
                         <Share2 className="w-3.5 h-3.5" />
-                        Share this Ride
+                        {t('dialog.copyLink', language)}
                       </>
                     )}
                   </button>
@@ -1034,12 +1051,12 @@ export const RoutePlanner = React.memo(({
             {/* Toggle details */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="w-full px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-muted/50 transition-colors border-b border-border"
+              className="w-full px-4 py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-muted/50 transition-colors border-b border-border"
             >
               {showDetails ? (
-                <>Hide stops <ChevronUp className="w-4 h-4" /></>
+                <>{t('route.hideStops', language)} <ChevronUp className="w-4 h-4" /></>
               ) : (
-                <>Show all stops <ChevronDown className="w-4 h-4" /></>
+                <>{t('route.showStops', language)} <ChevronDown className="w-4 h-4" /></>
               )}
             </button>
 
@@ -1055,10 +1072,10 @@ export const RoutePlanner = React.memo(({
         )}
 
         {/* No route state */}
-        {origin && destination && origin !== destination && !route && (
+        {origin && destination && origin !== destination && !isCalculating && !route && (
           <div className="p-8 text-center text-muted-foreground">
             <Route className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No route found between these stations</p>
+            <p>{t('route.noRouteFound', language)}</p>
           </div>
         )}
 
@@ -1066,7 +1083,7 @@ export const RoutePlanner = React.memo(({
         {(!origin || !destination) && (
           <div className="p-8 text-center text-muted-foreground">
             <Train className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>Select origin and destination stations</p>
+            <p>{t('route.selectStations', language)}</p>
           </div>
         )}
       </div>

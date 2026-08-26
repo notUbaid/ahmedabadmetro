@@ -2,7 +2,7 @@
 // NOTE: This file must not contain any git merge conflict markers.
 
 import { INTERCHANGE_STATIONS, NORMAL_STOP, INTERCHANGE_STOP, LINE_TIMINGS } from './segmentTimings';
-import { getISTDate } from '@/lib/utils';
+import { getISTDate, minutesUntil } from '@/lib/utils';
 import timetableFromExcelData from './timetableFromExcel.generated.json';
 
 import { stations } from './metroData';
@@ -78,8 +78,8 @@ export const lineInfo = {
     to: 'Koteshwar Road',
     distance: '20.2 km',
     travelTime: '35 min',
-    firstTrain: '06:16',
-    lastTrain: '22:11',
+    firstTrain: '06:15',
+    lastTrain: '23:09',
     frequency: 'Every 12 min (Mon-Sun)',
     note: 'Local services + through-running corridor services',
   },
@@ -90,8 +90,8 @@ export const lineInfo = {
     to: 'Mahatma Mandir',
     distance: '20.87 km',
     travelTime: '43 min',
-    firstTrain: '07:33',
-    lastTrain: '20:09',
+    firstTrain: '06:20',
+    lastTrain: '21:00',
     frequency: 'Average 24 min (Mon-Sun)',
     note: 'Local services + through-running corridor services from APMC',
   },
@@ -102,7 +102,7 @@ export const lineInfo = {
     to: 'GIFT City',
     distance: '5.8 km',
     travelTime: '6 min',
-    firstTrain: '07:36',
+    firstTrain: '06:45',
     lastTrain: '19:13',
     frequency: 'Morning: 49 min avg, Evening: 57 min avg',
     note: 'Bus service only from 10:18 to 16:06',
@@ -207,11 +207,10 @@ export const getUpcomingTrains = (stationId: string, limit = 3, language: Langua
     const startMinutes = schedule._cachedStartMinutes!;
     const arrivalMinutes = startMinutes + schedule.stationTimes[stationIndex];
 
-    let minutesAway = arrivalMinutes - currentMinutes;
-    if (minutesAway < -12 * 60) {
-      // Midnight boundary: e.g. arrival is 00:10 (10), current is 23:50 (1430) -> minutesAway = -1420
-      minutesAway += 24 * 60;
-    }
+    // Midnight boundary handled by minutesUntil: a 00:10 arrival seen at 23:50
+    // is 20 minutes away; the same 00:10 seen at 14:00 belongs to tonight and
+    // must not appear as "70 min away".
+    const minutesAway = minutesUntil(arrivalMinutes, currentMinutes);
 
     if (minutesAway >= 0 && minutesAway <= 120) {
       const arrivalHour = Math.floor(arrivalMinutes / 60) % 24;
@@ -356,6 +355,30 @@ export const getLastTrainWarnings = (stationId: string, language: Language = 'en
   });
 
   return warnings.sort((a, b) => a.minutesRemaining - b.minutesRemaining);
+};
+
+// First and last train times at a station for the current service day.
+// Used to explain an empty "upcoming" list: before first train vs end of service.
+export const getServiceWindow = (stationId: string): { first: string; last: string } | null => {
+  const now = getISTDate();
+  const dayOfWeek = now.getDay();
+  const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
+
+  let firstMinutes = Infinity;
+  let lastMinutes = -Infinity;
+  for (const schedule of schedulesByStation.get(stationId) || []) {
+    if (schedule.dayType && schedule.dayType !== currentDayType && !(schedule.line !== 'blue' && schedule.dayType === 'Mon-Fri')) continue;
+    const stationIndex = schedule.stations.indexOf(stationId);
+    if (stationIndex === -1 || stationIndex === schedule.stations.length - 1) continue;
+
+    const arrivalMinutes = schedule._cachedStartMinutes! + schedule.stationTimes[stationIndex];
+    if (arrivalMinutes < firstMinutes) firstMinutes = arrivalMinutes;
+    if (arrivalMinutes > lastMinutes) lastMinutes = arrivalMinutes;
+  }
+
+  if (lastMinutes === -Infinity) return null;
+  const fmt = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(Math.floor(m % 60)).padStart(2, '0')}`;
+  return { first: fmt(firstMinutes), last: fmt(lastMinutes) };
 };
 
 // Cache the filtered schedules to avoid O(N) filtering on every frame

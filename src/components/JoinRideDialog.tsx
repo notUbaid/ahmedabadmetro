@@ -5,7 +5,9 @@ import {
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
-import { cn, getISTDate } from '@/lib/utils';
+import { cn, getISTDate, minutesUntil } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t } from '@/lib/i18n';
 
 interface JoinRideDialogProps {
     isOpen: boolean;
@@ -25,6 +27,7 @@ export const JoinRideDialog = ({
     const [userStationId, setUserStationId] = useState('');
     const [search, setSearch] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
+    const { language } = useLanguage();
 
     // Find the shared train schedule
     const sharedTrain = useMemo(() => {
@@ -62,15 +65,14 @@ export const JoinRideDialog = ({
         const now = getISTDate();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-        if (arrivalMinutes < currentMinutes) {
-            return { status: 'passed', minutesAgo: currentMinutes - arrivalMinutes };
+        const minutesAway = minutesUntil(arrivalMinutes, currentMinutes);
+        if (minutesAway < 0) {
+            return { status: 'passed', minutesAgo: -minutesAway };
         }
 
         const h = Math.floor(arrivalMinutes / 60) % 24;
         const m = Math.floor(arrivalMinutes % 60);
         const timeString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-
-        const minutesAway = arrivalMinutes - currentMinutes;
 
         // Get destination from params or end of line
         const destStationId = initialDestination || sharedTrain.stations[sharedTrain.stations.length - 1];
@@ -93,9 +95,9 @@ export const JoinRideDialog = ({
             time: timeString,
             minutesAway,
             stationName: stations[userStationId].name,
-            destName: destStation?.name || 'End of Line'
+            destName: destStation?.name || t('joinRide.endOfLine', language)
         };
-    }, [sharedTrain, userStationId, initialDestination]);
+    }, [sharedTrain, userStationId, initialDestination, language]);
 
     if (!isOpen || !sharedTrain) return null;
 
@@ -109,7 +111,7 @@ export const JoinRideDialog = ({
             <div className="relative w-full max-w-sm bg-background p-6 rounded-2xl shadow-xl flex flex-col gap-4 animate-in fade-in zoom-in duration-300">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors"
+                    className="absolute top-4 right-4 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -119,20 +121,20 @@ export const JoinRideDialog = ({
                     <Train className="w-6 h-6" style={{ color: LINE_COLORS[sharedTrain.line as keyof typeof LINE_COLORS] }} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold">Join Shared Ride</h2>
-                        <p className="text-sm text-muted-foreground capitalize">{sharedTrain.line} Line Metro</p>
+                        <h2 className="text-xl font-bold">{t('joinRide.title', language)}</h2>
+                        <p className="text-sm text-muted-foreground capitalize">{t('joinRide.lineMetro', language).replace('{line}', sharedTrain.line)}</p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
                     <div className="bg-muted/40 p-4 rounded-xl border border-border">
-                        <p className="text-sm font-medium mb-2">Where will you board?</p>
+                        <p className="text-sm font-medium mb-2">{t('joinRide.whereBoard', language)}</p>
                         <div className="relative">
                             <div className="flex items-center gap-2 p-3 bg-background rounded-lg border border-border focus-within:border-primary transition-colors">
                                 <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                                 <input
                                     type="text"
-                                    placeholder="Search station..."
+                                    placeholder={t('common.search', language)}
                                     value={search}
                                     onChange={(e) => {
                                         setSearch(e.target.value);
@@ -152,7 +154,7 @@ export const JoinRideDialog = ({
                                                 setSearch(s.name);
                                                 setShowDropdown(false);
                                             }}
-                                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                                            className="w-full px-3 py-3 min-h-[44px] text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
                                         >
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: LINE_COLORS[s.lines[0] as keyof typeof LINE_COLORS] }} />
                                             {s.name}
@@ -163,12 +165,16 @@ export const JoinRideDialog = ({
                         </div>
                     </div>
 
+                    {sharedTrain && !userStationId && (
+                        <p className="text-sm text-muted-foreground">{t('joinRide.selectStation', language)}</p>
+                    )}
+
                     {interceptDetails?.status === 'not-on-route' && (
                         <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3">
                             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                             <div className="text-sm">
-                                <p className="font-semibold">Metro doesn't stop here</p>
-                                <p>This metro does not pass through {stations[userStationId]?.name}.</p>
+                                <p className="font-semibold">{t('joinRide.noStopHere', language)}</p>
+                                <p>{t('joinRide.doesNotPass', language).replace('{station}', stations[userStationId]?.name || '')}</p>
                             </div>
                         </div>
                     )}
@@ -177,35 +183,35 @@ export const JoinRideDialog = ({
                         <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3">
                             <Clock className="w-5 h-5 flex-shrink-0" />
                             <div className="text-sm">
-                                <p className="font-semibold">Metro has departed</p>
-                                <p>You missed it by {interceptDetails.minutesAgo} mins.</p>
+                                <p className="font-semibold">{t('dialog.departed', language)}</p>
+                                <p>{t('joinRide.missedBy', language).replace('{mins}', String(interceptDetails.minutesAgo))}</p>
                             </div>
                         </div>
                     )}
 
                     {interceptDetails?.status === 'upcoming' && (
                         <div className="p-4 bg-green-50 dark:bg-green-900/10 border-2 border-green-500/20 rounded-xl text-center space-y-2">
-                            <p className="text-sm text-green-700 dark:text-green-300 font-medium">Be at platform by</p>
+                            <p className="text-sm text-green-700 dark:text-green-300 font-medium">{t('joinRide.beAtPlatform', language)}</p>
                             <div className="text-4xl font-bold text-green-600 dark:text-green-400 tabular-nums">
                                 {interceptDetails.time}
                             </div>
                             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
                                 <Clock className="w-3 h-3" />
-                                Arrives in {interceptDetails.minutesAway} mins
+                                {t('joinRide.arrivesIn', language).replace('{mins}', String(interceptDetails.minutesAway))}
                             </p>
 
                             <div className="pt-2 mt-2 border-t border-green-200 dark:border-green-800/30 flex items-center justify-center gap-2 text-sm text-green-800 dark:text-green-200">
-                                <span>Destination:</span>
+                                <span>{t('joinRide.destination', language)}</span>
                                 <span className="font-semibold">{interceptDetails.destName}</span>
                             </div>
 
                             {onNavigate && (
                                 <button
                                     onClick={onNavigate}
-                                    className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white rounded-lg py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                                    className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white rounded-lg py-3 min-h-[44px] text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                                 >
                                     <Navigation className="w-4 h-4" />
-                                    Get Directions
+                                    {t('panel.directions', language)}
                                 </button>
                             )}
                         </div>

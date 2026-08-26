@@ -92,6 +92,8 @@ export default defineConfig(({ mode }) => ({
       } as any,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,geojson,json}"],
+        // og-image/feature-graphic are link-preview assets — no in-app code path needs them
+        globIgnores: ["**/og-image*", "**/feature-graphic*"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
@@ -124,21 +126,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: /^https:\/\/unpkg\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "unpkg-cdn",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
+            urlPattern: /^(\/api\/nominatim|https:\/\/nominatim\.openstreetmap\.org\/).*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "geocoding-cache",

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { findCommonTrainRoute, planRoute, calculateFare } from '../routePlanner';
+import { findCommonTrainRoute, planRoute, calculateFare, planRouteWithDeparture, calculateJourneyProgress } from '../routePlanner';
 import { trainSchedules } from '../../data/timetable';
 
 describe('Route Planner API', () => {
@@ -214,4 +214,71 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
     expect(interchangeAtOHC).toBeDefined();
     expect(interchangeAtOHC?.trainId).toBe(redLineTrain.id);
   });
+
+  describe('calculateJourneyProgress for shared link live tracking', () => {
+    it('calculates upcoming, ongoing, and completed journey progress accurately', () => {
+      // Find a valid schedule (e.g. APMC to Motera Stadium)
+      const schedule = trainSchedules.find(s => s.stations.includes('apmc') && s.stations.includes('motera_stadium'));
+      if (!schedule) return;
+
+      const [h, m] = schedule.startTime.split(':').map(Number);
+      const depMins = h * 60 + m;
+      const route = planRouteWithDeparture('apmc', 'motera_stadium', depMins);
+      expect(route).not.toBeNull();
+      if (!route) return;
+
+      // 1. Upcoming (before departure)
+      const upcomingProgress = calculateJourneyProgress(route, depMins - 10);
+      expect(upcomingProgress.status).toBe('upcoming');
+      expect(upcomingProgress.progress).toBe(0);
+      expect(upcomingProgress.currentStationId).toBe('apmc');
+      expect(upcomingProgress.isAtStation).toBe(true);
+      expect(upcomingProgress.statusText).toContain('Starting from APMC in 10 mins');
+
+      // 2. Ongoing - At departure time
+      const atStartProgress = calculateJourneyProgress(route, depMins);
+      expect(atStartProgress.status).toBe('ongoing');
+      expect(atStartProgress.currentStationId).toBe('apmc');
+      expect(atStartProgress.nextStationId).toBeDefined();
+
+      // 3. Ongoing - mid-journey
+      const arrMins = route.arrivalMinutes ?? (depMins + 30);
+      const midMins = depMins + (arrMins - depMins) / 2;
+      const midProgress = calculateJourneyProgress(route, midMins);
+      expect(midProgress.status).toBe('ongoing');
+      expect(midProgress.progress).toBeGreaterThan(0);
+      expect(midProgress.progress).toBeLessThan(1);
+      expect(midProgress.currentStationId).toBeDefined();
+      expect(midProgress.statusText).toBeDefined();
+
+      // 4. Completed (after arrival)
+      const completedProgress = calculateJourneyProgress(route, arrMins + 5);
+      expect(completedProgress.status).toBe('completed');
+      expect(completedProgress.progress).toBe(1);
+      expect(completedProgress.currentStationId).toBe('motera_stadium');
+      expect(completedProgress.isAtStation).toBe(true);
+      expect(completedProgress.statusText).toContain('Arrived at Motera Stadium');
+      expect(completedProgress.passedStationIds.length).toBeGreaterThan(0);
+    });
+
+    it('accurately tracks the 12:22 Paldi to GNLU train at 12:55 approaching Koba Circle', () => {
+      // Paldi to GNLU 12:22 departure
+      const depMins = 12 * 60 + 22; // 742 min
+      const route = planRouteWithDeparture('paldi', 'gnlu', depMins);
+      expect(route).not.toBeNull();
+      if (!route) return;
+
+      // At 12:55 (775 min)
+      const time1255 = 12 * 60 + 55;
+      const progress = calculateJourneyProgress(route, time1255);
+
+      expect(progress.status).toBe('ongoing');
+      expect(progress.nextStationId).toBe('koba_circle');
+      expect(progress.statusText).toBe('En route to Koba Circle');
+      expect(progress.subStatusText).toContain('Koba Circle');
+      expect(progress.passedStationIds).toContain('tapovan_circle');
+      expect(progress.passedStationIds).toContain('narmada_canal');
+    });
+  });
 });
+

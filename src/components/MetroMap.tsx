@@ -120,7 +120,7 @@ export const MetroMap = () => {
     }
 
     if (sharedOrig && sharedDest && depMinsStr) {
-      const depMins = parseInt(depMinsStr, 10);
+      const depMins = parseFloat(depMinsStr);
       const route = planRouteWithDeparture(sharedOrig, sharedDest, depMins);
       if (route) {
         const segments = route.steps
@@ -136,7 +136,9 @@ export const MetroMap = () => {
           depMins,
           segments
         });
+        setPlannedRoute(route);
         setIsFriendsViewerOpen(true);
+        setIsPanelExpanded(false);
       }
     }
 
@@ -518,7 +520,17 @@ export const MetroMap = () => {
   useEffect(() => {
     let animationFrameId: number;
 
+    let lastTickAt = 0;
+    let lastTrainCount = -1;
     const animateTrains = () => {
+      // Trains move <0.5% of a segment per frame — recomputing positions at
+      // 60 Hz wastes a full timetable scan per frame. Throttle to ~5 Hz.
+      const now = Date.now();
+      if (now - lastTickAt < 200) {
+        animationFrameId = requestAnimationFrame(animateTrains);
+        return;
+      }
+      lastTickAt = now;
       if (!mapRef.current) return;
 
       const positions = getCurrentTrainPositions();
@@ -528,8 +540,11 @@ export const MetroMap = () => {
       latestPositionsRef.current.clear();
       positions.forEach(p => latestPositionsRef.current.set(p.id, p));
 
-      // Update active train count
-      setActiveTrainCount(positions.length);
+      // Update active train count only when it changes (avoids re-render per tick)
+      if (positions.length !== lastTrainCount) {
+        lastTrainCount = positions.length;
+        setActiveTrainCount(positions.length);
+      }
 
       positions.forEach(pos => {
         // Calculate precise position using cached geometry
@@ -1381,12 +1396,35 @@ longPressTimer = setTimeout(() => {
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
       let isFirstPosition = true;
-      
+      let permissionToastShown = false;
+      let lastStatePushAt = 0;
+      let lastPushedLat = 0;
+      let lastPushedLng = 0;
+
       // Use watchPosition for continuous tracking (updates when user moves)
       geoWatchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
+
+          if (!isFirstPosition && position.coords.accuracy > 30) {
+            // Low-confidence fix — moving the marker here causes visible jumps.
+            return;
+          }
+
+          // Markers update imperatively below; throttle the React state push
+          // (which re-renders this whole component) to once per 2 seconds, and
+          // skip entirely when stationary (<10 m) so BottomPanel/SearchBar memo
+          // isn't defeated by fresh array identity every tick.
+          const now = Date.now();
+          const movedEnough =
+            Math.abs(latitude - lastPushedLat) > 0.0001 ||
+            Math.abs(longitude - lastPushedLng) > 0.0001;
+          if (now - lastStatePushAt > 2000 && (isFirstPosition || movedEnough)) {
+            lastStatePushAt = now;
+            lastPushedLat = latitude;
+            lastPushedLng = longitude;
+            setUserLocation([latitude, longitude]);
+          }
 
           if (isFirstPosition) {
             // First time: create markers and center map
@@ -1443,7 +1481,12 @@ longPressTimer = setTimeout(() => {
         },
         (error) => {
           console.warn('Geolocation disabled or failed:', error.message);
-          
+
+          // watchPosition can fire errors repeatedly — react only once,
+          // otherwise toasts spam and the map keeps re-fitting bounds.
+          if (permissionToastShown) return;
+          permissionToastShown = true;
+
           if (error.code === error.PERMISSION_DENIED) {
             toast({
               title: 'Location Services Disabled',
@@ -1451,7 +1494,7 @@ longPressTimer = setTimeout(() => {
             });
           }
 
-          // Fit to all stations if location denied
+          // Fit to all stations if location unavailable
           const allCoords = Object.values(stations).map(s => s.coordinates);
           if (allCoords.length > 0) {
             map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
@@ -1479,7 +1522,10 @@ longPressTimer = setTimeout(() => {
         mapRef.current = null;
       }
     };
-  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast, language]);
+    // `language` intentionally omitted: including it tears down and rebuilds the
+    // whole map on every language switch. The label-swap effect above (~line 200)
+    // already updates station labels in place.
+  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast]);
 
   const handleClosePanel = () => {
     setSelectedStation(null);
@@ -1590,7 +1636,11 @@ longPressTimer = setTimeout(() => {
       <div ref={mapContainerRef} className="w-full h-full" style={{ pointerEvents: 'auto' }} />
 
       <SearchBar onLocationSelect={handleLocationSelect} onStationSelect={handleStationSelect} />
-      <SideMenu onOpenRoutePlanner={() => setIsRoutePlannerOpen(true)} />
+      <SideMenu onOpenRoutePlanner={() => {
+        // Default the journey start to the user's nearest station.
+        setRoutePlannerOrigin(nearestStation?.id);
+        setIsRoutePlannerOpen(true);
+      }} />
 
       {/* Active Metros indicator */}
       {activeTrainCount > 0 && (

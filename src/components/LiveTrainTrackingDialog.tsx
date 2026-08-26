@@ -153,7 +153,7 @@ export const LiveTrainTrackingDialog = ({
     const [hours, mins] = schedule.startTime.split(':').map(Number);
     const depMins = hours * 60 + mins;
     
-    const shareUrl = `${window.location.origin}?orig=${originStation}&dest=${destStation}&depMins=${depMins}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?orig=${originStation}&dest=${destStation}&depMins=${depMins}`;
 
     if (navigator.share) {
       navigator.share({
@@ -172,11 +172,25 @@ export const LiveTrainTrackingDialog = ({
     const [hours, mins] = schedule.startTime.split(':').map(Number);
     const depMins = hours * 60 + mins;
     
-    const shareUrl = `${window.location.origin}?orig=${originStation}&dest=${destStation}&depMins=${depMins}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?orig=${originStation}&dest=${destStation}&depMins=${depMins}`;
     
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsAppShare = () => {
+    const originStation = schedule.stations[0];
+    const destStation = schedule.stations[schedule.stations.length - 1];
+    const originName = getStationName(stations[originStation], language) || originStation;
+    const destName = getStationName(stations[destStation], language) || destStation;
+    
+    const [hours, mins] = schedule.startTime.split(':').map(Number);
+    const depMins = hours * 60 + mins;
+    
+    const shareUrl = `${window.location.origin}${window.location.pathname}?orig=${originStation}&dest=${destStation}&depMins=${depMins}`;
+    const text = `🚆 Track my Ahmedabad Metro live on the ${line.charAt(0).toUpperCase() + line.slice(1)} Line (${originName} ➔ ${destName})\n${shareUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   // Get origin and destination
@@ -202,7 +216,7 @@ export const LiveTrainTrackingDialog = ({
               </span>
               {t('dialog.liveTracking', language)}
             </h2>
-            <p className="text-sm text-white/80">{t(`route.${line}Line` as Parameters<typeof t>[0], language)}</p>
+            <p className="text-sm text-white/80">{t(`route.${line}Line` as Parameters<typeof t>[0], language)} · {t('common.estimated', language)}</p>
           </div>
           <button 
             onClick={onClose}
@@ -240,19 +254,28 @@ export const LiveTrainTrackingDialog = ({
           </div>
 
           {/* Share Buttons */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2.5">
             <button
               onClick={handleShare}
-              className="flex-1 py-3 px-4 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
+              className="flex-1 py-3 px-4 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] shadow-sm"
               style={{ backgroundColor: LINE_COLORS[line as keyof typeof LINE_COLORS] }}
             >
               <Share2 size={18} />
               {t('dialog.shareLiveLocation', language)}
             </button>
             <button
+              onClick={handleWhatsAppShare}
+              className="py-3 px-4 rounded-xl font-semibold bg-[#25D366] text-white hover:bg-[#20ba59] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.586 1.761.88 2.79.88 3.182 0 5.768-2.587 5.768-5.766.001-3.187-2.575-5.766-5.767-5.766zm9.969 5.766c0 5.517-4.483 10-10 10-1.812 0-3.513-.485-4.981-1.328l-5.019 1.39 1.416-4.891c-.961-1.536-1.516-3.344-1.516-5.171 0-5.517 4.483-10 10-10 5.517 0 10 4.483 10 10z"/>
+              </svg>
+              WhatsApp
+            </button>
+            <button
               onClick={handleCopyLink}
               className={cn(
-                'flex-1 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all border',
+                'py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all border',
                 copied 
                   ? 'bg-green-500/20 border-green-500 text-green-500'
                   : 'bg-muted/50 border-border hover:bg-muted active:scale-[0.98]'

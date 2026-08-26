@@ -267,7 +267,7 @@ export const formatCrowdLevel = (level: CrowdLevel): CrowdInfo => {
     case 'low':
       return {
         level: 'low',
-        label: 'Low',
+        label: '~Low', // '~' marks estimate — no realtime crowding feed exists
         color: '#22c55e',
         bgClass: 'bg-green-500/15',
         textClass: 'text-green-600 dark:text-green-400'
@@ -275,7 +275,7 @@ export const formatCrowdLevel = (level: CrowdLevel): CrowdInfo => {
     case 'moderate':
       return {
         level: 'moderate',
-        label: 'Moderate',
+        label: '~Moderate',
         color: '#eab308',
         bgClass: 'bg-yellow-500/15',
         textClass: 'text-yellow-600 dark:text-yellow-400'
@@ -283,7 +283,7 @@ export const formatCrowdLevel = (level: CrowdLevel): CrowdInfo => {
     case 'heavy':
       return {
         level: 'heavy',
-        label: 'Heavy',
+        label: '~Heavy',
         color: '#ef4444',
         bgClass: 'bg-red-500/15',
         textClass: 'text-red-600 dark:text-red-400'

@@ -1,12 +1,12 @@
-import { getISTDate } from '@/lib/utils';
+import { getISTDate, minutesUntil } from '@/lib/utils';
 import { X, MapPin, Clock, Train, Navigation, Locate, Loader2, Route, AlertTriangle, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Station, LINE_COLORS } from '@/data/metroData';
-import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway } from '@/data/timetable';
+import { getUpcomingTrains, getLastTrainWarnings, getCurrentHeadway, getServiceWindow } from '@/data/timetable';
 import { getCrowdLevel } from '@/lib/crowding';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 interface BottomPanelProps {
   selectedStation: Station | null;
@@ -55,6 +55,9 @@ export const BottomPanel = React.memo(({
 
   const station = selectedStation || nearestStation;
 
+  // Service day window at this station — stable across the day, so no time dep.
+  const serviceWindow = useMemo(() => (station ? getServiceWindow(station.id) : null), [station]);
+
   // Auto-refresh current time every second for live feel
   useEffect(() => {
     const timeInterval = setInterval(() => {
@@ -81,12 +84,7 @@ export const BottomPanel = React.memo(({
     const [h, m] = arrivalTime.split(':').map(Number);
     const arrivalMinutes = h * 60 + m;
     const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    
-    let minutesAway = arrivalMinutes - currentMinutes;
-    if (minutesAway < -12 * 60) {
-      minutesAway += 24 * 60;
-    }
-    
+    const minutesAway = minutesUntil(arrivalMinutes, currentMinutes);
     const secondsIntoMinute = currentTime.getSeconds();
     return Math.max(0, minutesAway - (secondsIntoMinute > 30 ? 1 : 0));
   };
@@ -94,7 +92,7 @@ export const BottomPanel = React.memo(({
 
   const handleLocate = () => {
     if (!('geolocation' in navigator)) {
-      toast.error('Geolocation is not supported by your browser');
+      toast.error(t('panel.geoUnsupported', language));
       return;
     }
 
@@ -117,7 +115,7 @@ export const BottomPanel = React.memo(({
           if (error.code === error.PERMISSION_DENIED) {
             console.error('Geolocation error:', error);
             setIsLocating(false);
-            toast.error('Location access denied. Please enable location permissions.');
+            toast.error(t('panel.locationDenied', language));
             return;
           }
           
@@ -127,7 +125,7 @@ export const BottomPanel = React.memo(({
           } else {
             console.error('Geolocation error:', error);
             setIsLocating(false);
-            toast.error('Failed to get your location. Please try again.');
+            toast.error(t('panel.locationFailed', language));
           }
         },
         { 
@@ -150,7 +148,7 @@ export const BottomPanel = React.memo(({
         <button
           onClick={() => onPlanRoute(selectedStation.id)}
           className="absolute -top-16 left-4 p-3.5 flex items-center gap-2 bg-background text-foreground border border-border rounded-2xl shadow-xl shadow-black/5 hover:bg-muted transition-all hover:scale-105 active:scale-95 animate-fade-in pointer-events-auto will-change-transform transform-gpu"
-          aria-label="Plan journey"
+          aria-label={t('panel.planRoute', language)}
         >
           <Route className="w-5 h-5" />
           <span className="font-semibold text-sm">{t('panel.planRoute', language)}</span>
@@ -172,7 +170,7 @@ export const BottomPanel = React.memo(({
             window.open(url, '_blank');
           }}
           className="absolute -top-16 left-4 p-3.5 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/25 hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-fade-in pointer-events-auto"
-          aria-label="Navigate to station"
+          aria-label={t('panel.directions', language)}
         >
           <Navigation className="w-5 h-5 fill-current" />
           <span className="font-semibold text-sm">{t('panel.directions', language)}</span>
@@ -183,7 +181,7 @@ export const BottomPanel = React.memo(({
         onClick={handleLocate}
         disabled={isLocating}
         className="absolute -top-16 right-4 p-3.5 glass-panel rounded-2xl shadow-xl shadow-black/5 hover:bg-background/70 transition-all hover-scale disabled:opacity-50 pointer-events-auto"
-        aria-label="Locate me"
+        aria-label={t('panel.locateMe', language)}
       >
         {isLocating ? (
           <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -224,8 +222,8 @@ export const BottomPanel = React.memo(({
                       e.stopPropagation();
                       onClose();
                     }}
-                    className="p-1.5 rounded-full hover:bg-muted transition-colors"
-                    aria-label="Close panel"
+                    className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+                    aria-label={t('common.close', language)}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -233,17 +231,18 @@ export const BottomPanel = React.memo(({
               </div>
 
               {/* Line badges */}
-              <div className="flex gap-2 mb-2">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {station.lines.map(line => (
                   <span
                     key={line}
-                    className="px-2 py-0.5 rounded text-xs font-medium text-white capitalize"
+                    className="px-2.5 py-0.5 rounded-full text-xs font-semibold text-white shadow-xs capitalize tracking-wide"
+                    style={{ backgroundColor: LINE_COLORS[line as keyof typeof LINE_COLORS] || '#0066CC' }}
                   >
                     {t(`route.${line}Line` as Parameters<typeof t>[0], language)}
                   </span>
                 ))}
                 {station.isInterchange && (
-                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted/80 text-foreground border border-border/60">
                     {t('panel.interchange', language)}
                   </span>
                 )}
@@ -362,7 +361,17 @@ export const BottomPanel = React.memo(({
                   </div>
                 ) : (
                   <div className="text-sm text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-                    {t('panel.noUpcomingMetros', language)}
+                    {(() => {
+                      const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+                      if (serviceWindow) {
+                        const firstMin = Number(serviceWindow.first.slice(0, 2)) * 60 + Number(serviceWindow.first.slice(3));
+                        if (nowMinutes < firstMin) {
+                          return `${t('panel.firstMetro', language)} ${serviceWindow.first}`;
+                        }
+                        return `${t('panel.noUpcomingMetros', language)} · ${t('panel.lastMetro', language)} ${serviceWindow.last}`;
+                      }
+                      return t('panel.noUpcomingMetros', language);
+                    })()}
                   </div>
                 )}
               </div>

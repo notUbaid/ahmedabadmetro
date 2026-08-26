@@ -27,7 +27,8 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const [workSelectedIndex, setWorkSelectedIndex] = useState(-1);
   const { language } = useLanguage();
   
-  const existingSettings = useMemo(() => getCommuteSettings(), []);
+  // Re-read on every open — localStorage can change between mounts/dismissals
+  const existingSettings = useMemo(() => getCommuteSettings(), [isOpen]);
   const organizedStations = useMemo(() => getOrganizedStations(), []);
   const allStations = useMemo(() => Object.values(stations), []);
 
@@ -66,11 +67,12 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
   const handleSave = () => {
     if (homeStation && workStation && homeStation !== workStation) {
+      const current = getCommuteSettings();
       const settings: CommuteSettings = {
         homeStation,
         workStation,
-        homeToWorkDismissCount: existingSettings?.homeToWorkDismissCount || 0,
-        workToHomeDismissCount: existingSettings?.workToHomeDismissCount || 0,
+        homeToWorkDismissCount: current?.homeToWorkDismissCount || 0,
+        workToHomeDismissCount: current?.workToHomeDismissCount || 0,
       };
       saveCommuteSettings(settings);
       onClose();

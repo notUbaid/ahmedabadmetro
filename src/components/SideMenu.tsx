@@ -147,22 +147,6 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       description: t('menu.themeDesc', language)
     },
     {
-      icon: Languages,
-      label: t('menu.language', language),
-      onClick: () => {
-        const nextLang = language === 'en' ? 'gu' : language === 'gu' ? 'hi' : 'en';
-        setLanguage(nextLang);
-      },
-      description: language === 'en' 
-        ? 'English (Click to switch to ગુજરાતી)' 
-        : language === 'gu' 
-          ? 'ગુજરાતી (हिंदी में बदलने के लिए क्लिक करें)' 
-          : 'हिंदी (Click to switch to English)',
-      customIconColor: 'text-blue-600 dark:text-blue-400',
-      customBgColor: 'bg-blue-500/15',
-      isToggle: false,
-    },
-    {
       icon: Coffee,
       label: t('menu.buyCoffee', language),
       onClick: () => window.open('https://buymeacoffee.com/notUbaid', '_blank'),
@@ -225,7 +209,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
 
         {/* Menu Items */}
-        <div className="p-2">
+        <div className="p-2 space-y-1">
           {menuItems.map((item, index) => (
             <button
               key={index}
@@ -252,6 +236,48 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
               )}
             </button>
           ))}
+
+          {/* Language Selector */}
+          <div className="p-3 rounded-xl bg-muted/40 border border-border/50 space-y-2 mt-2">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                <Languages className="w-4 h-4" />
+              </div>
+              <span className="font-medium text-sm">{t('menu.language', language)}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1 p-1 bg-background/80 rounded-lg border border-border/40">
+              <button
+                onClick={() => setLanguage('en')}
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
+                  language === 'en'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                English
+              </button>
+              <button
+                onClick={() => setLanguage('gu')}
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
+                  language === 'gu'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                ગુજરાતી
+              </button>
+              <button
+                onClick={() => setLanguage('hi')}
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
+                  language === 'hi'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                हिंदी
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
