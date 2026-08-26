@@ -345,12 +345,44 @@ export const MetroMap = () => {
       return true;
     });
 
+    // Helper to get detailed curved track coordinates between two adjacent stations
+    const getTrackCoordsBetween = (s1: Station, s2: Station): [number, number][] => {
+      const segKey = `${s1.id}-${s2.id}`;
+      const revKey = `${s2.id}-${s1.id}`;
+      const segEntry = routeSegmentsRef.current.get(segKey);
+      const revEntry = routeSegmentsRef.current.get(revKey);
+
+      if (segEntry && segEntry.geometry.length > 0) {
+        return segEntry.geometry;
+      }
+      if (revEntry && revEntry.geometry.length > 0) {
+        return [...revEntry.geometry].reverse();
+      }
+      return [s1.coordinates, s2.coordinates];
+    };
+
     // Draw segments with line colors
     let currentLine: keyof typeof LINE_COLORS | undefined;
+    let currentBoardingStation: Station | null = null;
     let segmentCoords: [number, number][] = [];
+
+    const appendTrackSection = (s1: Station, s2: Station) => {
+      const trackPoints = getTrackCoordsBetween(s1, s2);
+      trackPoints.forEach((pt, pIdx) => {
+        if (pIdx === 0 && segmentCoords.length > 0) {
+          const lastPt = segmentCoords[segmentCoords.length - 1];
+          if (Math.abs(lastPt[0] - pt[0]) < 0.00001 && Math.abs(lastPt[1] - pt[1]) < 0.00001) {
+            return;
+          }
+        }
+        segmentCoords.push(pt);
+      });
+    };
 
     const flushSegment = () => {
       if (segmentCoords.length >= 2 && currentLine) {
+        const lineColor = LINE_COLORS[currentLine] || '#DC2626';
+
         // Draw glow/outline
         const glow = L.polyline(segmentCoords, {
           pane: 'routeHighlight',
@@ -365,7 +397,7 @@ export const MetroMap = () => {
         // Draw main line
         const line = L.polyline(segmentCoords, {
           pane: 'routeHighlight',
-          color: (currentLine === 'green' || currentLine === 'purple') ? LINE_COLORS['red'] : LINE_COLORS[currentLine],
+          color: lineColor,
           weight: 7,
           opacity: 1,
           lineCap: 'round',
@@ -377,33 +409,28 @@ export const MetroMap = () => {
     };
 
     // Build segments from steps
-    route.steps.forEach((step, idx) => {
+    route.steps.forEach((step) => {
       if (step.type === 'board') {
         currentLine = step.line;
-        segmentCoords = [step.station.coordinates];
+        currentBoardingStation = step.station;
       } else if (step.type === 'travel') {
-        // Add intermediate stations
-        if (step.stations) {
-          step.stations.forEach(s => {
-            segmentCoords.push(s.coordinates);
-          });
+        const travelStationList = [
+          ...(currentBoardingStation ? [currentBoardingStation] : []),
+          ...(step.stations || []),
+          step.station
+        ];
+        for (let i = 0; i < travelStationList.length - 1; i++) {
+          appendTrackSection(travelStationList[i], travelStationList[i + 1]);
         }
-        // Add destination of this travel segment
-        segmentCoords.push(step.station.coordinates);
+        currentBoardingStation = step.station;
       } else if (step.type === 'interchange') {
-        // Finish current segment
         flushSegment();
-        // Start new segment with new line
         currentLine = step.line;
-        segmentCoords = [step.station.coordinates];
+        currentBoardingStation = step.station;
       } else if (step.type === 'bus') {
-        // Finish current segment
         flushSegment();
-        // Draw bus segment in emerald color
-        if (segmentCoords.length >= 1) {
-          // Use the station as both start and end for bus visualization
-          const busCoords = [step.station.coordinates, step.station.coordinates];
-          // Draw bus segment
+        if (currentBoardingStation) {
+          const busCoords = [currentBoardingStation.coordinates, step.station.coordinates];
           const busLine = L.polyline(busCoords, {
             pane: 'routeHighlight',
             color: '#10B981',
@@ -415,8 +442,8 @@ export const MetroMap = () => {
           }).addTo(map);
           routeLayersRef.current.push(busLine);
         }
+        currentBoardingStation = step.station;
       } else if (step.type === 'alight') {
-        // Finish segment at destination
         flushSegment();
       }
     });
