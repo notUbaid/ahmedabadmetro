@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const url = `https://api.openrouteservice.org/v2/directions/foot-walking?api_key=${encodeURIComponent(apiKey)}&start=${coords[0]},${coords[1]}&end=${coords[2]},${coords[3]}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
 
     if (!response.ok) {
       const errorData = await response.text();

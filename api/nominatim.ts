@@ -14,15 +14,17 @@ let lastUpstreamCallTimestamp = 0;
 const MIN_REQUEST_INTERVAL_MS = 1000;
 
 async function throttleUpstream(): Promise<void> {
+  // Reserve the slot synchronously BEFORE sleeping — stamping after the await
+  // lets concurrent arrivals read a stale timestamp and all pass through at
+  // once, bursting above Nominatim's 1 req/s policy.
   const now = Date.now();
   const timeSinceLastCall = now - lastUpstreamCallTimestamp;
-  
+  lastUpstreamCallTimestamp = now;
+
   if (timeSinceLastCall < MIN_REQUEST_INTERVAL_MS) {
     const waitTime = MIN_REQUEST_INTERVAL_MS - timeSinceLastCall;
     await new Promise((resolve) => setTimeout(resolve, waitTime));
   }
-  
-  lastUpstreamCallTimestamp = Date.now();
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

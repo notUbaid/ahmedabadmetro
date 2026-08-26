@@ -126,7 +126,9 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: /^(\/api\/nominatim|https:\/\/nominatim\.openstreetmap\.org\/).*/i,
+            // Workbox matches against the absolute URL — same-origin /api
+            // requests must be matched as a substring, not anchored with ^.
+            urlPattern: /\/api\/nominatim|^https:\/\/nominatim\.openstreetmap\.org\//i,
             handler: "NetworkFirst",
             options: {
               cacheName: "geocoding-cache",
