@@ -31,6 +31,53 @@ export const POPULAR_PLACE_LABELS: Record<PopularPlaceType, string> = {
   club: 'Club',
 };
 
+export type PopularPlaceLang = 'en' | 'gu' | 'hi';
+
+const LABELS_GU: Record<PopularPlaceType, string> = {
+  monument: 'વારસાગત સ્મારક',
+  temple: 'મંદિર',
+  mosque: 'મસ્જિદ',
+  museum: 'સંગ્રહાલય',
+  mall: 'મોલ',
+  market: 'બજાર',
+  food: 'ફૂડ સ્ટ્રીટ',
+  park: 'બગીચો',
+  lake: 'તળાવ',
+  science: 'વિજ્ઞાન પ્રદર્શન',
+  transport: 'પરિવહન કેન્દ્ર',
+  education: 'કૅમ્પસ',
+  research: 'સંશોધન સંસ્થા',
+  hospital: 'હોસ્પિટલ',
+  stadium: 'સ્ટેડિયમ',
+  area: 'વિસ્તાર',
+  bridge: 'પુલ',
+  club: 'ક્લબ',
+};
+
+const LABELS_HI: Record<PopularPlaceType, string> = {
+  monument: 'विरासत स्मारक',
+  temple: 'मंदिर',
+  mosque: 'मस्जिद',
+  museum: 'संग्रहालय',
+  mall: 'मॉल',
+  market: 'बाज़ार',
+  food: 'फूड स्ट्रीट',
+  park: 'पार्क',
+  lake: 'झील',
+  science: 'विज्ञान प्रदर्शनी',
+  transport: 'परिवहन केंद्र',
+  education: 'कैंपस',
+  research: 'अनुसंधान संस्थान',
+  hospital: 'अस्पताल',
+  stadium: 'स्टेडियम',
+  area: 'इलाका',
+  bridge: 'पुल',
+  club: 'क्लब',
+};
+
+export const getPlaceLabel = (type: PopularPlaceType, lang: PopularPlaceLang = 'en'): string =>
+  lang === 'gu' ? LABELS_GU[type] : lang === 'hi' ? LABELS_HI[type] : POPULAR_PLACE_LABELS[type];
+
 export interface PopularPlace {
   /** Display name */
   n: string;

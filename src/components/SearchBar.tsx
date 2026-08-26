@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
-import { popularPlaces, POPULAR_PLACE_LABELS } from '@/data/popularPlaces';
+import { popularPlaces, getPlaceLabel } from '@/data/popularPlaces';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName, Language } from '@/lib/i18n';
@@ -106,13 +106,13 @@ const getMetroStationResults = (language: Language): SearchResult[] => {
 };
 
 // Curated popular places — always searched locally, no API needed.
-const getPopularPlaceResults = (): SearchResult[] => {
+const getPopularPlaceResults = (language: string): SearchResult[] => {
   return popularPlaces.map((p, i) => {
     const isLandmark = ['monument', 'temple', 'mosque', 'museum'].includes(p.t);
     return {
       id: `pop_${i}`,
       name: p.n,
-      description: POPULAR_PLACE_LABELS[p.t],
+      description: getPlaceLabel(p.t, language === 'gu' || language === 'hi' ? language : 'en'),
       lat: p.c[0],
       lng: p.c[1],
       type: isLandmark ? ('landmark' as const) : ('place' as const),
@@ -268,7 +268,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const metroStations = useMemo(() => getMetroStationResults(language), [language]);
 
   // Static curated data — computed once
-  const popularResults = useMemo(() => getPopularPlaceResults(), []);
+  const popularResults = useMemo(() => getPopularPlaceResults(language), [language]);
 
   // Load recent searches on mount
   useEffect(() => {

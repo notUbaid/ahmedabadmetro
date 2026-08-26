@@ -1408,7 +1408,13 @@ longPressTimer = setTimeout(() => {
 
           if (!isFirstPosition && position.coords.accuracy > 30) {
             // Low-confidence fix — moving the marker here causes visible jumps.
-            return;
+            // Escape hatch: accept it anyway if the user clearly moved (~50 m),
+            // else devices with sustained >30 m accuracy would freeze the dot
+            // at the first fix forever.
+            const farMoved =
+              Math.abs(latitude - lastPushedLat) > 0.0005 ||
+              Math.abs(longitude - lastPushedLng) > 0.0005;
+            if (!farMoved) return;
           }
 
           // Markers update imperatively below; throttle the React state push

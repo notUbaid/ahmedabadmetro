@@ -49,9 +49,9 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
         if (pRoute) {
             const now = getISTDate();
             const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-            setJourneyProgress(calculateJourneyProgress(pRoute, currentMins));
+            setJourneyProgress(calculateJourneyProgress(pRoute, currentMins, language));
         }
-    }, [data, isOpen]);
+    }, [data, isOpen, language]);
     
     // Update progress continuously every second with zero delay
     useEffect(() => {
@@ -60,13 +60,13 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
         const updateProgress = () => {
             const now = getISTDate();
             const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-            setJourneyProgress(calculateJourneyProgress(route, currentMins));
+            setJourneyProgress(calculateJourneyProgress(route, currentMins, language));
         };
-        
+
         updateProgress();
         const interval = setInterval(updateProgress, 1000);
         return () => clearInterval(interval);
-    }, [route, isOpen]);
+    }, [route, isOpen, language]);
 
     if (!isOpen || !data) return null;
 

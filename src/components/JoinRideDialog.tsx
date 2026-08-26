@@ -7,7 +7,7 @@ import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
 import { cn, getISTDate, minutesUntil } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { t } from '@/lib/i18n';
+import { t, getStationName } from '@/lib/i18n';
 
 interface JoinRideDialogProps {
     isOpen: boolean;
@@ -94,8 +94,8 @@ export const JoinRideDialog = ({
             status: 'upcoming',
             time: timeString,
             minutesAway,
-            stationName: stations[userStationId].name,
-            destName: destStation?.name || t('joinRide.endOfLine', language)
+            stationName: getStationName(stations[userStationId], language),
+            destName: destStation ? getStationName(destStation, language) : t('joinRide.endOfLine', language)
         };
     }, [sharedTrain, userStationId, initialDestination, language]);
 
@@ -174,7 +174,7 @@ export const JoinRideDialog = ({
                             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                             <div className="text-sm">
                                 <p className="font-semibold">{t('joinRide.noStopHere', language)}</p>
-                                <p>{t('joinRide.doesNotPass', language).replace('{station}', stations[userStationId]?.name || '')}</p>
+                                <p>{t('joinRide.doesNotPass', language).replace('{station}', userStationId ? getStationName(stations[userStationId], language) : '')}</p>
                             </div>
                         </div>
                     )}

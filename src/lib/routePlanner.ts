@@ -2,6 +2,7 @@ import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules, TrainSchedule, lineStations } from '@/data/timetable';
 import { CORRIDOR_TIMINGS, REVERSE_CORRIDOR_TIMINGS, LINE_TIMINGS } from '@/data/segmentTimings';
 import { getISTDate } from '@/lib/utils';
+import { t, getStationName, type Language } from '@/lib/i18n';
 
 export interface RouteStep {
   type: 'board' | 'interchange' | 'travel' | 'alight' | 'bus';
@@ -1143,6 +1144,8 @@ const getSchedulesDepartingExactlyAt = (stationId: string, departureMinutes: num
   // Fallback 2: search across any dayType if still no match
   if (matches.length === 0) {
     for (const schedule of trainSchedules) {
+      // Never seed a journey with a train that doesn't run today
+      if (schedule.dayType && schedule.dayType !== dayType) continue;
       const stationIdx = schedule.stations.indexOf(stationId);
       if (stationIdx === -1 || stationIdx === schedule.stations.length - 1) continue;
 
@@ -1843,10 +1846,14 @@ export interface JourneyProgress {
  */
 export const calculateJourneyProgress = (
   route: PlannedRoute,
-  currentTimeMins: number
+  currentTimeMins: number,
+  language: Language = 'en'
 ): JourneyProgress => {
   const depTime = route.departureMinutes ?? parseTimeToMinutes(route.departureTime || '00:00');
   const arrTime = route.arrivalMinutes ?? parseTimeToMinutes(route.arrivalTime || '00:00');
+
+  // Localized station label; falls back to the raw id for unknown ids
+  const sName = (id: string): string => (stations[id] ? getStationName(stations[id], language) : id);
 
   // Collect all unique station IDs in the entire journey
   const allRouteStationIds: string[] = [];
@@ -1872,9 +1879,9 @@ export const calculateJourneyProgress = (
       currentStationId: route.origin.id,
       nextStationId: firstNext,
       statusText: minsUntil <= 0
-        ? `Departing from ${route.origin.name}`
-        : `Starting from ${route.origin.name} in ${minsUntil} min${minsUntil > 1 ? 's' : ''}`,
-      subStatusText: `Scheduled departure: ${route.departureTime || formatMinutesToTime(depTime)}`,
+        ? t('journey.departingFrom', language).replace('{station}', getStationName(route.origin, language))
+        : t('journey.startingIn', language).replace('{station}', getStationName(route.origin, language)).replace('{mins}', String(minsUntil)),
+      subStatusText: t('journey.scheduledDep', language).replace('{time}', route.departureTime || formatMinutesToTime(depTime)),
       passedStationIds: []
     };
   }
@@ -1885,7 +1892,7 @@ export const calculateJourneyProgress = (
       status: 'completed',
       isAtStation: true,
       currentStationId: route.destination.id,
-      statusText: `Arrived at ${route.destination.name}`,
+      statusText: t('journey.arrivedAt', language).replace('{station}', getStationName(route.destination, language)),
       subStatusText: `Trip completed at ${route.arrivalTime || formatMinutesToTime(arrTime)}`,
       passedStationIds: allRouteStationIds
     };
@@ -1950,8 +1957,10 @@ export const calculateJourneyProgress = (
                 currentStationId: sId,
                 nextStationId: nextSId,
                 isAtStation: true,
-                statusText: j === 0 ? `Boarding at ${stations[sId]?.name || sId}` : `At ${stations[sId]?.name || sId}`,
-                subStatusText: `Next stop: ${stations[nextSId]?.name || nextSId}`
+                statusText: j === 0
+                  ? t('journey.boardingAt', language).replace('{station}', sName(sId))
+                  : t('journey.atStation', language).replace('{station}', sName(sId)),
+                subStatusText: t('journey.nextStop', language).replace('{station}', sName(nextSId))
               };
               for (let k = 0; k < j; k++) {
                 if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
@@ -1967,10 +1976,10 @@ export const calculateJourneyProgress = (
                 currentStationId: sId,
                 nextStationId: nextSId,
                 isAtStation: false,
-                statusText: `En route to ${stations[nextSId]?.name || nextSId}`,
+                statusText: t('journey.enRouteTo', language).replace('{station}', sName(nextSId)),
                 subStatusText: minsToNext <= 1
-                  ? `Approaching ${stations[nextSId]?.name || nextSId}`
-                  : `Departed ${stations[sId]?.name || sId} • ~${minsToNext}m to next stop`
+                  ? t('journey.approaching', language).replace('{station}', sName(nextSId))
+                  : t('journey.departed', language).replace('{station}', sName(sId)).replace('{mins}', String(minsToNext))
               };
               for (let k = 0; k <= j; k++) {
                 if (!passedStationIds.includes(stationsInLeg[k])) passedStationIds.push(stationsInLeg[k]);
@@ -2024,8 +2033,12 @@ export const calculateJourneyProgress = (
             currentStationId: activeStation,
             nextStationId: s2,
             isAtStation: atStation,
-            statusText: atStation ? `At ${stations[activeStation]?.name || activeStation}` : `En route to ${stations[s2]?.name || s2}`,
-            subStatusText: atStation ? `Next: ${stations[s2]?.name || s2}` : `Departed ${stations[s1]?.name || s1}`
+            statusText: atStation
+              ? t('journey.atStation', language).replace('{station}', sName(activeStation))
+              : t('journey.enRouteTo', language).replace('{station}', sName(s2)),
+            subStatusText: atStation
+              ? t('journey.nextShort', language).replace('{station}', sName(s2))
+              : t('journey.departed', language).replace('{station}', sName(s1)).replace('{mins}', '')
           };
 
           for (let k = 0; k <= segmentIdx; k++) {
@@ -2052,10 +2065,10 @@ export const calculateJourneyProgress = (
           currentStationId: step.station.id,
           nextStationId: nextDest,
           isAtStation: true,
-          statusText: `Interchanging at ${step.station.name}`,
+          statusText: t('journey.interchangingAt', language).replace('{station}', getStationName(step.station, language)),
           subStatusText: step.trainTime
-            ? `Next train at ${step.trainTime} (~${waitRemaining} min)`
-            : `Connecting to ${step.line} line`
+            ? t('journey.nextTrainAt', language).replace('{time}', step.trainTime).replace('{mins}', String(waitRemaining))
+            : t('journey.connectingTo', language).replace('{line}', String(step.line))
         };
         if (!passedStationIds.includes(step.station.id)) passedStationIds.push(step.station.id);
         found = true;
@@ -2069,8 +2082,8 @@ export const calculateJourneyProgress = (
         resultPos = {
           currentStationId: step.station.id,
           isAtStation: false,
-          statusText: `Traveling by bus to ${step.busDestination}`,
-          subStatusText: `Feeder bus connection`
+          statusText: t('journey.busTo', language).replace('{destination}', String(step.busDestination)),
+          subStatusText: t('journey.feederBus', language)
         };
         found = true;
         break;
@@ -2085,7 +2098,7 @@ export const calculateJourneyProgress = (
     isAtStation: resultPos.isAtStation ?? false,
     currentStationId: resultPos.currentStationId ?? route.origin.id,
     nextStationId: resultPos.nextStationId,
-    statusText: resultPos.statusText ?? `En route to ${route.destination.name}`,
+    statusText: resultPos.statusText ?? t('journey.enRouteTo', language).replace('{station}', getStationName(route.destination, language)),
     subStatusText: resultPos.subStatusText,
     passedStationIds
   };

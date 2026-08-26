@@ -58,7 +58,8 @@ export const CommuteCard = ({
       .map(route => {
         let routeLabel = t('route.directMetro', language);
         if (route.interchangeCount > 0) {
-          routeLabel = `${route.interchangeCount} ${route.interchangeCount === 1 ? (language === 'gu' ? 'બદલો' : language === 'hi' ? 'બદલાવ' : 'Change') : (language === 'gu' ? 'બદલાવ' : language === 'hi' ? 'બદલાવ' : 'Changes')}`;
+          // hi uses Devanagari बदलाव/बदलाव — not Gujarati script
+          routeLabel = `${route.interchangeCount} ${route.interchangeCount === 1 ? (language === 'gu' ? 'બદલો' : language === 'hi' ? 'बदलाव' : 'change') : (language === 'gu' ? 'બદલાવ' : language === 'hi' ? 'बदलाव' : 'changes')}`;
         }
         const trainLine = route.line || fromStation.lines[0];
         return {
@@ -108,7 +109,7 @@ export const CommuteCard = ({
           <button 
             onClick={onDismiss}
             className="p-1.5 hover:bg-white/20 rounded-full transition-colors text-white"
-            aria-label="Close"
+            aria-label={t('common.close', language)}
           >
             <X className="w-4 h-4" />
           </button>

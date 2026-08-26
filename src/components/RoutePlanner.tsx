@@ -990,7 +990,7 @@ export const RoutePlanner = React.memo(({
                 {route.interchangeCount > 0 && (
                   <div className="flex items-center gap-1.5">
                     <ArrowDownUp className="w-4 h-4 text-amber-500" />
-                    <span>{route.interchangeCount} {t('commute.changes', language)}</span>
+                    <span>{route.interchangeCount} {t(route.interchangeCount === 1 ? 'commute.change' : 'commute.changes', language)}</span>
                   </div>
                 )}
                 {route.hasBusSegment && (

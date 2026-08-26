@@ -233,7 +233,7 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
       expect(upcomingProgress.progress).toBe(0);
       expect(upcomingProgress.currentStationId).toBe('apmc');
       expect(upcomingProgress.isAtStation).toBe(true);
-      expect(upcomingProgress.statusText).toContain('Starting from APMC in 10 mins');
+      expect(upcomingProgress.statusText).toContain('Starting from APMC in 10 min');
 
       // 2. Ongoing - At departure time
       const atStartProgress = calculateJourneyProgress(route, depMins);
