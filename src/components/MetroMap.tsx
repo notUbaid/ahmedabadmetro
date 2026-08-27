@@ -262,9 +262,21 @@ export const MetroMap = () => {
         searchedLocationMarkerRef.current = null;
       }
       setSearchedLocation(null);
+      setUserLocation([lat, lng]);
 
-      // (userMarker is updated by watchPosition natively, no need to manually update here)
-      
+      // Ensure user marker exists on map
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setLatLng([lat, lng]);
+      } else {
+        userMarkerRef.current = L.circleMarker([lat, lng], {
+          radius: 8,
+          fillColor: '#3B82F6',
+          color: '#FFFFFF',
+          weight: 3,
+          fillOpacity: 1,
+        }).addTo(mapRef.current);
+      }
+
       updateNearestStation(lat, lng);
       setSelectedStation(null);
       setIsPanelExpanded(true); // Show panel when located
