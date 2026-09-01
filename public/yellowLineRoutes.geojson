@@ -4294,8 +4294,8 @@
       "type": "Feature",
       "properties": {
         "@id": "node/12696728310",
-        "name": "PDPU",
-        "name:gu": "પી ડી પી યુ",
+        "name": "PDEU",
+        "name:gu": "પી ડી ઈ યુ",
         "network": "Ahmedabad Metro",
         "operator": "Gujarat Metro Rail Corporation Limited",
         "operator:wikidata": "Q113158873",

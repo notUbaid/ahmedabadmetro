@@ -164,6 +164,7 @@ export const popularPlaces: PopularPlace[] = [
   { n: 'Gujarat Technological University', t: 'education', c: [23.1065, 72.5900], k: 'gtu chandkheda university' },
   { n: 'Gujarat Vidyapith', t: 'education', c: [23.0445, 72.5545], k: 'gujarat vidyapith ashram road university' },
   { n: 'Nirma University', t: 'education', c: [23.1575, 72.4955], k: 'nirma institute technology sg highway' },
+  { n: 'Pandit Deendayal Energy University (PDEU)', t: 'education', c: [23.1550, 72.6610], k: 'pdpu pdeu gandhinagar raysan petroleum university energy' },
   { n: "St. Xavier's College", t: 'education', c: [23.0330, 72.5480], k: 'st xavier college navrangpura' },
   { n: 'Physical Research Laboratory', t: 'research', c: [23.0350, 72.5440], k: 'prl navrangpura space research' },
   { n: 'Space Applications Centre (ISRO)', t: 'research', c: [23.0230, 72.5380], k: 'isro sac jodhpur tekra satellite satellite' },

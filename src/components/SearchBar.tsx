@@ -313,9 +313,17 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
     try {
       // Find matching metro stations (always prioritized)
-      const matchingStations = metroStations.filter(station =>
-        station.name.toLowerCase().includes(normalizedQuery)
-      ).sort((a, b) => (b.importance || 0) - (a.importance || 0));
+      const matchingStations = metroStations.filter(station => {
+        const origStation = stations[station.id];
+        return (
+          station.name.toLowerCase().includes(normalizedQuery) ||
+          origStation?.name?.toLowerCase().includes(normalizedQuery) ||
+          (origStation?.nameGu && origStation.nameGu.includes(normalizedQuery)) ||
+          (origStation?.nameHi && origStation.nameHi.includes(normalizedQuery)) ||
+          origStation?.aliases?.some(a => a.toLowerCase().includes(normalizedQuery)) ||
+          origStation?.id?.toLowerCase().includes(normalizedQuery)
+        );
+      }).sort((a, b) => (b.importance || 0) - (a.importance || 0));
 
       // Curated popular places — local match, no API needed
       const matchingPopular = matchPopularPlaces(popularResults, normalizedQuery);

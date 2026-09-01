@@ -3,6 +3,7 @@ export interface Station {
   name: string;
   nameGu?: string;
   nameHi?: string;
+  aliases?: string[];
   coordinates: [number, number]; // [lat, lng]
   lines: ('blue' | 'red' | 'green' | 'purple')[];
   isUnderground?: boolean;
@@ -80,6 +81,14 @@ export const stations: Record<string, Station> = {
   mahatma_mandir: { id: 'mahatma_mandir', name: 'Mahatma Mandir', nameGu: 'મહાત્મા મંદિર', nameHi: 'महात्मा मंदिर', coordinates: [23.2339412, 72.6338714], lines: ['green'] },
 
   // Purple Line (GNLU to GIFT City)
-  pdpu: { id: 'pdpu', name: 'PDPU', nameGu: 'પી ડી પી યુ', nameHi: 'पी डी पी यू', coordinates: [23.1548645, 72.6612117], lines: ['purple'] },
+  pdpu: {
+    id: 'pdpu',
+    name: 'PDEU',
+    nameGu: 'પી ડી ઈ યુ',
+    nameHi: 'पी डी ई यू',
+    aliases: ['PDPU', 'Pandit Deendayal Petroleum University', 'Pandit Deendayal Energy University', 'પી ડી પી યુ', 'पी डी पी यू'],
+    coordinates: [23.1548645, 72.6612117],
+    lines: ['purple']
+  },
   gift_city: { id: 'gift_city', name: 'GIFT City', nameGu: 'ગિફ્ટ સિટી', nameHi: 'गिफ्ट सिटी', coordinates: [23.1533555, 72.6855536], lines: ['purple'] },
 };

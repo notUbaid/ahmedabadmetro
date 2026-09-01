@@ -35,6 +35,16 @@ vi.mock('../timetableFromExcel.generated.json', () => {
           stations: ['koteshwar_road', 'motera_stadium', 'sabarmati', 'old_high_court', 'usmanpura'],
           stationTimes: [0, 10, 20, 30, 40], // Arrives at old_high_court at 08:15
         },
+        // Train 4: Afternoon Train (3 hours after 08:10, simulating gap like PDPU midday)
+        {
+          id: 'TEST-AFTERNOON-1',
+          line: 'purple',
+          direction: 'forward',
+          dayType: 'Mon-Fri',
+          startTime: '16:00',
+          stations: ['gnlu', 'pdpu', 'gift_city'],
+          stationTimes: [0, 6, 9], // Arrives at pdpu at 16:06
+        },
       ],
     },
   };
@@ -69,6 +79,15 @@ describe('Timetable Deduplication Logic', () => {
     expect(greenTrains[0].arrivalTime).toBe('08:15');
   });
 
+  it('getUpcomingTrains returns upcoming trains later in the day when none exist within 120 minutes (e.g. midday gap)', () => {
+    // Current time: 08:10 AM, PDPU next train is at 16:06 (476 minutes away)
+    const upcoming = getUpcomingTrains('pdpu', 3);
+    expect(upcoming).toHaveLength(1);
+    expect(upcoming[0].arrivalTime).toBe('16:06');
+    expect(upcoming[0].line).toBe('purple');
+    expect(upcoming[0].minutesAway).toBe(476);
+  });
+
   it('getCurrentTrainPositions drops visually colliding trains', () => {
     // Let's set the time to 08:07. 
     // Train 1 left APMC at 08:00. At 08:07 it is between jivraj_park (08:05) and rajiv_nagar (08:10).
@@ -90,6 +109,7 @@ describe('Timetable Deduplication Logic', () => {
 });
 
 import { getDirectionStr, getCurrentHeadway } from '../timetable';
+import { stations } from '../metroData';
 
 describe('Timetable Utility Functions', () => {
   it('getDirectionStr returns correct string for known destinations', () => {
@@ -115,6 +135,14 @@ describe('Timetable Utility Functions', () => {
     expect(getCurrentHeadway('blue').minutes).toBe(12);
 
     vi.useRealTimers();
+  });
+
+  it('verifies PDEU station has appropriate aliases including PDPU for search', () => {
+    const pdpuStation = stations['pdpu'];
+    expect(pdpuStation).toBeDefined();
+    expect(pdpuStation.name).toBe('PDEU');
+    expect(pdpuStation.aliases).toContain('PDPU');
+    expect(pdpuStation.aliases).toContain('Pandit Deendayal Energy University');
   });
 });
 

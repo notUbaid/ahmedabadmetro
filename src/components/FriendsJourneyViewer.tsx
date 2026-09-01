@@ -34,7 +34,18 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
 
     const stationOptions = useMemo(() => getStationOptions(), []);
     const filteredStations = useMemo(() => {
-        return destSearch ? stationOptions.filter(s => s.name.toLowerCase().includes(destSearch.toLowerCase())) : stationOptions;
+        if (!destSearch) return stationOptions;
+        const query = destSearch.toLowerCase().trim();
+        return stationOptions.filter(s => {
+            const orig = stations[s.id];
+            return (
+                s.name.toLowerCase().includes(query) ||
+                (orig?.nameGu && orig.nameGu.includes(query)) ||
+                (orig?.nameHi && orig.nameHi.includes(query)) ||
+                orig?.aliases?.some(a => a.toLowerCase().includes(query)) ||
+                s.id.toLowerCase().includes(query)
+            );
+        });
     }, [destSearch, stationOptions]);
 
     useEffect(() => {

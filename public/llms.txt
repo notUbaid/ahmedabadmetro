@@ -34,7 +34,7 @@ Stations: Koteshwar Road (interchange with Red Line), Vishwakarma College, Tapov
 
 ### Purple Line (GIFT City): GNLU ↔ GIFT City
 3 stations, approximately 6 minutes end-to-end.
-Stations: GNLU (interchange with Green Line), PDPU, GIFT City.
+Stations: GNLU (interchange with Green Line), PDEU, GIFT City.
 
 ## Interchange Stations
 

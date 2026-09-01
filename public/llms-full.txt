@@ -127,7 +127,7 @@ Station List (South to North):
 
 Station List:
 1. GNLU ★ INTERCHANGE with Green Line (terminal)
-2. PDPU
+2. PDEU
 3. GIFT City (terminal, Gujarat International Finance Tec-City)
 
 ---
@@ -193,7 +193,7 @@ Take Red Line to Koteshwar Road → Transfer to Green Line northbound → Travel
 ### At GNLU
 - Lines: Green Line ↔ Purple Line
 - Transfer Time: ~2 minutes
-- Use this to connect to GIFT City and PDPU
+- Use this to connect to GIFT City and PDEU
 
 ---
 

@@ -8296,7 +8296,7 @@ export const localPlaces = [
     ]
   },
   {
-    "n": "PDPU Highrise Hostel",
+    "n": "PDEU Highrise Hostel",
     "t": "hostel",
     "c": [
       23.157854,
@@ -27248,7 +27248,7 @@ export const localPlaces = [
     ]
   },
   {
-    "n": "PDPU",
+    "n": "PDEU",
     "t": "stop",
     "c": [
       23.1549205,
@@ -27256,7 +27256,7 @@ export const localPlaces = [
     ]
   },
   {
-    "n": "PDPU",
+    "n": "PDEU",
     "t": "stop",
     "c": [
       23.154954,
@@ -27752,7 +27752,7 @@ export const localPlaces = [
     ]
   },
   {
-    "n": "PDPU",
+    "n": "PDEU",
     "t": "station",
     "c": [
       23.1548645,

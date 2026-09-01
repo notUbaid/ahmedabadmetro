@@ -162,17 +162,25 @@ export const RoutePlanner = React.memo(({
 
   const filteredOriginStations = useMemo(() => {
     if (!originSearch) return stationOptions;
+    const query = originSearch.toLowerCase().trim();
     return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(originSearch.toLowerCase()) || 
-      (s.nameGu && s.nameGu.includes(originSearch))
+      s.name.toLowerCase().includes(query) || 
+      (s.nameGu && s.nameGu.includes(query)) ||
+      (s.nameHi && s.nameHi.includes(query)) ||
+      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
+      s.id.toLowerCase().includes(query)
     );
   }, [stationOptions, originSearch]);
 
   const filteredDestStations = useMemo(() => {
     if (!destSearch) return stationOptions;
+    const query = destSearch.toLowerCase().trim();
     return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(destSearch.toLowerCase()) || 
-      (s.nameGu && s.nameGu.includes(destSearch))
+      s.name.toLowerCase().includes(query) || 
+      (s.nameGu && s.nameGu.includes(query)) ||
+      (s.nameHi && s.nameHi.includes(query)) ||
+      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
+      s.id.toLowerCase().includes(query)
     );
   }, [stationOptions, destSearch]);
 
@@ -503,7 +511,7 @@ export const RoutePlanner = React.memo(({
                   {t('route.busDesc', language)}
                 </p>
                 <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                  ~{step.busDestination === 'PDPU' ? '8' : '15'} min • {t('route.fasterThanMetro', language)}
+                  ~{step.busDestination === 'PDEU' || step.busDestination === 'PDPU' ? '8' : '15'} min • {t('route.fasterThanMetro', language)}
                 </p>
               </div>
             </div>

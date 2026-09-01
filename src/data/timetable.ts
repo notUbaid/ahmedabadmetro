@@ -212,7 +212,7 @@ export const getUpcomingTrains = (stationId: string, limit = 3, language: Langua
     // must not appear as "70 min away".
     const minutesAway = minutesUntil(arrivalMinutes, currentMinutes);
 
-    if (minutesAway >= 0 && minutesAway <= 120) {
+    if (minutesAway >= 0) {
       const arrivalHour = Math.floor(arrivalMinutes / 60) % 24;
       const arrivalMin = Math.floor(arrivalMinutes % 60);
 
@@ -251,6 +251,12 @@ export const getUpcomingTrains = (stationId: string, limit = 3, language: Langua
     }
   }
 
+  const within120 = deduplicated.filter(t => t.minutesAway <= 120);
+  if (within120.length > 0) {
+    return within120.slice(0, limit);
+  }
+
+  // Fallback: If no trains within 120 mins (e.g. midday service gap on Purple line), return next scheduled trains today
   return deduplicated.slice(0, limit);
 };
 

@@ -43,9 +43,17 @@ export const JoinRideDialog = ({
 
     const filteredStations = useMemo(() => {
         if (!search) return stationOptions;
-        return stationOptions.filter(s =>
-            s.name.toLowerCase().includes(search.toLowerCase())
-        );
+        const query = search.toLowerCase().trim();
+        return stationOptions.filter(s => {
+            const orig = stations[s.id];
+            return (
+                s.name.toLowerCase().includes(query) ||
+                (orig?.nameGu && orig.nameGu.includes(query)) ||
+                (orig?.nameHi && orig.nameHi.includes(query)) ||
+                orig?.aliases?.some(a => a.toLowerCase().includes(query)) ||
+                s.id.toLowerCase().includes(query)
+            );
+        });
     }, [stationOptions, search]);
 
     // Calculate intercept details

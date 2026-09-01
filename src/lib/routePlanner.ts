@@ -776,7 +776,7 @@ const buildBusRoute = (
 
   // Determine bus time
   const busTime = destId === 'pdpu' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
-  const busDestName = destId === 'pdpu' ? 'PDPU' : 'GIFT City';
+  const busDestName = destId === 'pdpu' ? 'PDEU' : 'GIFT City';
 
   stepsWithBus.push({
     type: 'bus',
@@ -2076,7 +2076,7 @@ export const calculateJourneyProgress = (
       }
       currentAccumulatedTime = stepEndTime;
     } else if (step.type === 'bus') {
-      const busDuration = step.busDestination === 'PDPU' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
+      const busDuration = step.busDestination === 'PDEU' || step.busDestination === 'PDPU' ? BUS_TIME_GNLU_TO_PDPU : BUS_TIME_GNLU_TO_GIFT;
       const stepEndTime = currentAccumulatedTime + busDuration;
       if (currentTimeMins >= currentAccumulatedTime && currentTimeMins < stepEndTime) {
         resultPos = {

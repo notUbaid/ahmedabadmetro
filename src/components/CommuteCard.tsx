@@ -81,6 +81,16 @@ export const CommuteCard = ({
     return Math.max(0, minutesAway - (secondsIntoMinute > 30 ? 1 : 0));
   };
 
+  const formatMinutesAway = (mins: number) => {
+    if (mins === 0) return t('panel.now', language);
+    if (mins >= 60) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    }
+    return `${mins}m`;
+  };
+
   const primaryLine = MetrosToDestination[0]?.line || fromStation.lines[0];
   const headway = getCurrentHeadway(primaryLine);
   // Service day window at the boarding station, to explain an empty list.
@@ -170,7 +180,7 @@ export const CommuteCard = ({
                         <span>{crowd.label}</span>
                       </div>
                       <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${liveMinutes === 0 ? 'bg-green-500/20 text-green-700 dark:text-green-400' : liveMinutes <= 5 ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' : 'bg-muted text-muted-foreground'}`}>
-                        {liveMinutes === 0 ? t('panel.now', language) : `${liveMinutes}m`}
+                        {formatMinutesAway(liveMinutes)}
                       </div>
                     </div>
                   </div>
@@ -183,6 +193,7 @@ export const CommuteCard = ({
               {serviceWindow && (() => {
                 const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
                 const firstMin = Number(serviceWindow.first.slice(0, 2)) * 60 + Number(serviceWindow.first.slice(3));
+                const lastMin = Number(serviceWindow.last.slice(0, 2)) * 60 + Number(serviceWindow.last.slice(3));
                 if (nowMinutes < firstMin) {
                   return (
                     <div className="text-xs mt-1">
@@ -190,11 +201,14 @@ export const CommuteCard = ({
                     </div>
                   );
                 }
-                return (
-                  <div className="text-xs mt-1">
-                    {t('panel.serviceEnded', language)} · {t('panel.lastMetro', language)} {serviceWindow.last}
-                  </div>
-                );
+                if (nowMinutes > lastMin) {
+                  return (
+                    <div className="text-xs mt-1">
+                      {t('panel.serviceEnded', language)} · {t('panel.lastMetro', language)} {serviceWindow.last}
+                    </div>
+                  );
+                }
+                return null;
               })()}
             </div>
           )}

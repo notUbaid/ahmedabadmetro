@@ -89,6 +89,16 @@ export const BottomPanel = React.memo(({
     return Math.max(0, minutesAway - (secondsIntoMinute > 30 ? 1 : 0));
   };
 
+  const formatMinutesAway = (mins: number) => {
+    if (mins === 0) return t('panel.now', language);
+    if (mins >= 60) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    }
+    return `${mins}m`;
+  };
+
 
   const locatingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -346,9 +356,11 @@ export const BottomPanel = React.memo(({
                   {t('panel.upcomingMetros', language)}
                   {upcomingMetros.length > 0 && new Set(upcomingMetros.map(t => t.line)).size === 1 && (
                     <>
-                      <span className="text-xs text-muted-foreground font-normal">
-                        · {t('panel.every', language)} {getCurrentHeadway(upcomingMetros[0].line).label}
-                      </span>
+                      {upcomingMetros[0].minutesAway <= 60 && (
+                        <span className="text-xs text-muted-foreground font-normal">
+                          · {t('panel.every', language)} {getCurrentHeadway(upcomingMetros[0].line).label}
+                        </span>
+                      )}
                       <span className="ml-auto text-xs text-muted-foreground font-normal flex items-center">
                         {t('panel.live', language)}
                         <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full ml-1 animate-pulse" />
@@ -397,7 +409,7 @@ export const BottomPanel = React.memo(({
                             <div className="flex flex-col items-end">
                               <div className="text-sm font-semibold">{train.arrivalTime}</div>
                               <div className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${liveMinutes === 0 ? 'bg-green-500/20 text-green-600' : liveMinutes <= 2 ? 'bg-green-500/10 text-green-700' : liveMinutes <= 5 ? 'bg-yellow-500/10 text-yellow-700' : 'bg-muted text-muted-foreground'}`}>
-                                {liveMinutes === 0 ? t('panel.now', language) : `${liveMinutes}m`}
+                                {formatMinutesAway(liveMinutes)}
                               </div>
                             </div>
                           </div>
@@ -411,8 +423,12 @@ export const BottomPanel = React.memo(({
                       const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
                       if (serviceWindow) {
                         const firstMin = Number(serviceWindow.first.slice(0, 2)) * 60 + Number(serviceWindow.first.slice(3));
+                        const lastMin = Number(serviceWindow.last.slice(0, 2)) * 60 + Number(serviceWindow.last.slice(3));
                         if (nowMinutes < firstMin) {
                           return `${t('panel.firstMetro', language)} ${serviceWindow.first}`;
+                        }
+                        if (nowMinutes > lastMin) {
+                          return `${t('panel.serviceEnded', language)} · ${t('panel.lastMetro', language)} ${serviceWindow.last}`;
                         }
                         return `${t('panel.noUpcomingMetros', language)} · ${t('panel.lastMetro', language)} ${serviceWindow.last}`;
                       }
