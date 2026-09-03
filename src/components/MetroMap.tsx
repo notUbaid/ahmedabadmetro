@@ -284,16 +284,28 @@ export const MetroMap = () => {
       setSearchedLocation(null);
       setUserLocation([lat, lng]);
 
-      // Ensure user marker exists on map
+      // Ensure user marker and pulse effect exist on map
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([lat, lng]);
-      } else {
+        if (userPulseRef.current) {
+          userPulseRef.current.setLatLng([lat, lng]);
+        }
+      } else if (mapRef.current) {
         userMarkerRef.current = L.circleMarker([lat, lng], {
           radius: 8,
           fillColor: '#3B82F6',
           color: '#FFFFFF',
           weight: 3,
           fillOpacity: 1,
+        }).addTo(mapRef.current);
+
+        userPulseRef.current = L.circleMarker([lat, lng], {
+          radius: 20,
+          fillColor: '#3B82F6',
+          color: '#3B82F6',
+          weight: 1,
+          fillOpacity: 0.2,
+          opacity: 0.5,
         }).addTo(mapRef.current);
       }
 
@@ -1545,30 +1557,21 @@ longPressTimer = setTimeout(() => {
           }
         },
         (error) => {
-          console.warn('Geolocation disabled or failed:', error.message);
+          console.warn('Initial geolocation watch unavailable:', error.message);
 
-          // watchPosition can fire errors repeatedly — react only once,
-          // otherwise toasts spam and the map keeps re-fitting bounds.
-          if (permissionToastShown) return;
-          permissionToastShown = true;
-
-          if (error.code === error.PERMISSION_DENIED) {
-            toast({
-              title: 'Location Services Disabled',
-              description: 'We cannot show your live location on the map. You can still use the app normally.',
-            });
-          }
-
-          // Fit to all stations if location unavailable
-          const allCoords = Object.values(stations).map(s => s.coordinates);
-          if (allCoords.length > 0) {
-            map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+          // Fit to all stations if location unavailable on startup
+          if (!permissionToastShown) {
+            permissionToastShown = true;
+            const allCoords = Object.values(stations).map(s => s.coordinates);
+            if (allCoords.length > 0) {
+              map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+            }
           }
         },
         { 
-          enableHighAccuracy: true, 
-          timeout: 10000,
-          maximumAge: 5000 // Allow cached position up to 5 seconds old
+          enableHighAccuracy: false, 
+          timeout: 15000,
+          maximumAge: 120000 // Allow cached network/GPS position up to 2 minutes old
         }
       );
     }

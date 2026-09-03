@@ -7,6 +7,7 @@ import { getCrowdLevel } from '@/lib/crowding';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { getBestUserLocation } from '@/lib/geolocation';
 
 interface BottomPanelProps {
   selectedStation: Station | null;
@@ -128,69 +129,40 @@ export const BottomPanel = React.memo(({
 
     if (locatingTimeoutRef.current) {
       clearTimeout(locatingTimeoutRef.current);
+      locatingTimeoutRef.current = null;
     }
 
-    let isDone = false;
-
-    const finish = (lat?: number, lng?: number, errorMsg?: string) => {
-      if (isDone) return;
-      isDone = true;
-      if (locatingTimeoutRef.current) {
-        clearTimeout(locatingTimeoutRef.current);
-        locatingTimeoutRef.current = null;
-      }
-      setIsLocating(false);
-      if (lat !== undefined && lng !== undefined) {
-        onLocate(lat, lng);
-      } else if (errorMsg) {
-        toast.error(errorMsg);
-      }
-    };
-
-    // Hard safety watchdog timer: guarantee we never spin indefinitely
+    // Global safety timer so spinner never gets stuck
     locatingTimeoutRef.current = setTimeout(() => {
-      if (!isDone) {
-        console.warn('Geolocation hard timeout reached; trying fast network/cached fix as fallback...');
-        navigator.geolocation.getCurrentPosition(
-          (pos) => finish(pos.coords.latitude, pos.coords.longitude),
-          () => finish(undefined, undefined, t('panel.locationFailed', language)),
-          { enableHighAccuracy: false, maximumAge: 600000, timeout: 2500 }
-        );
-      }
-    }, 6000);
+      setIsLocating(false);
+      locatingTimeoutRef.current = null;
+    }, 20000);
 
-    // Step 1: Try high accuracy with a 4s timeout
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        finish(position.coords.latitude, position.coords.longitude);
+    getBestUserLocation(
+      (coords) => {
+        if (locatingTimeoutRef.current) {
+          clearTimeout(locatingTimeoutRef.current);
+          locatingTimeoutRef.current = null;
+        }
+        setIsLocating(false);
+        onLocate(coords.latitude, coords.longitude);
       },
       (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          finish(undefined, undefined, t('panel.locationDenied', language));
-          return;
+        if (locatingTimeoutRef.current) {
+          clearTimeout(locatingTimeoutRef.current);
+          locatingTimeoutRef.current = null;
         }
+        setIsLocating(false);
 
-        console.warn('High accuracy geolocation failed/timed out, trying fast network fix...', error);
-        // Step 2: Try low accuracy / network-based fix with 3s timeout
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            finish(position.coords.latitude, position.coords.longitude);
-          },
-          (fallbackError) => {
-            console.error('All geolocation attempts failed:', fallbackError);
-            finish(undefined, undefined, t('panel.locationFailed', language));
-          },
-          {
-            enableHighAccuracy: false,
-            timeout: 3000,
-            maximumAge: 300000 // Accept fixes up to 5 min old
-          }
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 4000,
-        maximumAge: 30000 // Accept fixes up to 30s old
+        if (error.code === 'PERMISSION_DENIED') {
+          toast.error(t('panel.locationDenied', language));
+        } else if (error.code === 'POSITION_UNAVAILABLE') {
+          toast.error(t('panel.locationUnavailable', language));
+        } else if (error.code === 'TIMEOUT') {
+          toast.error(t('panel.locationTimeout', language));
+        } else {
+          toast.error(t('panel.locationFailed', language));
+        }
       }
     );
   };
