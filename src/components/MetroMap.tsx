@@ -300,12 +300,13 @@ export const MetroMap = () => {
         }).addTo(mapRef.current);
 
         userPulseRef.current = L.circleMarker([lat, lng], {
-          radius: 20,
+          radius: 18,
           fillColor: '#3B82F6',
           color: '#3B82F6',
           weight: 1,
-          fillOpacity: 0.2,
-          opacity: 0.5,
+          fillOpacity: 0.25,
+          opacity: 0.6,
+          className: 'user-pulse-marker',
         }).addTo(mapRef.current);
       }
 
@@ -587,21 +588,13 @@ export const MetroMap = () => {
     setIsRoutePlannerOpen(true);
   }, [nearestStation]);
 
-  // Train animation - smooth real-time movement
+  // Train animation - smooth real-time movement at native display refresh rate (up to 144 FPS)
   useEffect(() => {
     let animationFrameId: number;
-
-    let lastTickAt = 0;
     let lastTrainCount = -1;
+
     const animateTrains = () => {
-      // Trains move <0.5% of a segment per frame — recomputing positions at
-      // 60 Hz wastes a full timetable scan per frame. Throttle to ~5 Hz.
-      const now = Date.now();
-      if (now - lastTickAt < 200) {
-        animationFrameId = requestAnimationFrame(animateTrains);
-        return;
-      }
-      lastTickAt = now;
+      animationFrameId = requestAnimationFrame(animateTrains);
       if (!mapRef.current) return;
 
       const positions = getCurrentTrainPositions();
@@ -891,7 +884,16 @@ export const MetroMap = () => {
       scrollWheelZoom: true,
       minZoom: 11,
       maxBounds: ahmedabadBounds,
-      maxBoundsViscosity: 1.0
+      maxBoundsViscosity: 1.0,
+      preferCanvas: true, // GPU canvas rendering for silky-smooth 144 FPS vector lines
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true,
+      inertia: true,
+      inertiaDeceleration: 3400,
+      inertiaMaxSpeed: Infinity,
+      easeLinearity: 0.15,
+      wheelPxPerZoomLevel: 100,
     });
 
     // Add zoom control to bottom right
@@ -1462,8 +1464,6 @@ longPressTimer = setTimeout(() => {
       });
     });
 
-    let pulseAnimationId: ReturnType<typeof setInterval> | null = null;
-
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
       let isFirstPosition = true;
@@ -1516,30 +1516,16 @@ longPressTimer = setTimeout(() => {
               fillOpacity: 1,
             }).addTo(map);
 
-            // Add pulsing effect
+            // Add pulsing effect with GPU-accelerated CSS animation
             userPulseRef.current = L.circleMarker([latitude, longitude], {
-              radius: 20,
+              radius: 18,
               fillColor: '#3B82F6',
               color: '#3B82F6',
               weight: 1,
-              fillOpacity: 0.2,
-              opacity: 0.5,
+              fillOpacity: 0.25,
+              opacity: 0.6,
+              className: 'user-pulse-marker',
             }).addTo(map);
-
-            // Simple pulse animation
-            let growing = true;
-            pulseAnimationId = setInterval(() => {
-              if (userPulseRef.current) {
-                const currentRadius = userPulseRef.current.getRadius();
-                if (growing) {
-                  userPulseRef.current.setRadius(currentRadius + 0.5);
-                  if (currentRadius >= 25) growing = false;
-                } else {
-                  userPulseRef.current.setRadius(currentRadius - 0.5);
-                  if (currentRadius <= 15) growing = true;
-                }
-              }
-            }, 100);
 
             // Center on user
             map.setView([latitude, longitude], 14);
@@ -1581,9 +1567,6 @@ longPressTimer = setTimeout(() => {
       if (geoWatchIdRef.current !== null) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
-      }
-      if (pulseAnimationId !== null) {
-        clearInterval(pulseAnimationId);
       }
       if (mapRef.current) {
         mapRef.current.remove();
