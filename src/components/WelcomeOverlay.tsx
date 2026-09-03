@@ -23,6 +23,7 @@ export const WelcomeOverlay = () => {
       <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-300">
         <button 
           onClick={handleClose}
+          aria-label="Close"
           className="absolute top-4 right-4 p-2 bg-muted/50 hover:bg-muted rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />

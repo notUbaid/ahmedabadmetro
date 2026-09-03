@@ -103,7 +103,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
                         <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-black">{t('friendsJourney.scheduleSync', language)}</p>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted rounded-full transition-colors">
+                <button onClick={onClose} aria-label="Close" className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted rounded-full transition-colors">
                     <X size={20} />
                 </button>
             </div>

@@ -212,6 +212,12 @@ All colors MUST be HSL.
   .safe-p-top {
     padding-top: max(env(safe-area-inset-top), 1rem);
   }
+  .safe-p-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+  .safe-p-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
 }
 
 /* Prevent pull-to-refresh and rubber-banding on the main app wrapper */

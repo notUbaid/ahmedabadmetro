@@ -119,6 +119,7 @@ export const JoinRideDialog = ({
             <div className="relative w-full max-w-sm bg-background p-6 rounded-2xl shadow-xl flex flex-col gap-4 animate-in fade-in zoom-in duration-300">
                 <button
                     onClick={onClose}
+                    aria-label="Close"
                     className="absolute top-4 right-4 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
                 >
                     <X className="w-5 h-5" />
