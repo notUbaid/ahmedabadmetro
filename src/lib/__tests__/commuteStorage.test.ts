@@ -24,7 +24,7 @@ describe('Daily Commute Storage & Trigger Rules', () => {
       clear: () => { storageMock = {}; },
       length: 0,
       key: () => null,
-    } as any;
+    } as Storage;
   });
 
   it('returns false if no commute settings exist', () => {
