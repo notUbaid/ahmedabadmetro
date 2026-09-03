@@ -5,7 +5,7 @@ import { Station, LINE_COLORS } from '@/data/metroData';
 import { getCurrentHeadway } from '@/data/timetable';
 import { getAvailableDepartures } from '@/lib/routePlanner';
 import { getServiceWindow } from '@/data/timetable';
-import { getSimpleCrowdLevel } from '@/lib/crowding';
+import { getCrowdLevel } from '@/lib/crowding';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
 
@@ -82,7 +82,7 @@ export const CommuteCard = ({
   };
 
   const formatMinutesAway = (mins: number) => {
-    if (mins === 0) return t('panel.now', language);
+    if (mins <= 0) return t('panel.now', language);
     if (mins >= 60) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
@@ -126,13 +126,16 @@ export const CommuteCard = ({
         </div>
 
         <div className="p-4 space-y-3">
-          {walkingTime !== null && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Navigation className="w-3.5 h-3.5 text-primary" />
-              <span>{Math.round(walkingTime / 60)} min {t('panel.walk', language)} - {getStationName(fromStation, language)}</span>
-              <span className="ml-auto text-xs font-medium text-foreground">every ~{headway.label}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Navigation className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+            <span className="truncate">
+              {walkingTime !== null 
+                ? `${Math.max(1, Math.round(walkingTime / 60))} min ${t('panel.walk', language)} • ${getStationName(fromStation, language)}`
+                : getStationName(fromStation, language)
+              }
+            </span>
+            <span className="ml-auto text-xs font-medium text-foreground whitespace-nowrap">every ~{headway.label}</span>
+          </div>
 
           {isLoading ? (
             <div className="space-y-2 py-1">
@@ -143,7 +146,10 @@ export const CommuteCard = ({
             <div className="space-y-2">
               {MetrosToDestination.map((train, idx) => {
                 const liveMinutes = getLiveMinutesAway(train.departureTime);
-                const crowd = getSimpleCrowdLevel(train.line);
+                const crowd = getCrowdLevel(train.line, '', {
+                  originStationId: fromStation.id,
+                  destinationStationId: toStation.id
+                });
                 
                 return (
                   <div 

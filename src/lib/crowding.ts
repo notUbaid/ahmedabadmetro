@@ -137,11 +137,21 @@ export const getCrowdLevel = (
     stationList?: string[];
     destinationStationId?: string;
     originStationId?: string;
+    date?: Date;
   }
 ): CrowdInfo => {
-  const now = getISTDate();
+  const now = options?.date ?? getISTDate();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
+  const hour = now.getHours();
+
+  // Schedule timing check (if trainId indicates a scheduled morning/evening service)
+  const scheduleMatch = trainId ? trainId.match(/L4-(NB|SB)-(\d+)/) : null;
+  const isScheduledEvening = scheduleMatch && scheduleMatch[1] === 'SB' && parseInt(scheduleMatch[2], 10) >= 20;
+  const isScheduledMorning = scheduleMatch && scheduleMatch[1] === 'NB' && parseInt(scheduleMatch[2], 10) <= 15;
+
+  const isEvening = (hour >= 15 && hour < 22) || !!isScheduledEvening;
+  const isMorning = (hour >= 6 && hour < 12) || !!isScheduledMorning;
   
   // Get service type
   const serviceType = getServiceType(line, trainId);
@@ -150,18 +160,47 @@ export const getCrowdLevel = (
 
   // If no detailed route info, fallback to simple base levels
   if (!options || options.stationIndex === undefined || !options.stationList) {
+    if (trainId.startsWith('L4-SB') && isEvening) return formatCrowdLevel(isWeekendDay ? 'moderate' : 'heavy');
+    if (trainId.startsWith('L4-NB') && isMorning) return formatCrowdLevel(isWeekendDay ? 'moderate' : 'heavy');
     if (serviceType === 'corridor') return formatCrowdLevel(isPeak ? 'heavy' : 'moderate');
     if (serviceType === 'blue_line') return formatCrowdLevel(isPeak ? 'heavy' : 'moderate');
     return formatCrowdLevel(isPeak ? 'moderate' : 'low');
   }
 
   const { stationIndex, stationList } = options;
-  const originStationId = stationList[0];
-  const destStationId = stationList[stationList.length - 1];
+  const originStationId = options.originStationId || stationList[0];
+  const destStationId = options.destinationStationId || stationList[stationList.length - 1];
   
   const ohcIndex = stationList.indexOf('old_high_court');
   const progress = stationIndex / Math.max(1, stationList.length - 1);
   const stationsRemaining = stationList.length - 1 - stationIndex;
+
+  const isDepartingFromGift = originStationId === 'gift_city' || trainId.startsWith('L4-SB') || stationList[0] === 'gift_city';
+  const isHeadingToGift = destStationId === 'gift_city' || trainId.startsWith('L4-NB') || stationList[stationList.length - 1] === 'gift_city';
+
+  // Rule 1: Metro departing from GIFT City in the evening:
+  // Right from GIFT City heavy crowding, keep heavy till Old High Court, and after that moderate.
+  if (isDepartingFromGift && isEvening) {
+    if (ohcIndex === -1 || stationIndex <= ohcIndex) {
+      level = 'heavy';
+    } else {
+      level = 'moderate';
+    }
+    if (isWeekendDay && level === 'heavy') level = 'moderate';
+    return formatCrowdLevel(level);
+  }
+
+  // Rule 2: Metro going towards GIFT City in the morning:
+  // Moderate crowding up to Old High Court, then heavy after Old High Court.
+  if (isHeadingToGift && isMorning) {
+    if (ohcIndex !== -1 && stationIndex <= ohcIndex) {
+      level = 'moderate';
+    } else {
+      level = 'heavy';
+    }
+    if (isWeekendDay && level === 'heavy') level = 'moderate';
+    return formatCrowdLevel(level);
+  }
 
   if (serviceType === 'corridor') {
     // Northbound (APMC to Gandhinagar)
@@ -252,6 +291,14 @@ export const getSimpleCrowdLevel = (
   const now = getISTDate();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
+  const hour = now.getHours();
+
+  if (trainId.startsWith('L4-SB') && (hour >= 15 && hour < 22)) {
+    return formatCrowdLevel(isWeekendDay ? 'moderate' : 'heavy');
+  }
+  if (trainId.startsWith('L4-NB') && (hour >= 6 && hour < 12)) {
+    return formatCrowdLevel(isWeekendDay ? 'moderate' : 'heavy');
+  }
   
   const serviceType = getServiceType(line, trainId);
   const level = getBaseLevel(serviceType, isPeak, isWeekendDay);

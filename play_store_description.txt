@@ -8,7 +8,7 @@ KEY FEATURES
 - Complete Offline Support: The routing engine, fare calculator, and timings work 100% offline, even when you lose signal underground. 
 - Interactive Metro Map: View the entire Ahmedabad Metro network in a clean, high-quality interactive map that is easy to zoom and navigate. 
 - Interchange Guidance: Step-by-step instructions on where to change trains at major junctions like Old High Court, Koteshwar Road, and GNLU. 
-- Station Information: Discover all 45+ stations across Ahmedabad and Gandhinagar. 
+- Station Information: Discover all 53 stations across Ahmedabad and Gandhinagar. 
 
 COMPLETE LINE COVERAGE
 AhmMetro is fully updated with the newest operational lines and extensions: 

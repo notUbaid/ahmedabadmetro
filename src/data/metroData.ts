@@ -19,7 +19,7 @@ export const LINE_COLORS = {
   purple: '#9333EA',
 } as const;
 
-// All 45 stations from OSM GeoJSON export with line assignments
+// All 53 operational stations across Ahmedabad and Gandhinagar
 export const stations: Record<string, Station> = {
   // Blue Line (East-West) - Thaltej Gam to Vastral Gam
   thaltej_gam: { id: 'thaltej_gam', name: 'Thaltej Gam', nameGu: 'થલતેજ ગામ', nameHi: 'थलतेज गाम', coordinates: [23.0502062, 72.5070123], lines: ['blue'] },

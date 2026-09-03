@@ -146,23 +146,47 @@ Station List:
 ---
 
 ## Ahmedabad Metro Fares
-
-Fares are distance-based and range from ₹5 to ₹30:
+ 
+Fares are distance-based and range from ₹5 to ₹40 based on official GMRC slabs:
 
 | Distance Range | Token Fare |
 |---|---|
-| 1-2 stations | ₹5 |
-| 3-5 stations | ₹10 |
-| 6-8 stations | ₹15 |
-| 9-12 stations | ₹20 |
-| 13-16 stations | ₹25 |
-| 17+ stations | ₹30 |
+| 0.0 – 2.5 km | ₹5 |
+| 2.5 – 7.5 km | ₹10 |
+| 7.5 – 12.5 km | ₹15 |
+| 12.5 – 17.5 km | ₹20 |
+| 17.5 – 22.5 km | ₹25 |
+| 22.5 – 27.5 km | ₹30 |
+| 27.5 – 32.5 km | ₹35 |
+| 32.5+ km | ₹40 |
 
-Metro Smart Card offers discounted fares. Cards can be purchased at any metro station.
+Metro Smart Card offers a 10% discount on all fares. Cards can be recharged and purchased at any metro station. AhmMetro is also available on Google Play Store (app id: ahmedabadmetro.site).
 
 ---
 
 ## Common Journey Routes
+
+### Next Metro from GNLU to Thaltej / Thaltej Gam (Timings, Route & Fare)
+- Direct Deep Link: https://www.ahmedabadmetro.site/?from=gnlu&to=thaltej
+- Route: Board southbound Green Line / corridor train at GNLU station towards APMC → Travel 15 stations to Old High Court interchange station → Transfer to the westbound Blue Line towards Thaltej Gam → Travel 8 stations to Thaltej or 9 stations to Thaltej Gam terminal.
+- Interchange: Old High Court station (transfer between Blue and Red/Green corridors, ~2-3 minute platform walk).
+- Exact Fare: ₹30 token (₹27 with 10% Metro Smart Card discount).
+- Travel Distance & Time: ~23.6 km (59 minutes) to Thaltej; ~24.9 km (63 minutes) to Thaltej Gam across 23–24 stations.
+- First Metro: ~07:33 AM from GNLU.
+- Last Metro: ~20:00–21:00 PM from GNLU.
+- Train Frequency: Every 10–15 minutes throughout the day, every 5–8 minutes during rush hours.
+- Live Real-Time Timetable: Check next train departures live at https://www.ahmedabadmetro.site/?from=gnlu&to=thaltej
+
+### Next Metro from Thaltej / Thaltej Gam to GNLU (Timings, Route & Fare)
+- Direct Deep Link: https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
+- Route: Board eastbound Blue Line at Thaltej Gam or Thaltej station towards Vastral Gam → Travel 8–9 stations to Old High Court interchange station → Transfer to the northbound Green Line corridor towards Gandhinagar / Mahatma Mandir → Travel 15 stations to GNLU station.
+- Interchange: Old High Court station.
+- Exact Fare: ₹30 token (₹27 with Metro Smart Card).
+- Travel Distance & Time: ~23.6 km (59 minutes) from Thaltej; ~24.9 km (63 minutes) from Thaltej Gam across 23–24 stations.
+- First Metro: 06:30 AM from Thaltej Gam.
+- Last Metro: ~21:15 PM from Thaltej.
+- Train Frequency: Every 10–15 minutes throughout the day.
+- Live Real-Time Timetable: Check next train departures live at https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
 
 ### How to reach GIFT City from South Ahmedabad (APMC)
 Take Red Line from APMC northbound → Transfer at Koteshwar Road to Green Line → Travel to GNLU → Transfer to Purple Line → Arrive at GIFT City. Total: ~60-70 minutes.

@@ -31,10 +31,11 @@ describe('Route Planner API', () => {
       expect(fare).toBeLessThanOrEqual(40);
     });
 
-    it('calculates fallback fares for Purple/Green lines', () => {
-      expect(calculateFare('gnlu', 'gift_city', 2)).toBe(5); // 2 stations
-      expect(calculateFare('gnlu', 'mahatma_mandir', 8)).toBe(15); // 8 stations
-      expect(calculateFare('koteshwar_road', 'mahatma_mandir', 16)).toBe(25); // 16 stations
+    it('calculates official GMRC fares for Purple/Green and Phase 2 lines', () => {
+      expect(calculateFare('vadaj', 'vishwakarma_college')).toBe(15); // Vadaj to Vishwakarma College: ₹15
+      expect(calculateFare('gnlu', 'gift_city')).toBe(10); // GNLU to GIFT City: ₹10 (4.54 km)
+      expect(calculateFare('gnlu', 'mahatma_mandir')).toBe(20); // GNLU to Mahatma Mandir: ₹20 (14.27 km)
+      expect(calculateFare('koteshwar_road', 'mahatma_mandir')).toBe(25); // Koteshwar Road to Mahatma Mandir: ₹25 (21.8 km)
     });
   });
 

@@ -8,7 +8,7 @@ import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentS
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
-import { getCommuteSettings, incrementDismissCount, shouldShowCommuteCard } from '@/lib/commuteStorage';
+import { getCommuteSettings, incrementDismissCount, shouldShowCommuteCard, markCommuteCardShown } from '@/lib/commuteStorage';
 import SearchBar from './SearchBar';
 import BottomPanel from './BottomPanel';
 import RoutePlanner from './RoutePlanner';
@@ -142,6 +142,16 @@ export const MetroMap = () => {
       }
     }
 
+    // Direct route query params (e.g. ?from=gnlu&to=thaltej) for SEO & deep linking
+    const routeFrom = params.get('from') || params.get('origin');
+    const routeTo = params.get('to') || params.get('destination');
+    if (routeFrom && routeTo && stations[routeFrom] && stations[routeTo]) {
+      setRoutePlannerOrigin(routeFrom);
+      setRoutePlannerDestination(routeTo);
+      setIsRoutePlannerOpen(true);
+      setIsPanelExpanded(false);
+    }
+
     if (joinTrainId || (sharedOrig && sharedDest && depMinsStr)) {
       window.history.replaceState({}, '', window.location.pathname);
     }
@@ -152,7 +162,7 @@ export const MetroMap = () => {
     if (commuteCardShownRef.current) return;
     
     const settings = getCommuteSettings();
-    if (!settings) return;
+    if (!settings || !settings.homeStation || !settings.workStation) return;
 
     const homeStation = stations[settings.homeStation];
     const workStation = stations[settings.workStation];
@@ -168,29 +178,39 @@ export const MetroMap = () => {
     const nearestStations = findClosestStations(lat, lng, 1);
     const nearestId = nearestStations.length > 0 ? nearestStations[0].id : null;
 
-    // Trigger threshold: 5 km (allows 3-4km distance as requested)
-    const MAX_COMMUTE_TRIGGER_DIST = 5000;  
+    // Trigger threshold: 3.5 km from station (allows comfortable vicinity coverage)
+    const MAX_COMMUTE_TRIGGER_DIST = 3500;  
 
-    if (distToHome < distToWork && distToHome < MAX_COMMUTE_TRIGGER_DIST) {
+    if (distToHome < distToWork && distToHome <= MAX_COMMUTE_TRIGGER_DIST) {
       if (shouldShowCommuteCard('homeToWork')) {
+        markCommuteCardShown('homeToWork');
         commuteCardShownRef.current = true;
+        const walkSeconds = walkingTime !== null && nearestId === settings.homeStation
+          ? walkingTime
+          : Math.round(distToHome / 1.2);
+
         setCommuteCard({
           show: true,
           direction: 'homeToWork',
           fromStation: homeStation,
           toStation: workStation,
-          walkingTime: nearestId === settings.homeStation ? walkingTime : null
+          walkingTime: walkSeconds
         });
       }
-    } else if (distToWork < distToHome && distToWork < MAX_COMMUTE_TRIGGER_DIST) {
+    } else if (distToWork < distToHome && distToWork <= MAX_COMMUTE_TRIGGER_DIST) {
       if (shouldShowCommuteCard('workToHome')) {
+        markCommuteCardShown('workToHome');
         commuteCardShownRef.current = true;
+        const walkSeconds = walkingTime !== null && nearestId === settings.workStation
+          ? walkingTime
+          : Math.round(distToWork / 1.2);
+
         setCommuteCard({
           show: true,
           direction: 'workToHome',
           fromStation: workStation,
           toStation: homeStation,
-          walkingTime: nearestId === settings.workStation ? walkingTime : null
+          walkingTime: walkSeconds
         });
       }
     }
@@ -1753,11 +1773,13 @@ longPressTimer = setTimeout(() => {
           toStation={commuteCard.toStation}
           walkingTime={commuteCard.walkingTime}
           onDismiss={() => {
-            incrementDismissCount(commuteCard.direction);
+            commuteCardShownRef.current = false;
+            markCommuteCardShown(commuteCard.direction);
             setCommuteCard(null);
           }}
           onPlanRoute={() => {
-            incrementDismissCount(commuteCard.direction);
+            commuteCardShownRef.current = false;
+            markCommuteCardShown(commuteCard.direction);
             setRoutePlannerOrigin(commuteCard.fromStation.id);
             setRoutePlannerDestination(commuteCard.toStation.id);
             setIsRoutePlannerOpen(true);

@@ -82,11 +82,27 @@ const BUS_TIME_GNLU_TO_PDPU = 8; // Bus takes ~8 mins from GNLU to PDPU
 const BUS_TIME_GNLU_TO_GIFT = 15; // Bus takes ~15 mins from GNLU to GIFT City
 const MIN_TRANSFER_TIME = 2; // Minimum minutes required to change trains
 
-import { BLUE_LINE_STATION_INDEX, BLUE_LINE_FARE_MATRIX, RED_LINE_STATION_INDEX, BLUE_RED_FARE_MATRIX, RED_LINE_FARE_MATRIX } from '@/data/fareData';
+import { 
+  ALL_STATIONS_INDEX,
+  NETWORK_FARE_MATRIX,
+  BLUE_LINE_STATION_INDEX, 
+  BLUE_LINE_FARE_MATRIX, 
+  RED_LINE_STATION_INDEX, 
+  BLUE_RED_FARE_MATRIX, 
+  RED_LINE_FARE_MATRIX 
+} from '@/data/fareData';
 
-// Fare calculation (based on number of stations, with precise matrix for Blue, Red and Blue-Red lookups)
-export const calculateFare = (originId: string, destId: string, stationCount: number): number => {
-  // 1. Check Blue-Blue internal fare
+// Fare calculation (based on exact GMRC network fare matrix, with fallbacks)
+export const calculateFare = (originId: string, destId: string, stationCount?: number): number => {
+  // 1. Check exact official GMRC network fare matrix across all 53 stations
+  const origIdx = ALL_STATIONS_INDEX[originId];
+  const destIdx = ALL_STATIONS_INDEX[destId];
+
+  if (origIdx !== undefined && destIdx !== undefined) {
+    return NETWORK_FARE_MATRIX[origIdx][destIdx];
+  }
+
+  // 2. Check Blue-Blue internal fare (fallback/legacy)
   const originBlueIdx = BLUE_LINE_STATION_INDEX[originId];
   const destBlueIdx = BLUE_LINE_STATION_INDEX[destId];
 
@@ -94,7 +110,7 @@ export const calculateFare = (originId: string, destId: string, stationCount: nu
     return BLUE_LINE_FARE_MATRIX[originBlueIdx][destBlueIdx];
   }
 
-  // 2. Check Red-Red internal fare
+  // 3. Check Red-Red internal fare (fallback/legacy)
   const originRedIdx = RED_LINE_STATION_INDEX[originId];
   const destRedIdx = RED_LINE_STATION_INDEX[destId];
 
@@ -102,7 +118,7 @@ export const calculateFare = (originId: string, destId: string, stationCount: nu
     return RED_LINE_FARE_MATRIX[originRedIdx][destRedIdx];
   }
 
-  // 3. Check Blue-Red inter-line fare
+  // 4. Check Blue-Red inter-line fare (fallback/legacy)
   // Blue -> Red
   if (originBlueIdx !== undefined && destRedIdx !== undefined) {
     return BLUE_RED_FARE_MATRIX[originBlueIdx][destRedIdx];
@@ -112,24 +128,15 @@ export const calculateFare = (originId: string, destId: string, stationCount: nu
     return BLUE_RED_FARE_MATRIX[destBlueIdx][originRedIdx];
   }
 
-  // Fallback distance-based fare for other lines (Green, Purple) or multi-line journeys
-  // Derived from user requirements and Blue/Red dynamics: 
-  // 0-2 stations: 5, 3-7: 10, 8-10: 15, 11-14: 20, 15-22: 25, 23-26: 30, 27-30: 35, 31+: 40
-  // 0-3 stops: 5
-  if (stationCount <= 3) return 5;
-  // 4-6 stops: 10
-  if (stationCount <= 6) return 10;
-  // 7-10 stops: 15
-  if (stationCount <= 10) return 15;
-  // 11-15 stops: 20
-  if (stationCount <= 15) return 20;
-  // 16-20 stops: 25
-  if (stationCount <= 20) return 25;
-  // 21-25 stops: 30
-  if (stationCount <= 25) return 30;
-  // 26-30 stops: 35
-  if (stationCount <= 30) return 35;
-  // 31 or more stops: 40
+  // Fallback distance-based fare for unlisted stations
+  const count = stationCount ?? 0;
+  if (count <= 3) return 5;
+  if (count <= 6) return 10;
+  if (count <= 10) return 15;
+  if (count <= 15) return 20;
+  if (count <= 20) return 25;
+  if (count <= 25) return 30;
+  if (count <= 30) return 35;
   return 40;
 };
 
@@ -756,7 +763,7 @@ const buildBusRoute = (
     if (!routeToGnlu) return null;
 
     arrivalAtGnlu = routeToGnlu.arrivalMinutes ?? startTimeMinutes;
-    totalFare = routeToGnlu.fare;
+    totalFare = calculateFare(originId, destId);
     totalStations = routeToGnlu.totalStations;
     interchangeCount = routeToGnlu.interchangeCount;
     departureTime = routeToGnlu.departureTime;

@@ -68,11 +68,14 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const handleSave = () => {
     if (homeStation && workStation && homeStation !== workStation) {
       const current = getCommuteSettings();
+      const isNewRoute = current?.homeStation !== homeStation || current?.workStation !== workStation;
       const settings: CommuteSettings = {
         homeStation,
         workStation,
-        homeToWorkDismissCount: current?.homeToWorkDismissCount || 0,
-        workToHomeDismissCount: current?.workToHomeDismissCount || 0,
+        lastShownHomeToWorkDate: isNewRoute ? undefined : current?.lastShownHomeToWorkDate,
+        lastShownWorkToHomeDate: isNewRoute ? undefined : current?.lastShownWorkToHomeDate,
+        homeToWorkDismissCount: 0,
+        workToHomeDismissCount: 0,
       };
       saveCommuteSettings(settings);
       onClose();

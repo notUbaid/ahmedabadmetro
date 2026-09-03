@@ -21,6 +21,15 @@ interface SideMenuProps {
   onOpenRoutePlanner: () => void;
 }
 
+const GooglePlayIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 512 512" fill="none">
+    <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 59.9z" fill="#00E676"/>
+    <path d="M47 38.6c-5.7 6.4-9 15.3-9 25.8v383.2c0 10.5 3.3 19.4 9 25.8l219.7-219.7L47 38.6z" fill="#00B0FF"/>
+    <path d="M325.3 277.7l60.1 60.1-280.8 161.2 220.7-221.3z" fill="#FF3D00"/>
+    <path d="M465 238.4l-79.6-45.7-60.1 59.9 60.1 60.1 79.6-45.7c15.2-8.7 15.2-22.9 0-31.6z" fill="#FFC107"/>
+  </svg>
+);
+
 export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
@@ -28,11 +37,31 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const [isDark, setIsDark] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const [isAndroidWebUser, setIsAndroidWebUser] = useState(false);
   const { hasMetroCard, setHasMetroCard } = useMetroCard();
   const { language, setLanguage } = useLanguage();
   const commuteSettings = getCommuteSettings();
 
   useEffect(() => {
+    // Detect Android web users (exclude iOS, desktop, and already-installed PWA/Play Store TWA)
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      const ua = navigator.userAgent || '';
+      const isAndroid = /android/i.test(ua);
+      const isIOS = /iphone|ipad|ipod/i.test(ua);
+
+      const isStandalone = 
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        (navigator as any).standalone === true ||
+        document.referrer.startsWith('android-app://') ||
+        ua.includes('wv');
+
+      if (isAndroid && !isIOS && !isStandalone) {
+        setIsAndroidWebUser(true);
+      }
+    }
+
     const root = document.documentElement;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const stored = localStorage.getItem('theme');
@@ -164,14 +193,24 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       description: t('menu.tipsDesc', language),
       disabled: false
     },
-    ...(isInstallable ? [{
+    ...(isAndroidWebUser ? [{
+      icon: GooglePlayIcon,
+      label: t('menu.playStore', language),
+      onClick: () => {
+        setIsOpen(false);
+        window.open('https://play.google.com/store/apps/details?id=ahmedabadmetro.site', '_blank', 'noopener,noreferrer');
+      },
+      description: t('menu.playStoreDesc', language),
+      customIconColor: '',
+      customBgColor: 'bg-emerald-500/15'
+    }] : (isInstallable ? [{
       icon: Download,
       label: t('menu.installApp', language),
       onClick: handleInstallClick,
       description: t('menu.installAppDesc', language),
       customIconColor: 'text-blue-600 dark:text-blue-400',
       customBgColor: 'bg-blue-500/15'
-    }] : []),
+    }] : [])),
   ];
 
   return (
@@ -290,7 +329,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
             
             <div className="flex items-center justify-between w-full px-1 mt-1">
               <p className="text-xs text-muted-foreground font-medium">
-                v1.2.1 • June 2026
+                v1.2.1 • September 2026
               </p>
               <p className="text-xs text-muted-foreground/70">
                 by{' '}
