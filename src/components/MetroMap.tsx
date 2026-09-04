@@ -300,13 +300,12 @@ export const MetroMap = () => {
         }).addTo(mapRef.current);
 
         userPulseRef.current = L.circleMarker([lat, lng], {
-          radius: 18,
+          radius: 20,
           fillColor: '#3B82F6',
           color: '#3B82F6',
           weight: 1,
-          fillOpacity: 0.25,
-          opacity: 0.6,
-          className: 'user-pulse-marker',
+          fillOpacity: 0.2,
+          opacity: 0.5,
         }).addTo(mapRef.current);
       }
 
@@ -588,12 +587,22 @@ export const MetroMap = () => {
     setIsRoutePlannerOpen(true);
   }, [nearestStation]);
 
-  // Train animation - smooth real-time movement at native display refresh rate (up to 144 FPS)
+  // Train animation - smooth real-time movement
   useEffect(() => {
     let animationFrameId: number;
+    let lastTickAt = 0;
     let lastTrainCount = -1;
 
     const animateTrains = () => {
+      // Trains move <0.5% of a segment per frame — recomputing positions at
+      // 60-144 Hz wastes a full timetable scan per frame. Throttle to ~5 Hz.
+      const now = Date.now();
+      if (now - lastTickAt < 200) {
+        animationFrameId = requestAnimationFrame(animateTrains);
+        return;
+      }
+      lastTickAt = now;
+
       animationFrameId = requestAnimationFrame(animateTrains);
       if (!mapRef.current) return;
 
@@ -755,7 +764,7 @@ export const MetroMap = () => {
         const trainColor = '#FFB347'; // Light orange for all Metros
         const isMoving = pos.status === 'moving';
         const trainIconHtml = `
-          <div class="train-icon-wrapper" style="padding: 6px; will-change: transform; transform: translateZ(0);">
+          <div class="train-icon-wrapper" style="padding: 6px;">
             <svg width="44" height="22" viewBox="0 0 44 22" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="g${pos.id}" x1="0" x2="1">
@@ -788,7 +797,7 @@ export const MetroMap = () => {
           const el = marker.getElement();
           if (el) {
             const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-            if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg) translateZ(0)`;
+            if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
           }
           existingIds.delete(pos.id);
         } else {
@@ -884,16 +893,7 @@ export const MetroMap = () => {
       scrollWheelZoom: true,
       minZoom: 11,
       maxBounds: ahmedabadBounds,
-      maxBoundsViscosity: 1.0,
-      preferCanvas: true, // GPU canvas rendering for silky-smooth 144 FPS vector lines
-      zoomAnimation: true,
-      fadeAnimation: true,
-      markerZoomAnimation: true,
-      inertia: true,
-      inertiaDeceleration: 3400,
-      inertiaMaxSpeed: Infinity,
-      easeLinearity: 0.15,
-      wheelPxPerZoomLevel: 100,
+      maxBoundsViscosity: 1.0
     });
 
     // Add zoom control to bottom right
@@ -1464,6 +1464,8 @@ longPressTimer = setTimeout(() => {
       });
     });
 
+    let pulseAnimationId: ReturnType<typeof setInterval> | null = null;
+
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
       let isFirstPosition = true;
@@ -1516,16 +1518,30 @@ longPressTimer = setTimeout(() => {
               fillOpacity: 1,
             }).addTo(map);
 
-            // Add pulsing effect with GPU-accelerated CSS animation
+            // Add pulsing effect
             userPulseRef.current = L.circleMarker([latitude, longitude], {
-              radius: 18,
+              radius: 20,
               fillColor: '#3B82F6',
               color: '#3B82F6',
               weight: 1,
-              fillOpacity: 0.25,
-              opacity: 0.6,
-              className: 'user-pulse-marker',
+              fillOpacity: 0.2,
+              opacity: 0.5,
             }).addTo(map);
+
+            // Simple pulse animation
+            let growing = true;
+            pulseAnimationId = setInterval(() => {
+              if (userPulseRef.current) {
+                const currentRadius = userPulseRef.current.getRadius();
+                if (growing) {
+                  userPulseRef.current.setRadius(currentRadius + 0.5);
+                  if (currentRadius >= 25) growing = false;
+                } else {
+                  userPulseRef.current.setRadius(currentRadius - 0.5);
+                  if (currentRadius <= 15) growing = true;
+                }
+              }
+            }, 100);
 
             // Center on user
             map.setView([latitude, longitude], 14);
@@ -1567,6 +1583,9 @@ longPressTimer = setTimeout(() => {
       if (geoWatchIdRef.current !== null) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
+      }
+      if (pulseAnimationId !== null) {
+        clearInterval(pulseAnimationId);
       }
       if (mapRef.current) {
         mapRef.current.remove();

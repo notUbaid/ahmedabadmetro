@@ -1,54 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* 144Hz / 120Hz Native High-Refresh Rate Hardware Acceleration */
 * {
   -webkit-tap-highlight-color: transparent;
 }
-
-html, body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  touch-action: pan-x pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* GPU composite layers for 144 FPS scrolling, panning and animations */
-.leaflet-container,
-.leaflet-pane,
-.leaflet-tile-pane,
-.leaflet-marker-pane,
-.leaflet-zoom-animated,
-.train-icon-wrapper {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.85);
-    opacity: 0.65;
-  }
-  50% {
-    transform: scale(1.35);
-    opacity: 0.15;
-  }
-  100% {
-    transform: scale(0.85);
-    opacity: 0.65;
-  }
-}
-
-.user-pulse-marker {
-  transform-origin: center;
-  animation: pulse-ring 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
