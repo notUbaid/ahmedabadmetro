@@ -602,8 +602,6 @@ export const MetroMap = () => {
         return;
       }
       lastTickAt = now;
-
-      animationFrameId = requestAnimationFrame(animateTrains);
       if (!mapRef.current) return;
 
       const positions = getCurrentTrainPositions();
@@ -852,7 +850,7 @@ export const MetroMap = () => {
               el.style.cursor = 'pointer';
               el.style.pointerEvents = 'auto';
               const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-              if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg) translateZ(0)`;
+              if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
               el.onclick = handleClick;
             }
           });
