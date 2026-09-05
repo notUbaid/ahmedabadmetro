@@ -194,7 +194,7 @@ const translations = {
     'panel.geoUnsupported': 'Geolocation is not supported by your browser',
     'panel.locationDenied': 'Location access denied. Please enable location permissions.',
     'panel.locationUnavailable': 'Location unavailable. Please make sure your device GPS/Location toggle is turned ON in Quick Settings.',
-    'panel.locationTimeout': 'Location request timed out. Please check your signal and try again.',
+    'panel.locationTimeout': 'Location request timed out. If using a VPN (e.g. Opera VPN) or proxy, please turn it off and ensure GPS is enabled.',
     'panel.locationFailed': 'Failed to get your location. Please try again.',
 
     // Route Planner extras
@@ -464,7 +464,7 @@ const translations = {
     'panel.geoUnsupported': 'તમારું બ્રાઉઝર લોકેશન આધાર નથી',
     'panel.locationDenied': 'લોકેશન પરવાનગી નકારી છે. કૃપા કરીને પરવાનગી ચાલુ કરો.',
     'panel.locationUnavailable': 'લોકેશન અનુપલબ્ધ છે. કૃપા કરીને ડિવાઇસ ક્વિક સેટિંગ્સમાં GPS / લોકેશન ચાલુ કરો.',
-    'panel.locationTimeout': 'લોકેશન મેળવવાનો સમય સમાપ્ત થયો. કૃપા કરીને ફરી પ્રયાસ કરો.',
+    'panel.locationTimeout': 'લોકેશન વિનંતીનો સમય સમાપ્ત થયો. જો VPN ચાલુ હોય તો તેને બંધ કરો અને GPS ચાલુ રાખો.',
     'panel.locationFailed': 'લોકેશન મેળવવામાં નિષ્ફળ. ફરી પ્રયાસ કરો.',
 
     // Route Planner extras
@@ -733,7 +733,7 @@ const translations = {
     'panel.geoUnsupported': 'आपका ब्राउज़र लोकेशन का समर्थन नहीं करता',
     'panel.locationDenied': 'लोकेशन की अनुमति नहीं मिली। कृपया अनुमति चालू करें।',
     'panel.locationUnavailable': 'लोकेशन अनुपलब्ध है। कृपया डिवाइस की क्विक सेटिंग्स में GPS / लोकेशन चालू करें।',
-    'panel.locationTimeout': 'लोकेशन अनुरोध का समय समाप्त हुआ। कृपया पुनः प्रयास करें।',
+    'panel.locationTimeout': 'लोकेशन अनुरोध का समय समाप्त हुआ। यदि VPN चालू है तो कृपया इसे बंद करें और GPS चालू रखें।',
     'panel.locationFailed': 'लोकेशन प्राप्त करने में विफल। फिर से प्रयास करें।',
 
     // Route Planner extras
