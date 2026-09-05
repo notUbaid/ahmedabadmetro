@@ -1569,9 +1569,9 @@ longPressTimer = setTimeout(() => {
           }
         },
         { 
-          enableHighAccuracy: false, 
-          timeout: 15000,
-          maximumAge: 120000 // Allow cached network/GPS position up to 2 minutes old
+          enableHighAccuracy: true, 
+          timeout: 25000,
+          maximumAge: 300000 // Allow cached network/GPS position up to 5 minutes old for instant startup fix
         }
       );
     }

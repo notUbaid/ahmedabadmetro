@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getBestUserLocation } from '../geolocation';
 
 type PositionCallback = (position: {
@@ -25,17 +25,28 @@ interface GeolocationOptions {
 
 describe('Geolocation Service', () => {
   let mockGetCurrentPosition: ReturnType<typeof vi.fn>;
+  let mockWatchPosition: ReturnType<typeof vi.fn>;
+  let mockClearWatch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     mockGetCurrentPosition = vi.fn();
+    mockWatchPosition = vi.fn();
+    mockClearWatch = vi.fn();
+
     Object.defineProperty(globalThis.navigator, 'geolocation', {
       value: {
         getCurrentPosition: mockGetCurrentPosition,
+        watchPosition: mockWatchPosition,
+        clearWatch: mockClearWatch,
       },
       configurable: true,
       writable: true,
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('handles unsupported browser environment', () => {
@@ -55,7 +66,7 @@ describe('Geolocation Service', () => {
     );
   });
 
-  it('acquires fast location and triggers background GPS refinement', () => {
+  it('acquires fast location and refines via watchPosition stream', () => {
     mockGetCurrentPosition.mockImplementation(
       (success: PositionCallback, _error: ErrorCallback, options?: GeolocationOptions) => {
         if (options?.enableHighAccuracy === false) {
@@ -66,15 +77,21 @@ describe('Geolocation Service', () => {
               accuracy: 65,
             },
           });
-        } else {
-          success({
-            coords: {
-              latitude: 23.02251,
-              longitude: 72.57141,
-              accuracy: 10,
-            },
-          });
         }
+      }
+    );
+
+    mockWatchPosition.mockImplementation(
+      (success: PositionCallback, _error: ErrorCallback) => {
+        // High-accuracy GPS stream delivers refined fix
+        success({
+          coords: {
+            latitude: 23.02251,
+            longitude: 72.57141,
+            accuracy: 10,
+          },
+        });
+        return 42;
       }
     );
 
@@ -92,6 +109,7 @@ describe('Geolocation Service', () => {
       2,
       expect.objectContaining({ latitude: 23.02251, isHighAccuracy: true })
     );
+    expect(mockClearWatch).toHaveBeenCalledWith(42);
     expect(onError).not.toHaveBeenCalled();
   });
 
@@ -118,27 +136,13 @@ describe('Geolocation Service', () => {
   });
 
   it('reports POSITION_UNAVAILABLE when device location is off', () => {
-    let callCount = 0;
     mockGetCurrentPosition.mockImplementation(
-      (_success: PositionCallback, error: ErrorCallback, options?: GeolocationOptions) => {
-        callCount++;
-        if (options?.enableHighAccuracy === false) {
-          // Fast fix failed (e.g. timeout / no network)
-          error({
-            code: 3,
-            PERMISSION_DENIED: 1,
-            message: 'Fast network fix timed out',
-          });
-        } else {
-          // GPS failed with POSITION_UNAVAILABLE
-          error({
-            code: 2, // POSITION_UNAVAILABLE
-            PERMISSION_DENIED: 1,
-            POSITION_UNAVAILABLE: 2,
-            TIMEOUT: 3,
-            message: 'Location provider should be enabled',
-          });
-        }
+      (_success: PositionCallback, error: ErrorCallback) => {
+        error({
+          code: 2, // POSITION_UNAVAILABLE
+          POSITION_UNAVAILABLE: 2,
+          message: 'Location provider disabled',
+        });
       }
     );
 
@@ -147,9 +151,43 @@ describe('Geolocation Service', () => {
 
     getBestUserLocation(onSuccess, onError);
 
-    expect(callCount).toBe(2);
     expect(onError).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'POSITION_UNAVAILABLE' })
     );
+  });
+
+  it('handles master timeout when all providers fail to return a location', () => {
+    vi.useFakeTimers();
+
+    mockGetCurrentPosition.mockImplementation(() => {
+      // no response
+    });
+    mockWatchPosition.mockImplementation(() => 99);
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    getBestUserLocation(onSuccess, onError, { timeout: 5000 });
+
+    vi.advanceTimersByTime(5100);
+
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'TIMEOUT' })
+    );
+    expect(mockClearWatch).toHaveBeenCalledWith(99);
+  });
+
+  it('allows manual cancellation and clears active watch', () => {
+    mockWatchPosition.mockImplementation(() => 101);
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    const cancel = getBestUserLocation(onSuccess, onError);
+    cancel();
+
+    expect(mockClearWatch).toHaveBeenCalledWith(101);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
   });
 });

@@ -2,13 +2,22 @@
  * Resilient, multi-stage geolocation service for web & mobile PWA/TWA.
  * 
  * Strategy:
- * 1. Fast path: Acquire cached / network-based fix (enableHighAccuracy: false)
- *    within 200-500ms so map and nearest station update immediately.
- * 2. Precision path: In parallel/background, refine coordinates via GPS
- *    (enableHighAccuracy: true). If GPS is unavailable (e.g. indoors/subway),
- *    the user already has their location without any error banners.
- * 3. Graceful error diagnosis: Distinguish between PERMISSION_DENIED,
- *    POSITION_UNAVAILABLE (device GPS toggle off), and TIMEOUT with actionable advice.
+ * 1. Dual-Path Immediate & Stream Architecture:
+ *    - Path A (Instant Coarse/Cached): Uses `getCurrentPosition` with `maximumAge: 300000` (5 min cache)
+ *      to deliver any cached Android location (from Swiggy, Google Maps, WhatsApp, etc.) in <50ms.
+ *    - Path B (High-Accuracy Stream): Uses `watchPosition` with `enableHighAccuracy: true`. On Android,
+ *      watchPosition wakes up the FusedLocationProvider hardware loop, eliminating the notorious one-shot
+ *      cold-start GPS timeout on fresh installs.
+ * 2. Progressive Accuracy Refinement:
+ *    - First fix wins immediately to eliminate user perceived latency and dismiss spinners.
+ *    - If the initial fix was coarse (>35m), the stream continues running in the background to refine
+ *      to pin-point GPS accuracy, then cleanly unsubscribes.
+ * 3. Human-Tolerant Safety Windows:
+ *    - 25-30s master timeout to comfortably accommodate users reading and accepting Android runtime
+ *      permission dialogs ("While using the app") without false-positive TIMEOUT errors.
+ * 4. Precise Error Diagnosis:
+ *    - Differentiates PERMISSION_DENIED (fails fast), POSITION_UNAVAILABLE (GPS toggle off in Android
+ *      Quick Settings), and genuine TIMEOUT.
  */
 
 export interface GeolocationCoords {
@@ -49,109 +58,173 @@ export const getBestUserLocation = (
 
   let hasAcquiredLocation = false;
   let isCancelled = false;
+  let bestAccuracy = Infinity;
+  let watchId: number | null = null;
+  let masterTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const fastTimeout = options.timeout ?? 12000; // 12 seconds gives ample time for permission dialog
-  const fastMaxAge = options.maximumAge ?? 300000; // Accept fixes up to 5 min old for instant responsiveness
+  const totalTimeout = options.timeout ?? 25000;
+  const maxAge = options.maximumAge ?? 300000;
 
-  // Stage 1: Fast network / cellular / Wi-Fi fix
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      if (isCancelled) return;
+  const cleanup = () => {
+    isCancelled = true;
+    if (watchId !== null && typeof nav.geolocation.clearWatch === 'function') {
+      try {
+        nav.geolocation.clearWatch(watchId);
+      } catch {
+        // Ignore cleanup errors
+      }
+      watchId = null;
+    }
+    if (masterTimer !== null) {
+      clearTimeout(masterTimer);
+      masterTimer = null;
+    }
+  };
+
+  // Master safety timer: only fires if zero location fixes were acquired
+  masterTimer = setTimeout(() => {
+    if (isCancelled || hasAcquiredLocation) return;
+    cleanup();
+    onError({
+      code: 'TIMEOUT',
+      message: 'Location request timed out. Please check your signal and try again.'
+    });
+  }, totalTimeout);
+
+  const handlePosition = (
+    pos: { coords: { latitude: number; longitude: number; accuracy: number } },
+    isHighAccuracy: boolean
+  ) => {
+    if (isCancelled) return;
+
+    const acc = pos.coords.accuracy ?? 100;
+
+    // Only deliver if this is our first fix, or if it substantially refines accuracy
+    if (!hasAcquiredLocation || acc < bestAccuracy * 0.85) {
       hasAcquiredLocation = true;
+      bestAccuracy = Math.min(bestAccuracy, acc);
+
       onSuccess({
         latitude: pos.coords.latitude,
         longitude: pos.coords.longitude,
-        accuracy: pos.coords.accuracy,
-        isHighAccuracy: false,
+        accuracy: acc,
+        isHighAccuracy,
       });
+    }
 
-      // Stage 2: Background GPS refinement
-      navigator.geolocation.getCurrentPosition(
-        (highPos) => {
-          if (isCancelled) return;
-          // Refine position if accuracy is better or reasonable
-          onSuccess({
-            latitude: highPos.coords.latitude,
-            longitude: highPos.coords.longitude,
-            accuracy: highPos.coords.accuracy,
-            isHighAccuracy: true,
-          });
+    // If we've achieved excellent GPS precision (<= 35m), stop listening to save battery
+    if (acc <= 35) {
+      cleanup();
+    }
+  };
+
+  const handleTerminalError = (
+    err: { code: number; message?: string; PERMISSION_DENIED?: number; POSITION_UNAVAILABLE?: number }
+  ) => {
+    if (isCancelled || hasAcquiredLocation) return;
+
+    const permDeniedCode = err.PERMISSION_DENIED ?? 1;
+    const posUnavailCode = err.POSITION_UNAVAILABLE ?? 2;
+
+    if (err.code === permDeniedCode) {
+      cleanup();
+      onError({
+        code: 'PERMISSION_DENIED',
+        message: 'Location access denied. Please grant location permissions in your app/browser settings.'
+      });
+      return true;
+    }
+
+    if (err.code === posUnavailCode) {
+      cleanup();
+      onError({
+        code: 'POSITION_UNAVAILABLE',
+        message: 'Location unavailable. Please make sure your device GPS/Location toggle is turned ON in Quick Settings.'
+      });
+      return true;
+    }
+
+    return false;
+  };
+
+  // Path 1: Fast cached / network fix (getCurrentPosition with enableHighAccuracy: false)
+  try {
+    nav.geolocation.getCurrentPosition(
+      (pos) => {
+        handlePosition(pos, false);
+      },
+      (err) => {
+        // If user denied permission explicitly, fail immediately
+        if (handleTerminalError(err)) return;
+        // For timeouts or network misses, let Path 2 continue
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: Math.min(8000, totalTimeout),
+        maximumAge: maxAge,
+      }
+    );
+  } catch (e) {
+    console.debug('Fast geolocation check unavailable:', e);
+  }
+
+  // Path 2: Precision GPS stream (watchPosition with enableHighAccuracy: true)
+  if (typeof nav.geolocation.watchPosition === 'function') {
+    try {
+      const id = nav.geolocation.watchPosition(
+        (pos) => {
+          handlePosition(pos, true);
         },
-        (highErr) => {
-          // Silent fallback: user already has their network location
-          console.debug('Background GPS refinement unavailable:', highErr.message);
+        (err) => {
+          handleTerminalError(err);
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
+          timeout: totalTimeout,
+          maximumAge: maxAge,
         }
       );
-    },
-    (fastErr) => {
-      if (isCancelled) return;
-
-      // If user denied permission explicitly, stop immediately and report PERMISSION_DENIED
-      if (fastErr.code === fastErr.PERMISSION_DENIED) {
-        onError({
-          code: 'PERMISSION_DENIED',
-          message: 'Location access denied. Please grant location permissions in your app/browser settings.'
-        });
-        return;
+      if (isCancelled) {
+        try {
+          nav.geolocation.clearWatch(id);
+        } catch {
+          // Ignore
+        }
+      } else {
+        watchId = id;
       }
-
-      // If network fix failed for other reasons (e.g. timeout or no network), try GPS directly
-      navigator.geolocation.getCurrentPosition(
-        (gpsPos) => {
-          if (isCancelled) return;
-          hasAcquiredLocation = true;
-          onSuccess({
-            latitude: gpsPos.coords.latitude,
-            longitude: gpsPos.coords.longitude,
-            accuracy: gpsPos.coords.accuracy,
-            isHighAccuracy: true,
-          });
+    } catch (e) {
+      console.debug('watchPosition unavailable, falling back to getCurrentPosition:', e);
+    }
+  } else {
+    // Fallback environment (e.g. basic unit tests or environments without watchPosition)
+    try {
+      nav.geolocation.getCurrentPosition(
+        (pos) => {
+          handlePosition(pos, true);
         },
-        (gpsErr) => {
-          if (isCancelled || hasAcquiredLocation) return;
-
-          if (gpsErr.code === gpsErr.PERMISSION_DENIED) {
-            onError({
-              code: 'PERMISSION_DENIED',
-              message: 'Location access denied. Please grant location permissions in your app/browser settings.'
-            });
-          } else if (gpsErr.code === gpsErr.POSITION_UNAVAILABLE) {
-            onError({
-              code: 'POSITION_UNAVAILABLE',
-              message: 'Location unavailable. Please make sure your device GPS/Location toggle is turned ON in Quick Settings.'
-            });
-          } else if (gpsErr.code === gpsErr.TIMEOUT) {
-            onError({
-              code: 'TIMEOUT',
-              message: 'Location request timed out. Please check your signal and try again.'
-            });
-          } else {
-            onError({
-              code: 'UNKNOWN',
-              message: gpsErr.message || 'Unable to acquire your location. Please try again.'
-            });
+        (err) => {
+          if (!handleTerminalError(err)) {
+            // If neither succeeded and masterTimer hasn't fired
+            if (!hasAcquiredLocation) {
+              cleanup();
+              onError({
+                code: 'TIMEOUT',
+                message: 'Location request timed out. Please check your signal and try again.'
+              });
+            }
           }
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 60000,
+          timeout: totalTimeout,
+          maximumAge: maxAge,
         }
       );
-    },
-    {
-      enableHighAccuracy: false,
-      timeout: fastTimeout,
-      maximumAge: fastMaxAge,
+    } catch (e) {
+      console.debug('High-accuracy fallback error:', e);
     }
-  );
+  }
 
-  return () => {
-    isCancelled = true;
-  };
+  return cleanup;
 };

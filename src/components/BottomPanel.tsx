@@ -136,7 +136,7 @@ export const BottomPanel = React.memo(({
     locatingTimeoutRef.current = setTimeout(() => {
       setIsLocating(false);
       locatingTimeoutRef.current = null;
-    }, 20000);
+    }, 28000);
 
     getBestUserLocation(
       (coords) => {
