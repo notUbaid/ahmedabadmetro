@@ -272,6 +272,40 @@ const translations = {
     'joinRide.arrivesIn': 'Arrives in {mins} mins',
     'joinRide.destination': 'Destination:',
     'joinRide.endOfLine': 'End of Line',
+
+    // Map & Live Indicator
+    'map.metrosRunning': '{count} metros running',
+    'map.towards': 'towards',
+    'map.crowding': 'Crowding',
+    'map.shareJourney': 'Share This Journey',
+    'map.viewMetroDetails': 'View Metro Details',
+
+    // Bottom Panel additions
+    'panel.firstMetroTomorrow': 'First metro tomorrow at',
+
+    // Commute
+    'commute.setupTitle': 'Daily Commute',
+    'commute.setupDesc': 'Set up your daily route and get quick access to upcoming metros when you are near your home or work station.',
+    'commute.homeStation': 'Home Station',
+    'commute.workStation': 'Work Station',
+    'commute.homePlaceholder': 'Home station...',
+    'commute.workPlaceholder': 'Work station...',
+    'commute.currentSetup': 'Current commute:',
+    'commute.sameStationError': 'Home and work stations cannot be the same.',
+    'commute.save': 'Save Commute',
+    'commute.noStationsFound': 'No stations found',
+    'commute.quickCommute': 'Quick Commute',
+
+    // Welcome Overlay
+    'welcome.title': 'Welcome to AhmMetro!',
+    'welcome.subtitle': 'Your digital guide to stress-free travel on the AhmMetro.',
+    'welcome.feature1Title': 'Plan Your Journey',
+    'welcome.feature1Desc': 'Get accurate timetable-based routes, fare details, and exact interchange wait times.',
+    'welcome.feature2Title': 'Live Animated Map',
+    'welcome.feature2Desc': 'Watch metros move across the network in real-time, click on them to track and share.',
+    'welcome.feature3Title': 'Custom Times & Future Trips',
+    'welcome.feature3Desc': 'Choose a specific departure or arrival time to plan your trips in advance effortlessly.',
+    'welcome.letsGo': "Let's Go!",
   },
   gu: {
     // General
@@ -541,6 +575,40 @@ const translations = {
     'joinRide.arrivesIn': '{mins} મિનિટમાં આવશે',
     'joinRide.destination': 'ગંતવ્ય:',
     'joinRide.endOfLine': 'લાઇનનો અંત',
+
+    // Map & Live Indicator
+    'map.metrosRunning': '{count} મેટ્રો દોડી રહી છે',
+    'map.towards': 'તરફ',
+    'map.crowding': 'ભીડ',
+    'map.shareJourney': 'આ મુસાફરી શેર કરો',
+    'map.viewMetroDetails': 'મેટ્રો વિગતો જુઓ',
+
+    // Bottom Panel additions
+    'panel.firstMetroTomorrow': 'આવતીકાલે પ્રથમ મેટ્રો',
+
+    // Commute
+    'commute.setupTitle': 'દૈનિક મુસાફરી',
+    'commute.setupDesc': 'જ્યારે તમે તમારા સ્ટેશને પહોંચો ત્યારે ઘર અને ઓફિસ વચ્ચે 1-ટેપ રૂટ મેળવો.',
+    'commute.homeStation': 'ઘરનું સ્ટેશન',
+    'commute.workStation': 'ઓફિસનું સ્ટેશન',
+    'commute.homePlaceholder': 'ઘરનું સ્ટેશન...',
+    'commute.workPlaceholder': 'ઓફિસનું સ્ટેશન...',
+    'commute.currentSetup': 'વર્તમાન મુસાફરી:',
+    'commute.sameStationError': 'ઘર અને ઓફિસનું સ્ટેશન સમાન ન હોઈ શકે.',
+    'commute.save': 'સેવ કરો',
+    'commute.noStationsFound': 'કોઈ સ્ટેશન મળ્યું નથી',
+    'commute.quickCommute': 'ઝડપી મુસાફરી',
+
+    // Welcome Overlay
+    'welcome.title': 'અમદાવાદ મેટ્રોમાં આપનું સ્વાગત છે!',
+    'welcome.subtitle': 'અમદાવાદ મેટ્રો પર સરળ મુસાફરી માટે તમારી ડિજિટલ માર્ગદર્શિકા.',
+    'welcome.feature1Title': 'મુસાફરીનું આયોજન કરો',
+    'welcome.feature1Desc': 'સમયપત્રક આધારિત રૂટ, ભાડાની વિગતો અને ઇન્ટરચેન્જ માટે ચોક્કસ પ્રતીક્ષા સમય મેળવો.',
+    'welcome.feature2Title': 'લાઇવ એનિમેટેડ નકશો',
+    'welcome.feature2Desc': 'નેટવર્ક પર રીઅલ-ટાઇમમાં મેટ્રો દોડતી જુઓ, ટ્રેક કરવા અને શેર કરવા માટે તેના પર ક્લિક કરો.',
+    'welcome.feature3Title': 'ચોક્કસ સમય અને ભાવિ મુસાફરી',
+    'welcome.feature3Desc': 'પહેલેથી આયોજન કરવા માટે ચોક્કસ પ્રસ્થાન અથવા આગમન સમય પસંદ કરો.',
+    'welcome.letsGo': 'ચાલો શરૂ કરીએ!',
   },
   hi: {
     // General
@@ -810,6 +878,40 @@ const translations = {
     'joinRide.arrivesIn': '{mins} मिनट में आएगी',
     'joinRide.destination': 'गंतव्य:',
     'joinRide.endOfLine': 'लाइन का अंत',
+
+    // Map & Live Indicator
+    'map.metrosRunning': '{count} मेट्रो चल रही हैं',
+    'map.towards': 'की ओर',
+    'map.crowding': 'भीड़',
+    'map.shareJourney': 'यह यात्रा साझा करें',
+    'map.viewMetroDetails': 'मेट्रो विवरण देखें',
+
+    // Bottom Panel additions
+    'panel.firstMetroTomorrow': 'कल पहली मेट्रो',
+
+    // Commute
+    'commute.setupTitle': 'दैनिक यात्रा',
+    'commute.setupDesc': 'जब आप अपने स्टेशन के पास हों तो घर और ऑफिस के बीच 1-टैप रूट पाएं।',
+    'commute.homeStation': 'घर का स्टेशन',
+    'commute.workStation': 'ऑफिस का स्टेशन',
+    'commute.homePlaceholder': 'घर का स्टेशन...',
+    'commute.workPlaceholder': 'ऑफिस का स्टेशन...',
+    'commute.currentSetup': 'वर्तमान यात्रा:',
+    'commute.sameStationError': 'घर और ऑफिस का स्टेशन समान नहीं हो सकता।',
+    'commute.save': 'सहेजें',
+    'commute.noStationsFound': 'कोई स्टेशन नहीं मिला',
+    'commute.quickCommute': 'त्वरित यात्रा',
+
+    // Welcome Overlay
+    'welcome.title': 'अहमदाबाद मेट्रो में आपका स्वागत है!',
+    'welcome.subtitle': 'अहमदाबाद मेट्रो पर तनावमुक्त यात्रा के लिए आपकी डिजिटल गाइड।',
+    'welcome.feature1Title': 'अपनी यात्रा की योजना बनाएं',
+    'welcome.feature1Desc': 'समय सारणी आधारित सटीक रूट, किराया विवरण और इंटरचेंज का सटीक प्रतीक्षा समय पाएं।',
+    'welcome.feature2Title': 'लाइव एनिमेटेड मैप',
+    'welcome.feature2Desc': 'नेटवर्क पर रियल-टाइम में मेट्रो को चलते देखें, ट्रैक और शेयर करने के लिए क्लिक करें।',
+    'welcome.feature3Title': 'कस्टम समय और अग्रिम यात्रा',
+    'welcome.feature3Desc': 'आसानी से अग्रिम यात्रा की योजना बनाने के लिए विशिष्ट प्रस्थान या आगमन समय चुनें।',
+    'welcome.letsGo': 'शुरू करें!',
   }
 };
 

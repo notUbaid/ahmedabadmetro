@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { getBestUserLocation } from '@/lib/geolocation';
+import { useCurrentTime } from '@/hooks/useCurrentTime';
 
 interface BottomPanelProps {
   selectedStation: Station | null;
@@ -51,21 +52,13 @@ export const BottomPanel = React.memo(({
   const [upcomingMetros, setUpcomingMetros] = useState<ReturnType<typeof getUpcomingTrains>>([]);
   const [lastTrainWarnings, setLastTrainWarnings] = useState<ReturnType<typeof getLastTrainWarnings>>([]);
   const [isLocating, setIsLocating] = useState(false);
-  const [currentTime, setCurrentTime] = useState(getISTDate());
+  const currentTime = useCurrentTime();
   const { language } = useLanguage();
 
   const station = selectedStation || nearestStation;
 
   // Service day window at this station — stable across the day, so no time dep.
   const serviceWindow = useMemo(() => (station ? getServiceWindow(station.id) : null), [station]);
-
-  // Auto-refresh current time every second for live feel
-  useEffect(() => {
-    const timeInterval = setInterval(() => {
-      setCurrentTime(getISTDate());
-    }, 1000);
-    return () => clearInterval(timeInterval);
-  }, []);
 
   // Auto-refresh upcoming metros and Last Metro warnings every 10 seconds
   useEffect(() => {
@@ -222,9 +215,12 @@ export const BottomPanel = React.memo(({
       <div className="glass-panel rounded-t-3xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t pointer-events-auto safe-p-bottom transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1) will-change-transform transform-gpu">
         {/* Always visible header - clickable to expand/collapse */}
         <div
-          className="px-4 pt-4 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
+          className="px-4 pt-3 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
           onClick={() => onToggleExpand()}
         >
+          {/* Visual drag handle pill */}
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-3" />
+
           {station ? (
             <>
               {/* Station header */}
@@ -400,7 +396,7 @@ export const BottomPanel = React.memo(({
                           return `${t('panel.firstMetro', language)} ${serviceWindow.first}`;
                         }
                         if (nowMinutes > lastMin) {
-                          return `${t('panel.serviceEnded', language)} · ${t('panel.lastMetro', language)} ${serviceWindow.last}`;
+                          return `${t('panel.serviceEnded', language)} · ${t('panel.firstMetroTomorrow', language)} ${serviceWindow.first}`;
                         }
                         return `${t('panel.noUpcomingMetros', language)} · ${t('panel.lastMetro', language)} ${serviceWindow.last}`;
                       }

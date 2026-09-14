@@ -15,12 +15,6 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "prompt",
       injectRegister: "script",
-      includeAssets: [
-        "favicon.ico",
-        "blueLineRoutes.geojson",
-        "metroRoutes.geojson",
-        "yellowLineRoutes.geojson",
-      ],
       manifest: {
         id: "/",
         name: "AhmMetro",
@@ -92,8 +86,8 @@ export default defineConfig(({ mode }) => ({
       } as any,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,geojson,json}"],
-        // og-image/feature-graphic are link-preview assets — no in-app code path needs them
-        globIgnores: ["**/og-image*", "**/feature-graphic*"],
+        // Exclude social previews, SEO verification, and search crawler files from offline precache
+        globIgnores: ["**/og-image*", "**/feature-graphic*", "**/google*.html", "**/robots.txt", "**/sitemap.xml", "**/llms*.txt"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
@@ -158,7 +152,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom", "lucide-react"],
           leaflet: ["leaflet"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-popover"],
           data: ["./src/data/metroData.ts", "./src/data/timetable.ts"],
         },
       },
@@ -168,7 +161,7 @@ export default defineConfig(({ mode }) => ({
     minify: "terser",
     terserOptions: {
       compress: {
-        drop_console: true,
+        pure_funcs: ["console.log", "console.info", "console.debug"],
         drop_debugger: true,
       },
     },

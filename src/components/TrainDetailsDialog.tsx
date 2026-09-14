@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { X, Clock, MapPin, Train, Zap } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
-import { cn, getISTDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrentTime } from '@/hooks/useCurrentTime';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
 
@@ -20,21 +21,8 @@ export const TrainDetailsDialog = ({
   line
 }: TrainDetailsDialogProps) => {
   const { language } = useLanguage();
-  const [currentTime, setCurrentTime] = useState<number>(0);
-
-  // Update current time every second
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const updateTime = () => {
-      const now = getISTDate();
-      setCurrentTime(now.getHours() * 60 + now.getMinutes());
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, [isOpen]);
+  const now = useCurrentTime();
+  const currentTime = now.getHours() * 60 + now.getMinutes();
 
   // Find the train schedule
   const schedule = useMemo(() => {

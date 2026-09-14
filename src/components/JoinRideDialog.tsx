@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules } from '@/data/timetable';
+import { getStationOptions } from '@/lib/routePlanner';
 import { cn, getISTDate, minutesUntil } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
@@ -35,25 +36,18 @@ export const JoinRideDialog = ({
     }, [trainId]);
 
     // Station options
-    const stationOptions = useMemo(() => {
-        return Object.values(stations)
-            .map(s => ({ id: s.id, name: s.name, lines: s.lines }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, []);
+    const stationOptions = useMemo(() => getStationOptions(), []);
 
     const filteredStations = useMemo(() => {
         if (!search) return stationOptions;
         const query = search.toLowerCase().trim();
-        return stationOptions.filter(s => {
-            const orig = stations[s.id];
-            return (
-                s.name.toLowerCase().includes(query) ||
-                (orig?.nameGu && orig.nameGu.includes(query)) ||
-                (orig?.nameHi && orig.nameHi.includes(query)) ||
-                orig?.aliases?.some(a => a.toLowerCase().includes(query)) ||
-                s.id.toLowerCase().includes(query)
-            );
-        });
+        return stationOptions.filter(s =>
+            s.name.toLowerCase().includes(query) ||
+            (s.nameGu && s.nameGu.includes(query)) ||
+            (s.nameHi && s.nameHi.includes(query)) ||
+            s.aliases?.some(a => a.toLowerCase().includes(query)) ||
+            s.id.toLowerCase().includes(query)
+        );
     }, [stationOptions, search]);
 
     // Calculate intercept details
@@ -110,7 +104,7 @@ export const JoinRideDialog = ({
     if (!isOpen || !sharedTrain) return null;
 
     return (
-        <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={onClose}

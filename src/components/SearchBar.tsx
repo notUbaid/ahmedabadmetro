@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
 import { stations } from '@/data/metroData';
 import { popularPlaces, getPlaceLabel } from '@/data/popularPlaces';
-import { cn } from '@/lib/utils';
+import { cn, getHaversineDistance } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName, Language } from '@/lib/i18n';
 import { findNearestByWalking } from '@/lib/walkingRoute';
@@ -53,16 +53,9 @@ interface SearchResult {
   nearestStationDist?: number;
 }
 
-// Distance helper
+// Distance helper in km
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+  return getHaversineDistance(lat1, lon1, lat2, lon2) / 1000;
 };
 
 // Find nearest station
@@ -300,9 +293,10 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
 
     const searchId = ++activeSearchIdRef.current;
+    const cacheKey = `${language}:${normalizedQuery}`;
 
     // Check cache first
-    const cached = searchCache.get(normalizedQuery);
+    const cached = searchCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       setResults(cached.results);
       setShowResults(true);
@@ -455,7 +449,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       }));
 
       // Cache results
-      searchCache.set(normalizedQuery, {
+      searchCache.set(cacheKey, {
         results: resultsWithRealNearest,
         timestamp: Date.now()
       });
@@ -482,7 +476,7 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         setIsLoading(false);
       }
     }
-  }, [metroStations, popularResults]);
+  }, [metroStations, popularResults, language]);
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {

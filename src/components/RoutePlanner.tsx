@@ -10,12 +10,119 @@ import { cn, getISTDate } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
+import { toast } from 'sonner';
+import { track } from '@vercel/analytics';
 
 // Parse time string "HH:MM" to minutes since midnight
 const parseTimeToMinutes = (time: string): number => {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
 };
+
+interface StationDropdownProps {
+  isSearching: boolean;
+  filteredStations: ReturnType<typeof getStationOptions>;
+  organizedStations: ReturnType<typeof getOrganizedStations>;
+  selectedStationId?: string;
+  onSelectStation: (id: string) => void;
+  language: Parameters<typeof getStationName>[1];
+}
+
+const StationDropdown = React.memo(({
+  isSearching,
+  filteredStations,
+  organizedStations,
+  selectedStationId,
+  onSelectStation,
+  language,
+}: StationDropdownProps) => {
+  return (
+    <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-72 overflow-y-auto z-10">
+      {isSearching ? (
+        filteredStations.map(s => (
+          <button
+            key={s.id}
+            onClick={() => onSelectStation(s.id)}
+            className={cn(
+              "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
+              selectedStationId === s.id && "bg-primary/10"
+            )}
+          >
+            <Train className="w-3 h-3 text-muted-foreground" />
+            <span>{getStationName(s, language)}</span>
+            <div className="flex gap-1 ml-auto">
+              {s.lines.map(l => (
+                <span
+                  key={l}
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
+                />
+              ))}
+            </div>
+          </button>
+        ))
+      ) : (
+        <>
+          {organizedStations.interchanges.length > 0 && (
+            <>
+              <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
+                {t('route.interchangeStations', language)}
+              </div>
+              {organizedStations.interchanges.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => onSelectStation(s.id)}
+                  className={cn(
+                    "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
+                    selectedStationId === s.id && "bg-primary/10"
+                  )}
+                >
+                  <Train className="w-3 h-3 text-muted-foreground" />
+                  <span>{getStationName(s, language)}</span>
+                  <div className="flex gap-1 ml-auto">
+                    {s.lines.map(l => (
+                      <span
+                        key={l}
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
+                      />
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </>
+          )}
+          {organizedStations.byLine.map(group => (
+            <div key={group.line}>
+              <div 
+                className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
+              >
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
+                />
+                {t(('line.' + group.line) as Parameters<typeof t>[0], language) || group.lineName}
+              </div>
+              {group.stations.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => onSelectStation(s.id)}
+                  className={cn(
+                    "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
+                    selectedStationId === s.id && "bg-primary/10"
+                  )}
+                >
+                  <Train className="w-3 h-3 text-muted-foreground" />
+                  <span>{getStationName(s, language)}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+});
 interface RoutePlannerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -68,6 +175,7 @@ export const RoutePlanner = React.memo(({
   const [showArriveDropdown, setShowArriveDropdown] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
 
   useEffect(() => {
     setInternalIsCoordinating(isCoordinating);
@@ -121,6 +229,13 @@ export const RoutePlanner = React.memo(({
           newRoute = planRoute(origin, destination);
         }
         setRoute(newRoute);
+        if (newRoute) {
+          try {
+            track('route_search', { origin, destination });
+          } catch {
+            // Ignore analytics error in dev/offline
+          }
+        }
       } catch (e) {
         console.error("Error calculating route:", e);
         setAvailableDepartures([]);
@@ -259,6 +374,7 @@ export const RoutePlanner = React.memo(({
     setOriginSearch(getStationName(stations[destination], language) || '');
     setDestSearch(getStationName(stations[origin], language) || '');
     setSelectedDepartureIdx(null);
+    setIsSwapped(prev => !prev);
   };
 
   const handleSelectDeparture = (departureTime: string) => {
@@ -317,10 +433,42 @@ export const RoutePlanner = React.memo(({
       url.searchParams.set('orig', origin);
       url.searchParams.set('dest', destination);
       url.searchParams.set('depMins', depMins.toString());
+      const shareUrl = url.toString();
 
-      await navigator.clipboard.writeText(url.toString());
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      let copied = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          copied = true;
+        } catch {
+          // fallback below
+        }
+      }
+
+      if (!copied) {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          copied = true;
+        } catch (e) {
+          console.error('Fallback copy failed', e);
+        }
+        document.body.removeChild(textArea);
+      }
+
+      if (copied) {
+        setIsCopied(true);
+        toast.success(t('dialog.copied', language));
+        setTimeout(() => setIsCopied(false), 2000);
+      } else {
+        toast.error('Failed to copy link');
+      }
     } catch (err) {
       console.error('Failed to copy link', err);
     }
@@ -329,13 +477,10 @@ export const RoutePlanner = React.memo(({
   const handleWhatsAppShare = () => {
     if (!route || !route.departureTime) return;
     const depMins = route.departureMinutes ?? parseTimeToMinutes(route.departureTime);
-    const url = new URL(window.location.href);
-    url.searchParams.set('orig', origin);
-    url.searchParams.set('dest', destination);
-    url.searchParams.set('depMins', depMins.toString());
     const originName = getStationName(stations[origin], language) || origin;
     const destName = getStationName(stations[destination], language) || destination;
-    const text = `🚆 Track my Ahmedabad Metro journey: ${originName} ➔ ${destName} (Departing ${route.departureTime})\n${url.toString()}`;
+    const shareUrl = `${window.location.origin}/api/share?orig=${encodeURIComponent(origin)}&dest=${encodeURIComponent(destination)}&depMins=${encodeURIComponent(depMins.toString())}`;
+    const text = `🚆 Track my Ahmedabad Metro journey: ${originName} ➔ ${destName} (Departing ${route.departureTime})\n${shareUrl}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -546,7 +691,7 @@ export const RoutePlanner = React.memo(({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1002] flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-md"
@@ -565,6 +710,7 @@ export const RoutePlanner = React.memo(({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
@@ -661,90 +807,14 @@ export const RoutePlanner = React.memo(({
               />
             </div>
             {showOriginDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-72 overflow-y-auto z-10">
-                {isOriginSearching ? (
-                  filteredOriginStations.map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => selectOrigin(s.id)}
-                      className={cn(
-                        "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                        origin === s.id && "bg-primary/10"
-                      )}
-                    >
-                      <Train className="w-3 h-3 text-muted-foreground" />
-                      <span>{getStationName(s, language)}</span>
-                      <div className="flex gap-1 ml-auto">
-                        {s.lines.map(l => (
-                          <span
-                            key={l}
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
-                          />
-                        ))}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <>
-                    {organizedStations.interchanges.length > 0 && (
-                      <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
-                          {t('route.interchangeStations', language)}
-                        </div>
-                        {organizedStations.interchanges.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => selectOrigin(s.id)}
-                            className={cn(
-                              "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                              origin === s.id && "bg-primary/10"
-                            )}
-                          >
-                            <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{getStationName(s, language)}</span>
-                            <div className="flex gap-1 ml-auto">
-                              {s.lines.map(l => (
-                                <span
-                                  key={l}
-                                  className="w-2 h-2 rounded-full"
-                                  style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
-                                />
-                              ))}
-                            </div>
-                          </button>
-                        ))}
-                      </>
-                    )}
-                    {organizedStations.byLine.map(group => (
-                      <div key={group.line}>
-                        <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
-                        >
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
-                          />
-                          {t(('line.' + group.line) as Parameters<typeof t>[0], language) || group.lineName}
-                        </div>
-                        {group.stations.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => selectOrigin(s.id)}
-                            className={cn(
-                              "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                              origin === s.id && "bg-primary/10"
-                            )}
-                          >
-                            <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{getStationName(s, language)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+              <StationDropdown
+                isSearching={isOriginSearching}
+                filteredStations={filteredOriginStations}
+                organizedStations={organizedStations}
+                selectedStationId={origin}
+                onSelectStation={selectOrigin}
+                language={language}
+              />
             )}
           </div>
 
@@ -752,10 +822,11 @@ export const RoutePlanner = React.memo(({
           <div className="flex justify-center">
             <button
               onClick={swapStations}
+              aria-label="Swap origin and destination"
               className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
               disabled={!origin && !destination}
             >
-              <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
+              <ArrowDownUp className={cn("w-4 h-4 text-muted-foreground transition-transform duration-300", isSwapped && "rotate-180")} />
             </button>
           </div>
 
@@ -776,90 +847,14 @@ export const RoutePlanner = React.memo(({
               />
             </div>
             {showDestDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-72 overflow-y-auto z-10">
-                {isDestSearching ? (
-                  filteredDestStations.map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => selectDestination(s.id)}
-                      className={cn(
-                        "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                        destination === s.id && "bg-primary/10"
-                      )}
-                    >
-                      <Train className="w-3 h-3 text-muted-foreground" />
-                      <span>{getStationName(s, language)}</span>
-                      <div className="flex gap-1 ml-auto">
-                        {s.lines.map(l => (
-                          <span
-                            key={l}
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
-                          />
-                        ))}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <>
-                    {organizedStations.interchanges.length > 0 && (
-                      <>
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50">
-                          {t('route.interchangeStations', language)}
-                        </div>
-                        {organizedStations.interchanges.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => selectDestination(s.id)}
-                            className={cn(
-                              "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                              destination === s.id && "bg-primary/10"
-                            )}
-                          >
-                            <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{getStationName(s, language)}</span>
-                            <div className="flex gap-1 ml-auto">
-                              {s.lines.map(l => (
-                                <span
-                                  key={l}
-                                  className="w-2 h-2 rounded-full"
-                                  style={{ backgroundColor: LINE_COLORS[l as keyof typeof LINE_COLORS] }}
-                                />
-                              ))}
-                            </div>
-                          </button>
-                        ))}
-                      </>
-                    )}
-                    {organizedStations.byLine.map(group => (
-                      <div key={group.line}>
-                        <div 
-                          className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-popover/75 backdrop-blur-sm sticky top-0 z-10 border-b border-border/50 flex items-center gap-2"
-                        >
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: LINE_COLORS[group.line as keyof typeof LINE_COLORS] }}
-                          />
-                          {t(('line.' + group.line) as Parameters<typeof t>[0], language) || group.lineName}
-                        </div>
-                        {group.stations.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => selectDestination(s.id)}
-                            className={cn(
-                              "w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2",
-                              destination === s.id && "bg-primary/10"
-                            )}
-                          >
-                            <Train className="w-3 h-3 text-muted-foreground" />
-                            <span>{getStationName(s, language)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+              <StationDropdown
+                isSearching={isDestSearching}
+                filteredStations={filteredDestStations}
+                organizedStations={organizedStations}
+                selectedStationId={destination}
+                onSelectStation={selectDestination}
+                language={language}
+              />
             )}
           </div>
         </div>

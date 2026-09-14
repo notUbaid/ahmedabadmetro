@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { X, Home, Briefcase, Train, ArrowLeftRight, Trash2 } from 'lucide-react';
 import { stations, LINE_COLORS } from '@/data/metroData';
-import { getOrganizedStations } from '@/lib/routePlanner';
 import { 
   getCommuteSettings, 
   saveCommuteSettings, 
@@ -25,21 +24,28 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
   const [showWorkDropdown, setShowWorkDropdown] = useState(false);
   const [homeSelectedIndex, setHomeSelectedIndex] = useState(-1);
   const [workSelectedIndex, setWorkSelectedIndex] = useState(-1);
+  const [existingSettings, setExistingSettings] = useState<CommuteSettings | null>(null);
   const { language } = useLanguage();
   
-  // Re-read on every open — localStorage can change between mounts/dismissals
-  const existingSettings = useMemo(() => getCommuteSettings(), [isOpen]);
-  const organizedStations = useMemo(() => getOrganizedStations(), []);
   const allStations = useMemo(() => Object.values(stations), []);
 
   useEffect(() => {
-    if (existingSettings) {
-      setHomeStation(existingSettings.homeStation);
-      setWorkStation(existingSettings.workStation);
-      setHomeSearch(getStationName(stations[existingSettings.homeStation], language) || '');
-      setWorkSearch(getStationName(stations[existingSettings.workStation], language) || '');
+    if (isOpen) {
+      const current = getCommuteSettings();
+      setExistingSettings(current);
+      if (current) {
+        setHomeStation(current.homeStation);
+        setWorkStation(current.workStation);
+        setHomeSearch(getStationName(stations[current.homeStation], language) || '');
+        setWorkSearch(getStationName(stations[current.workStation], language) || '');
+      } else {
+        setHomeStation('');
+        setWorkStation('');
+        setHomeSearch('');
+        setWorkSearch('');
+      }
     }
-  }, [language, existingSettings]);
+  }, [isOpen, language]);
 
   const filteredHomeStations = useMemo(() => {
     if (!homeSearch) return [];
@@ -78,12 +84,14 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
         workToHomeDismissCount: 0,
       };
       saveCommuteSettings(settings);
+      setExistingSettings(settings);
       onClose();
     }
   };
 
   const handleClear = () => {
     clearCommuteSettings();
+    setExistingSettings(null);
     setHomeStation('');
     setWorkStation('');
     setHomeSearch('');
@@ -147,10 +155,11 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-lg">{t('commute.dailyCommute', language)}</h2>
+            <h2 className="font-semibold text-lg">{t('commute.setupTitle', language)}</h2>
           </div>
           <button 
             onClick={onClose}
+            aria-label={t('common.close', language)}
             className="p-2 hover:bg-muted rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
@@ -159,7 +168,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
         <div className="p-4 space-y-4">
           <p className="text-sm text-muted-foreground">
-            Set up your daily route and get quick access to upcoming metros when you're near your home or work station.
+            {t('commute.setupDesc', language)}
           </p>
 
           <div className="space-y-3">
@@ -168,7 +177,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                 <Home className="w-4 h-4 text-green-500 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="Home station..."
+                  placeholder={t('commute.homePlaceholder', language)}
                   value={homeSearch}
                   onChange={(e) => {
                     setHomeSearch(e.target.value);
@@ -206,7 +215,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                       </button>
                     ))
                   ) : (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">No stations found</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">{t('commute.noStationsFound', language)}</div>
                   )}
                 </div>
               )}
@@ -217,7 +226,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                 <Briefcase className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="Work station..."
+                  placeholder={t('commute.workPlaceholder', language)}
                   value={workSearch}
                   onChange={(e) => {
                     setWorkSearch(e.target.value);
@@ -255,7 +264,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
                       </button>
                     ))
                   ) : (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">No stations found</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">{t('commute.noStationsFound', language)}</div>
                   )}
                 </div>
               )}
@@ -264,7 +273,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
           {existingSettings && (
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-xs text-muted-foreground mb-1">Current commute:</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('commute.currentSetup', language)}</p>
               <p className="text-sm font-medium">
                 {getStationName(stations[existingSettings.homeStation], language)} ↔ {getStationName(stations[existingSettings.workStation], language)}
               </p>
@@ -273,7 +282,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
           {homeStation && workStation && homeStation === workStation && (
             <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20 text-red-600 text-xs">
-              Home and work stations cannot be the same.
+              {t('commute.sameStationError', language)}
             </div>
           )}
 
@@ -283,7 +292,7 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
               disabled={!homeStation || !workStation || homeStation === workStation}
               className="flex-1 py-3 px-4 rounded-xl font-medium bg-primary text-primary-foreground flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Commute
+              {t('commute.save', language)}
             </button>
             {existingSettings && (
               <button

@@ -218,6 +218,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
+        aria-label="Open menu"
         className="fixed top-4 right-4 z-[1001] p-3 glass-panel rounded-xl shadow-lg border border-border hover:bg-muted transition-colors pointer-events-auto safe-m-top hover-scale"
       >
         <Menu className="w-5 h-5" />
@@ -241,6 +242,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
           <h2 className="font-semibold text-lg">{t('menu.title', language)}</h2>
           <button
             onClick={() => setIsOpen(false)}
+            aria-label="Close menu"
             className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />

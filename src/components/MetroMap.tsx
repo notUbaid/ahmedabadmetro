@@ -1,14 +1,14 @@
 import { X, Route, Share2, ArrowRight, Train, Clock, MapPin, Check, Users } from 'lucide-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
-import { getCurrentTrainPositions, trainSchedules, lineStations, getAllAdjacentStationPairs, TrainPosition } from '@/data/timetable';
+import { getCurrentTrainPositions, trainSchedules, lineStations, TrainPosition } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
-import { calculateJourneyProgress, planRouteWithDeparture, PlannedRoute, getStationOptions } from '@/lib/routePlanner';
+import { planRouteWithDeparture, PlannedRoute } from '@/lib/routePlanner';
 import { getCrowdLevel } from '@/lib/crowding';
-import { getCommuteSettings, incrementDismissCount, shouldShowCommuteCard, markCommuteCardShown } from '@/lib/commuteStorage';
+import { getCommuteSettings, shouldShowCommuteCard, markCommuteCardShown } from '@/lib/commuteStorage';
+import staticRouteSegments from '@/data/routeSegments.generated.json';
 import SearchBar from './SearchBar';
 import BottomPanel from './BottomPanel';
 import RoutePlanner from './RoutePlanner';
@@ -19,7 +19,8 @@ import { CommuteCard } from './CommuteCard';
 import { TrainDetailsDialog } from './TrainDetailsDialog';
 import { LiveTrainTrackingDialog } from './LiveTrainTrackingDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getStationName } from '@/lib/i18n';
+import { t, getStationName } from '@/lib/i18n';
+import { track } from '@vercel/analytics';
 
 const CENTER: [number, number] = [23.0700, 72.5900];
 const DEFAULT_ZOOM = 12;
@@ -44,12 +45,13 @@ export const MetroMap = () => {
   const routeLayersRef = useRef<L.Layer[]>([]);
   // Use a ref to store precise route segments between stations: "stationA-stationB" -> coordinates[]
   // Cache route geometry plus precomputed distances to avoid per-frame recomputation
-  const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(new Map());
+  const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(
+    new Map(Object.entries(staticRouteSegments as Record<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>))
+  );
   const latestPositionsRef = useRef<Map<string, TrainPosition>>(new Map());
   const stationLabelsRef = useRef<Map<string, L.Marker>>(new Map());
 
   const { language } = useLanguage();
-  const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [searchedLocation, setSearchedLocation] = useState<[number, number] | null>(null);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
@@ -293,19 +295,19 @@ export const MetroMap = () => {
       } else if (mapRef.current) {
         userMarkerRef.current = L.circleMarker([lat, lng], {
           radius: 8,
-          fillColor: '#3B82F6',
+          fillColor: '#2563EB',
           color: '#FFFFFF',
           weight: 3,
           fillOpacity: 1,
         }).addTo(mapRef.current);
 
         userPulseRef.current = L.circleMarker([lat, lng], {
-          radius: 20,
+          radius: 22,
           fillColor: '#3B82F6',
-          color: '#3B82F6',
+          color: '#60A5FA',
           weight: 1,
-          fillOpacity: 0.2,
-          opacity: 0.5,
+          fillOpacity: 0.15,
+          opacity: 0.35,
         }).addTo(mapRef.current);
       }
 
@@ -346,6 +348,11 @@ export const MetroMap = () => {
       setSelectedStation(station);
       setIsPanelExpanded(true);
       mapRef.current.setView(station.coordinates, 15);
+      try {
+        track('station_tap', { stationId: station.id, stationName: station.name, source: 'search' });
+      } catch {
+        // Ignore analytics in dev/offline
+      }
     }
   }, []);
 
@@ -502,8 +509,8 @@ export const MetroMap = () => {
           </div>
         </div>
       `,
-      iconSize: [100, 100],
-      iconAnchor: [50, 50],
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
     });
     const originMarker = L.marker(route.origin.coordinates, {
       pane: 'routeHighlight',
@@ -522,8 +529,8 @@ export const MetroMap = () => {
           </div>
         </div>
       `,
-      iconSize: [100, 100],
-      iconAnchor: [50, 50],
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
     });
     const destMarker = L.marker(route.destination.coordinates, {
       pane: 'routeHighlight',
@@ -542,8 +549,8 @@ export const MetroMap = () => {
               <div class="interchange-inner" style="background-color: #F59E0B; width: 14px; height: 14px;"></div>
             </div>
           `,
-          iconSize: [100, 100],
-          iconAnchor: [50, 50],
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
         });
         const interchangeMarker = L.marker(step.station.coordinates, {
           pane: 'routeHighlight',
@@ -999,148 +1006,7 @@ longPressTimer = setTimeout(() => {
         const koteshwarLat = stations.koteshwar_road?.coordinates?.[0] ?? 23.1031114;
         const EPS = 0.0003;
 
-        // Robust helper to find continuous path between stations using all line features
-        const buildLineCache = (lineStationsList: string[], features: GeoJSON.Feature[]) => {
-          if (!lineStationsList || lineStationsList.length < 2) return;
-          
-          const nodes: [number, number][] = [];
-          const adj: number[][] = [];
 
-          // 1. Add all station coordinates as nodes
-          const stationNodes = lineStationsList.map(id => {
-            const st = stations[id];
-            nodes.push([st.coordinates[0], st.coordinates[1]]);
-            adj.push([]);
-            return nodes.length - 1;
-          });
-
-          // 2. Add all GeoJSON points and connect adjacent ones
-          features.forEach(f => {
-            if (f.geometry.type !== 'LineString') return;
-            const coords = (f.geometry as GeoJSON.LineString).coordinates as [number, number][];
-            const startIdx = nodes.length;
-            coords.forEach(c => {
-              nodes.push([c[1], c[0]]); // GeoJSON is [lng, lat], Leaflet is [lat, lng]
-              adj.push([]);
-            });
-            for (let i = 0; i < coords.length - 1; i++) {
-              adj[startIdx + i].push(startIdx + i + 1);
-              adj[startIdx + i + 1].push(startIdx + i);
-            }
-          });
-
-          // 3. Connect stations to their closest track node
-          const MAX_STATION_GAP = 0.05; // ~5.5km, ensures all stations find a track
-          
-          for (let i = 0; i < lineStationsList.length; i++) {
-            let closestNode = -1;
-            let minDist = MAX_STATION_GAP;
-            for (let j = lineStationsList.length; j < nodes.length; j++) {
-              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-              if (dist < minDist) {
-                minDist = dist;
-                closestNode = j;
-              }
-            }
-            if (closestNode !== -1) {
-              adj[i].push(closestNode);
-              adj[closestNode].push(i);
-            }
-          }
-
-          // Find feature endpoints and connect fragmented ends
-          const MAX_ENDPOINT_GAP = 0.005; // 500m
-          for (let i = lineStationsList.length; i < nodes.length; i++) {
-            if (adj[i].length === 1) { 
-              for (let j = i + 1; j < nodes.length; j++) {
-                if (adj[j].length === 1) { 
-                  const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-                  if (dist < MAX_ENDPOINT_GAP) {
-                    adj[i].push(j);
-                    adj[j].push(i);
-                  }
-                }
-              }
-            }
-          }
-
-          // Connect all close track nodes (e.g. parallel tracks or overlaps) to allow Dijkstra to switch tracks
-          for (let i = lineStationsList.length; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-              if (dist < 0.0005) { // 50m
-                adj[i].push(j);
-                adj[j].push(i);
-              }
-            }
-          }
-
-          // 4. Find shortest path between each adjacent station pair
-          for (let i = 0; i < lineStationsList.length - 1; i++) {
-            const startNode = i;
-            const endNode = i + 1;
-            const s1 = lineStationsList[i];
-            const s2 = lineStationsList[i + 1];
-
-            const dist = new Float32Array(nodes.length).fill(Infinity);
-            const prev = new Int32Array(nodes.length).fill(-1);
-            const visited = new Uint8Array(nodes.length);
-            dist[startNode] = 0;
-
-            for (let step = 0; step < nodes.length; step++) {
-              let u = -1;
-              let minDist = Infinity;
-              for (let v = 0; v < nodes.length; v++) {
-                if (!visited[v] && dist[v] < minDist) {
-                  minDist = dist[v];
-                  u = v;
-                }
-              }
-              if (u === -1 || u === endNode) break;
-              visited[u] = 1;
-
-              for (const v of adj[u]) {
-                if (visited[v]) continue;
-                const dx = nodes[u][0] - nodes[v][0];
-                const dy = nodes[u][1] - nodes[v][1];
-                const d = Math.sqrt(dx*dx + dy*dy);
-                if (dist[u] + d < dist[v]) {
-                  dist[v] = dist[u] + d;
-                  prev[v] = u;
-                }
-              }
-            }
-
-            if (prev[endNode] !== -1) {
-              const path: [number, number][] = [];
-              let curr = endNode;
-              while (curr !== -1) {
-                path.push(nodes[curr]);
-                curr = prev[curr];
-              }
-              path.reverse();
-
-              const dists: number[] = [0];
-              let totalDist = 0;
-              for (let k = 0; k < path.length - 1; k++) {
-                const d = Math.sqrt(Math.pow(path[k + 1][0] - path[k][0], 2) + Math.pow(path[k + 1][1] - path[k][1], 2));
-                totalDist += d;
-                dists.push(totalDist);
-              }
-
-              const key1 = `${s1}-${s2}`;
-              if (!routeSegmentsRef.current.has(key1)) {
-                const entry = { geometry: path, dists, totalDist };
-                routeSegmentsRef.current.set(key1, entry);
-
-                const revPath = [...path].reverse();
-                const revDists = [...dists].map(d => totalDist - d).reverse();
-                const revEntry = { geometry: revPath, dists: revDists, totalDist };
-                routeSegmentsRef.current.set(`${s2}-${s1}`, revEntry);
-              }
-            }
-          }
-        };
 
         const classifyPoint = (lat: number): 'red' | 'green' | 'neutral' => {
           if (lat < koteshwarLat - EPS) return 'red';
@@ -1266,148 +1132,7 @@ longPressTimer = setTimeout(() => {
         const greenLayer = addRouteLayer(green, LINE_COLORS.green);
         greenLayer?.bringToFront();
 
-        // Build route geometry cache for train animation
-        routeSegmentsRef.current.clear();
-        buildLineCache(lineStations.blue, blue);
-        buildLineCache(lineStations.red, red);
-        buildLineCache(lineStations.green, green);
-        buildLineCache(lineStations.purple, purple);
 
-        // Fill in missing station pairs from through-running train schedules.
-        // Through-running Metros (e.g. purple APMC→GIFT) traverse station pairs
-        // that aren't in any single line's cache. Build those using all features.
-        const allPairs = getAllAdjacentStationPairs();
-        const allFeatures = [...blue, ...red, ...green, ...purple];
-        const missingPairs = allPairs.filter(([s1, s2]) =>
-          !routeSegmentsRef.current.has(`${s1}-${s2}`) &&
-          !routeSegmentsRef.current.has(`${s2}-${s1}`)
-        );
-        if (missingPairs.length > 0) {
-          // Build a single Dijkstra graph from ALL features to resolve missing pairs
-          const missingStationIds = new Set<string>();
-          missingPairs.forEach(([s1, s2]) => { missingStationIds.add(s1); missingStationIds.add(s2); });
-          const missingStationsList = [...missingStationIds];
-
-          const nodes: [number, number][] = [];
-          const adj: number[][] = [];
-
-          // Add station nodes
-          const stationNodeMap = new Map<string, number>();
-          missingStationsList.forEach(id => {
-            const st = stations[id];
-            if (!st) return;
-            stationNodeMap.set(id, nodes.length);
-            nodes.push([st.coordinates[0], st.coordinates[1]]);
-            adj.push([]);
-          });
-
-          // Add all GeoJSON track nodes
-          allFeatures.forEach(f => {
-            if (f.geometry.type !== 'LineString') return;
-            const coords = (f.geometry as GeoJSON.LineString).coordinates as [number, number][];
-            const startIdx = nodes.length;
-            coords.forEach(c => {
-              nodes.push([c[1], c[0]]);
-              adj.push([]);
-            });
-            for (let i = 0; i < coords.length - 1; i++) {
-              adj[startIdx + i].push(startIdx + i + 1);
-              adj[startIdx + i + 1].push(startIdx + i);
-            }
-          });
-
-          // Connect stations to nearest track nodes
-          for (const [id, nodeIdx] of stationNodeMap) {
-            let closestNode = -1;
-            let minDist = 0.05;
-            for (let j = missingStationsList.length; j < nodes.length; j++) {
-              const dist = Math.sqrt(Math.pow(nodes[nodeIdx][0] - nodes[j][0], 2) + Math.pow(nodes[nodeIdx][1] - nodes[j][1], 2));
-              if (dist < minDist) {
-                minDist = dist;
-                closestNode = j;
-              }
-            }
-            if (closestNode !== -1) {
-              adj[nodeIdx].push(closestNode);
-              adj[closestNode].push(nodeIdx);
-            }
-          }
-
-          // Connect close track nodes (parallel tracks)
-          for (let i = missingStationsList.length; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-              const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-              if (dist < 0.0005) {
-                adj[i].push(j);
-                adj[j].push(i);
-              }
-            }
-          }
-
-          // Connect fragmented endpoints
-          for (let i = missingStationsList.length; i < nodes.length; i++) {
-            if (adj[i].length === 1) {
-              for (let j = i + 1; j < nodes.length; j++) {
-                if (adj[j].length === 1) {
-                  const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-                  if (dist < 0.005) {
-                    adj[i].push(j);
-                    adj[j].push(i);
-                  }
-                }
-              }
-            }
-          }
-
-          // Run Dijkstra for each missing pair
-          for (const [s1, s2] of missingPairs) {
-            const startNode = stationNodeMap.get(s1);
-            const endNode = stationNodeMap.get(s2);
-            if (startNode === undefined || endNode === undefined) continue;
-
-            const dist = new Float32Array(nodes.length).fill(Infinity);
-            const prev = new Int32Array(nodes.length).fill(-1);
-            const visited = new Uint8Array(nodes.length);
-            dist[startNode] = 0;
-
-            for (let step = 0; step < nodes.length; step++) {
-              let u = -1;
-              let minD = Infinity;
-              for (let v = 0; v < nodes.length; v++) {
-                if (!visited[v] && dist[v] < minD) { minD = dist[v]; u = v; }
-              }
-              if (u === -1 || u === endNode) break;
-              visited[u] = 1;
-              for (const v of adj[u]) {
-                if (visited[v]) continue;
-                const dx = nodes[u][0] - nodes[v][0];
-                const dy = nodes[u][1] - nodes[v][1];
-                const d = Math.sqrt(dx*dx + dy*dy);
-                if (dist[u] + d < dist[v]) { dist[v] = dist[u] + d; prev[v] = u; }
-              }
-            }
-
-            if (prev[endNode] !== -1) {
-              const path: [number, number][] = [];
-              let curr = endNode;
-              while (curr !== -1) { path.push(nodes[curr]); curr = prev[curr]; }
-              path.reverse();
-
-              const dists: number[] = [0];
-              let totalDist = 0;
-              for (let k = 0; k < path.length - 1; k++) {
-                const d = Math.sqrt(Math.pow(path[k+1][0]-path[k][0],2) + Math.pow(path[k+1][1]-path[k][1],2));
-                totalDist += d;
-                dists.push(totalDist);
-              }
-
-              routeSegmentsRef.current.set(`${s1}-${s2}`, { geometry: path, dists, totalDist });
-              const revPath = [...path].reverse();
-              const revDists = [...dists].map(d => totalDist - d).reverse();
-              routeSegmentsRef.current.set(`${s2}-${s1}`, { geometry: revPath, dists: revDists, totalDist });
-            }
-          }
-        }
 
       })
       .catch(err => console.error('Failed to load metro routes:', err));
@@ -1426,8 +1151,8 @@ longPressTimer = setTimeout(() => {
             ${isInterchange ? `<div class="interchange-inner" style="background-color: ${LINE_COLORS[station.lines[0]]}"></div>` : ''}
           </div>
         `,
-        iconSize: [100, 100],
-        iconAnchor: [50, 50],
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
       });
 
       const marker = L.marker(station.coordinates, {
@@ -1455,14 +1180,21 @@ longPressTimer = setTimeout(() => {
       // Click handler
       marker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
+        if ('vibrate' in navigator) {
+          navigator.vibrate(30);
+        }
         stationClickedRef.current = true;
         setSelectedStation(station);
         setIsPanelExpanded(true);
         map.setView(station.coordinates, 15);
+        try {
+          track('station_tap', { stationId: station.id, stationName: station.name, source: 'map_marker' });
+        } catch {
+          // Ignore analytics in dev/offline
+        }
       });
     });
 
-    let pulseAnimationId: ReturnType<typeof setInterval> | null = null;
 
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
@@ -1510,36 +1242,21 @@ longPressTimer = setTimeout(() => {
             // Add user marker
             userMarkerRef.current = L.circleMarker([latitude, longitude], {
               radius: 8,
-              fillColor: '#3B82F6',
+              fillColor: '#2563EB',
               color: '#FFFFFF',
               weight: 3,
               fillOpacity: 1,
             }).addTo(map);
 
-            // Add pulsing effect
+            // Add user location halo (calm, static translucent accuracy ring)
             userPulseRef.current = L.circleMarker([latitude, longitude], {
-              radius: 20,
+              radius: 22,
               fillColor: '#3B82F6',
-              color: '#3B82F6',
+              color: '#60A5FA',
               weight: 1,
-              fillOpacity: 0.2,
-              opacity: 0.5,
+              fillOpacity: 0.15,
+              opacity: 0.35,
             }).addTo(map);
-
-            // Simple pulse animation
-            let growing = true;
-            pulseAnimationId = setInterval(() => {
-              if (userPulseRef.current) {
-                const currentRadius = userPulseRef.current.getRadius();
-                if (growing) {
-                  userPulseRef.current.setRadius(currentRadius + 0.5);
-                  if (currentRadius >= 25) growing = false;
-                } else {
-                  userPulseRef.current.setRadius(currentRadius - 0.5);
-                  if (currentRadius <= 15) growing = true;
-                }
-              }
-            }, 100);
 
             // Center on user
             map.setView([latitude, longitude], 14);
@@ -1582,18 +1299,17 @@ longPressTimer = setTimeout(() => {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
       }
-      if (pulseAnimationId !== null) {
-        clearInterval(pulseAnimationId);
-      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      userMarkerRef.current = null;
+      userPulseRef.current = null;
     };
     // `language` intentionally omitted: including it tears down and rebuilds the
     // whole map on every language switch. The label-swap effect above (~line 200)
     // already updates station labels in place.
-  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation, toast]);
+  }, [handleLocationUpdate, handleLocationSelect, updateNearestStation]);
 
   const handleClosePanel = () => {
     setSelectedStation(null);
@@ -1704,9 +1420,15 @@ longPressTimer = setTimeout(() => {
       <div ref={mapContainerRef} className="w-full h-full" style={{ pointerEvents: 'auto' }} />
 
       <SearchBar onLocationSelect={handleLocationSelect} onStationSelect={handleStationSelect} />
-      <SideMenu onOpenRoutePlanner={() => {
-        // Default the journey start to the user's nearest station.
-        setRoutePlannerOrigin(nearestStation?.id);
+      <SideMenu onOpenRoutePlanner={(origin, destination) => {
+        if (origin && destination) {
+          setRoutePlannerOrigin(origin);
+          setRoutePlannerDestination(destination);
+        } else {
+          // Default the journey start to the user's nearest station.
+          setRoutePlannerOrigin(nearestStation?.id);
+          setRoutePlannerDestination(undefined);
+        }
         setIsRoutePlannerOpen(true);
       }} />
 
@@ -1717,7 +1439,9 @@ longPressTimer = setTimeout(() => {
             <div className="w-3 h-3 bg-green-500 rounded-full" />
             <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />
           </div>
-          <span className="text-sm font-medium">{activeTrainCount} metros running</span>
+          <span className="text-sm font-medium">
+            {t('map.metrosRunning', language).replace('{count}', String(activeTrainCount))}
+          </span>
         </div>
       )}
 
@@ -1811,8 +1535,15 @@ longPressTimer = setTimeout(() => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">{selectedTrain.line.charAt(0).toUpperCase() + selectedTrain.line.slice(1)} Line</h3>
-                    <p className="text-sm text-white/80">towards {selectedTrain.destination}</p>
+                    <h3 className="font-bold text-lg">{t(`line.${selectedTrain.line}` as Parameters<typeof t>[0], language)}</h3>
+                    <p className="text-sm text-white/80">
+                      {t('map.towards', language)}{' '}
+                      {(() => {
+                        const sched = trainSchedules.find(s => s.id === selectedTrain.id);
+                        const destSt = sched ? stations[sched.stations[sched.stations.length - 1]] : null;
+                        return destSt ? getStationName(destSt, language) : selectedTrain.destination;
+                      })()}
+                    </p>
                   </div>
                 </div>
                 <button 
@@ -1828,7 +1559,9 @@ longPressTimer = setTimeout(() => {
               <div className="flex items-center gap-3 text-sm">
                 <MapPin size={16} className="text-muted-foreground" />
                 <span>
-                  {stations[selectedTrain.fromStationId]?.name || 'Unknown'} → {stations[selectedTrain.toStationId]?.name || 'Unknown'}
+                  {stations[selectedTrain.fromStationId] ? getStationName(stations[selectedTrain.fromStationId], language) : 'Unknown'}
+                  {' → '}
+                  {stations[selectedTrain.toStationId] ? getStationName(stations[selectedTrain.toStationId], language) : 'Unknown'}
                 </span>
               </div>
               
@@ -1846,7 +1579,7 @@ longPressTimer = setTimeout(() => {
                   return (
                     <div className="flex items-center gap-3 text-sm">
                       <Users size={16} className="text-muted-foreground" />
-                      <span>Crowding: </span>
+                      <span>{t('map.crowding', language)}: </span>
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${crowd.bgClass} ${crowd.textClass}`}>
                         {crowd.label}
                       </span>
@@ -1864,7 +1597,7 @@ longPressTimer = setTimeout(() => {
                 style={{ backgroundColor: '#FFB347' }}
               >
                 <Share2 size={18} />
-                Share This Journey
+                {t('map.shareJourney', language)}
               </button>
               
               <button
@@ -1874,7 +1607,7 @@ longPressTimer = setTimeout(() => {
                 className="w-full py-3 px-4 rounded-xl font-medium border border-border bg-muted/50 flex items-center justify-center gap-2 transition-all hover:bg-muted active:scale-[0.98]"
               >
                 <Train size={18} />
-                View Metro Details
+                {t('map.viewMetroDetails', language)}
               </button>
             </div>
           </div>

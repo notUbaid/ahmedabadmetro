@@ -48,26 +48,7 @@ const getDayType = (date: Date = getISTDate()) => {
   return day === 0 ? 'Sunday' : day === 6 ? 'Saturday' : 'Mon-Fri';
 };
 
-const LINE_STATIONS: Record<string, string[]> = {
-  blue: [
-    'thaltej_gam', 'thaltej', 'doordarshan_kendra', 'gurukul_road', 'gujarat_university',
-    'commerce_six_road', 'stadium', 'old_high_court', 'shahpur', 'gheekanta', 'kalupur',
-    'kankaria_east', 'apparel_park', 'amraiwadi', 'rabari_colony', 'vastral',
-    'nirant_cross_roads', 'vastral_gam'
-  ],
-  red: [
-    'apmc', 'jivraj_park', 'rajiv_nagar', 'shreyas', 'paldi', 'gandhigram',
-    'old_high_court', 'usmanpura', 'vijay_nagar', 'vadaj', 'ranip', 'aec',
-    'sabarmati', 'motera_stadium', 'koteshwar_road'
-  ],
-  green: [
-    'koteshwar_road', 'vishwakarma_college', 'tapovan_circle',
-    'narmada_canal', 'koba_circle', 'juna_koba', 'koba_gam', 'gnlu', 'raysan',
-    'randesan', 'dholakuva_circle', 'infocity', 'sector_1', 'sector_10a', 'sachivalaya',
-    'akshardham', 'juna_sachivalaya', 'sector_16', 'sector_24', 'mahatma_mandir'
-  ],
-  purple: ['gnlu', 'pdpu', 'gift_city']
-};
+const LINE_STATIONS = lineStations;
 
 // Terminal stations for direction names
 const LINE_TERMINALS: Record<string, { start: string; end: string }> = {
