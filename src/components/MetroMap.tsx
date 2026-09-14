@@ -1195,6 +1195,10 @@ longPressTimer = setTimeout(() => {
       });
     });
 
+    // Notify startup splash that map and stations are mounted and ready
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ahm-map-ready'));
+    }
 
     // Request user location with continuous watching for movement
     if ('geolocation' in navigator) {
