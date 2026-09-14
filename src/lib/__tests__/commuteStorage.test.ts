@@ -4,6 +4,7 @@ import {
   saveCommuteSettings, 
   clearCommuteSettings, 
   markCommuteCardShown, 
+  incrementDismissCount,
   shouldShowCommuteCard,
   getISTDateString
 } from '../commuteStorage';
@@ -97,4 +98,75 @@ describe('Daily Commute Storage & Trigger Rules', () => {
     expect(shouldShowCommuteCard('homeToWork', day2)).toBe(true);
     expect(shouldShowCommuteCard('workToHome', day2)).toBe(true);
   });
+
+  describe('Storage Resilience and Edge Cases', () => {
+    it('gracefully handles corrupt or malformed JSON in localStorage', () => {
+      // Intentionally insert malformed JSON string
+      storageMock['ahmedabad_metro_commute'] = '{{invalid_json...';
+      
+      const settings = getCommuteSettings();
+      expect(settings).toBeNull();
+      expect(shouldShowCommuteCard('homeToWork', day1)).toBe(false);
+    });
+
+    it('clears commute settings successfully', () => {
+      saveCommuteSettings({
+        homeStation: 'apmc',
+        workStation: 'motera_stadium'
+      });
+      expect(getCommuteSettings()).not.toBeNull();
+
+      clearCommuteSettings();
+      expect(getCommuteSettings()).toBeNull();
+    });
+
+    it('gracefully handles localStorage exception on save and clear (e.g. QuotaExceededError or private browsing sandbox)', () => {
+      // Simulate setItem throwing an error
+      globalThis.localStorage.setItem = () => {
+        throw new Error('QuotaExceededError');
+      };
+      // Should not throw, logs error gracefully
+      expect(() => {
+        saveCommuteSettings({
+          homeStation: 'thaltej',
+          workStation: 'vastral'
+        });
+      }).not.toThrow();
+
+      // Simulate removeItem throwing an error
+      globalThis.localStorage.removeItem = () => {
+        throw new Error('SecurityError: access denied');
+      };
+      expect(() => {
+        clearCommuteSettings();
+      }).not.toThrow();
+    });
+
+    it('increments dismiss count and marks card as shown via incrementDismissCount', () => {
+      saveCommuteSettings({
+        homeStation: 'thaltej',
+        workStation: 'vastral'
+      });
+
+      incrementDismissCount('homeToWork');
+      const updated = getCommuteSettings();
+      expect(updated?.homeToWorkDismissCount).toBe(1);
+      expect(updated?.lastShownHomeToWorkDate).toBe(getISTDateString());
+
+      incrementDismissCount('workToHome');
+      const updated2 = getCommuteSettings();
+      expect(updated2?.workToHomeDismissCount).toBe(1);
+      expect(updated2?.lastShownWorkToHomeDate).toBe(getISTDateString());
+    });
+
+    it('returns false when settings are missing required homeStation or workStation', () => {
+      // Missing workStation
+      saveCommuteSettings({
+        homeStation: 'thaltej',
+        workStation: ''
+      });
+      expect(shouldShowCommuteCard('homeToWork', day1)).toBe(false);
+    });
+  });
 });
+

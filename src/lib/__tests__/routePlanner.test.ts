@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { findCommonTrainRoute, planRoute, calculateFare, planRouteWithDeparture, calculateJourneyProgress } from '../routePlanner';
+import { findCommonTrainRoute, planRoute, calculateFare, planRouteWithDeparture, calculateJourneyProgress, type PlannedRoute } from '../routePlanner';
 import { trainSchedules } from '../../data/timetable';
+import { stations } from '../../data/metroData';
 
 describe('Route Planner API', () => {
   beforeEach(() => {
@@ -279,6 +280,69 @@ describe('Coordinate with Friend - findCommonTrainRoute', () => {
       expect(progress.subStatusText).toContain('Koba Circle');
       expect(progress.passedStationIds).toContain('tapovan_circle');
       expect(progress.passedStationIds).toContain('narmada_canal');
+    });
+
+    it('accurately tracks live progress during an interchange step', () => {
+      // Find a route with an interchange (e.g. Vastral Gam to APMC via Old High Court)
+      const depMins = 8 * 60 + 0;
+      const route = planRouteWithDeparture('vastral_gam', 'apmc', depMins);
+      expect(route).not.toBeNull();
+      if (!route) return;
+
+      const interchangeStep = route.steps.find(s => s.type === 'interchange');
+      expect(interchangeStep).toBeDefined();
+
+      if (interchangeStep && interchangeStep.arrivalTime) {
+        // Calculate the exact minutes when arriving at interchange station
+        const [arrH, arrM] = interchangeStep.arrivalTime.split(':').map(Number);
+        const arrivalAtInterchange = arrH * 60 + arrM;
+        const progressDuringTransfer = calculateJourneyProgress(route, arrivalAtInterchange + 1);
+
+        expect(progressDuringTransfer.status).toBe('ongoing');
+        expect(progressDuringTransfer.currentStationId).toBe('old_high_court');
+        expect(progressDuringTransfer.isAtStation).toBe(true);
+        expect(progressDuringTransfer.statusText).toContain('Old High Court');
+      }
+    });
+
+    it('accurately tracks feeder bus step for routes utilizing the feeder service', () => {
+      // Test calculateJourneyProgress handling of bus steps with a deterministic route
+      const busRoute: PlannedRoute = {
+        origin: stations['gnlu'],
+        destination: stations['gift_city'],
+        totalStations: 2,
+        totalTime: 15,
+        interchangeCount: 0,
+        fare: 10,
+        departureTime: '12:00',
+        arrivalTime: '12:15',
+        departureMinutes: 720,
+        arrivalMinutes: 735,
+        hasBusSegment: true,
+        steps: [
+          {
+            type: 'board',
+            station: stations['gnlu'],
+            trainTime: '12:00',
+          },
+          {
+            type: 'bus',
+            station: stations['gnlu'],
+            busDestination: 'GIFT City',
+          },
+          {
+            type: 'alight',
+            station: stations['gift_city'],
+            arrivalTime: '12:15',
+          }
+        ]
+      };
+
+      const busProgress = calculateJourneyProgress(busRoute, 725);
+      expect(busProgress.status).toBe('ongoing');
+      expect(busProgress.statusText).toContain('GIFT City');
+      expect(busProgress.subStatusText).toBe('Feeder bus connection');
+      expect(busProgress.isAtStation).toBe(false);
     });
   });
 });

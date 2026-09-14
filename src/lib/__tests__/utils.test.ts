@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { minutesUntil, getISTDate } from '../utils';
+import { minutesUntil, getISTDate, cn } from '../utils';
+
+describe('cn utility', () => {
+  it('combines and resolves conflicting Tailwind class names', () => {
+    expect(cn('px-2 py-1', 'bg-red-500')).toBe('px-2 py-1 bg-red-500');
+    expect(cn('p-4', 'p-2')).toBe('p-2');
+    expect(cn('text-sm', false, undefined, null, 'text-red-500')).toBe('text-sm text-red-500');
+  });
+});
 
 describe('minutesUntil', () => {
   it('returns plain difference within the same day', () => {
