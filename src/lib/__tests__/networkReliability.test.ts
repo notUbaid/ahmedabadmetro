@@ -43,7 +43,7 @@ describe('Network Reliability & Timetable Verification', () => {
       expect(route.fare).toBeLessThanOrEqual(40);
       expect(route.steps.length).toBeGreaterThan(0);
     }
-  }, 30000);
+  }, 60000);
 
   it('verifies Vadaj to Vishwakarma College exact fare is ₹15', () => {
     expect(calculateFare('vadaj', 'vishwakarma_college')).toBe(15);

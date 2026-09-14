@@ -27,6 +27,7 @@ describe('Geolocation Service', () => {
   let mockGetCurrentPosition: ReturnType<typeof vi.fn>;
   let mockWatchPosition: ReturnType<typeof vi.fn>;
   let mockClearWatch: ReturnType<typeof vi.fn>;
+  const originalNavigator = globalThis.navigator;
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -34,11 +35,14 @@ describe('Geolocation Service', () => {
     mockWatchPosition = vi.fn();
     mockClearWatch = vi.fn();
 
-    Object.defineProperty(globalThis.navigator, 'geolocation', {
+    // Define navigator on globalThis safely so it works across Linux CI and Windows
+    Object.defineProperty(globalThis, 'navigator', {
       value: {
-        getCurrentPosition: mockGetCurrentPosition,
-        watchPosition: mockWatchPosition,
-        clearWatch: mockClearWatch,
+        geolocation: {
+          getCurrentPosition: mockGetCurrentPosition,
+          watchPosition: mockWatchPosition,
+          clearWatch: mockClearWatch,
+        },
       },
       configurable: true,
       writable: true,
@@ -47,10 +51,19 @@ describe('Geolocation Service', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    if (originalNavigator !== undefined) {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: originalNavigator,
+        configurable: true,
+        writable: true,
+      });
+    } else {
+      delete (globalThis as Record<string, unknown>).navigator;
+    }
   });
 
   it('handles unsupported browser environment', () => {
-    Object.defineProperty(globalThis.navigator, 'geolocation', {
+    Object.defineProperty(globalThis, 'navigator', {
       value: undefined,
       configurable: true,
       writable: true,
