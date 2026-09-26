@@ -152,6 +152,13 @@ export const MetroMap = () => {
       setRoutePlannerDestination(routeTo);
       setIsRoutePlannerOpen(true);
       setIsPanelExpanded(false);
+    } else {
+      // Direct station query param (e.g. ?station=kalupur or ?st=motera_stadium) for SEO & deep linking
+      const stationParam = params.get('station') || params.get('st');
+      if (stationParam && stations[stationParam]) {
+        setSelectedStation(stations[stationParam]);
+        setIsPanelExpanded(true);
+      }
     }
 
     if (joinTrainId || (sharedOrig && sharedDest && depMinsStr)) {
@@ -1198,6 +1205,13 @@ longPressTimer = setTimeout(() => {
     // Notify startup splash that map and stations are mounted and ready
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('ahm-map-ready'));
+    }
+
+    // If a specific station was requested via URL, center map on it
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialStationId = urlParams.get('station') || urlParams.get('st');
+    if (initialStationId && stations[initialStationId]) {
+      map.setView(stations[initialStationId].coordinates, 15);
     }
 
     // Request user location with continuous watching for movement

@@ -1,10 +1,45 @@
-# AhmMetro Route Planner - www.ahmedabadmetro.site
-# https://www.robotstxt.org/robotstxt.html
+# AhmMetro Route Planner - https://www.ahmedabadmetro.site
+# Full AI Crawling & Search Engine Discoverability Policy
 
+# Google & Primary Search Spiders
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
+Allow: /
+
+# AI Search Engines & LLM Grounding Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Diffbot
 Allow: /
 
 User-agent: Twitterbot
@@ -16,8 +51,13 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Sitemaps
+# Sitemap Index
 Sitemap: https://www.ahmedabadmetro.site/sitemap.xml
+
+# AI & LLM Machine-Readable Context Manifests
+# See https://llmstxt.org
+# Link: <https://www.ahmedabadmetro.site/llms.txt>; rel="help"
+# Link: <https://www.ahmedabadmetro.site/llms-full.txt>; rel="help"
 
 # Host
 Host: https://www.ahmedabadmetro.site
