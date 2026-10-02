@@ -6,6 +6,7 @@ import { stations, LINE_COLORS, Station } from '@/data/metroData';
 import { getCurrentTrainPositions, trainSchedules, lineStations, TrainPosition } from '@/data/timetable';
 import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
 import { planRouteWithDeparture, PlannedRoute } from '@/lib/routePlanner';
+import { slugToStationId, parseRouteSlug } from '@/lib/seoRoutes';
 import { getCrowdLevel } from '@/lib/crowding';
 import { getCommuteSettings, shouldShowCommuteCard, markCommuteCardShown } from '@/lib/commuteStorage';
 import staticRouteSegments from '@/data/routeSegments.generated.json';
@@ -144,17 +145,37 @@ export const MetroMap = () => {
       }
     }
 
-    // Direct route query params (e.g. ?from=gnlu&to=thaltej) for SEO & deep linking
-    const routeFrom = params.get('from') || params.get('origin');
-    const routeTo = params.get('to') || params.get('destination');
+    // Support both clean SEO paths (/station/:slug, /route/:slug) and query params (?station=, ?from=&to=)
+    const pathname = window.location.pathname.toLowerCase();
+    let stationIdFromPath: string | null = null;
+    let routeFromPath: { fromId: string; toId: string } | null = null;
+
+    if (pathname.startsWith('/station/')) {
+      const slug = pathname.replace(/^\/station\//, '').replace(/\/$/, '');
+      stationIdFromPath = slugToStationId(slug);
+    } else if (pathname.startsWith('/route/')) {
+      const slug = pathname.replace(/^\/route\//, '').replace(/\/$/, '');
+      routeFromPath = parseRouteSlug(slug);
+    } else if (pathname === '/routes' || pathname === '/routes/' || pathname === '/route' || pathname === '/route/') {
+      setIsRoutePlannerOpen(true);
+      setIsPanelExpanded(false);
+    } else if (pathname === '/stations' || pathname === '/stations/') {
+      setIsPanelExpanded(true);
+    } else if (pathname === '/interchange' || pathname === '/interchange/') {
+      stationIdFromPath = 'old_high_court';
+    } else if (pathname === '/airport' || pathname === '/airport/') {
+      stationIdFromPath = 'koteshwar_road';
+    }
+
+    const routeFrom = routeFromPath ? routeFromPath.fromId : (params.get('from') || params.get('origin'));
+    const routeTo = routeFromPath ? routeFromPath.toId : (params.get('to') || params.get('destination'));
     if (routeFrom && routeTo && stations[routeFrom] && stations[routeTo]) {
       setRoutePlannerOrigin(routeFrom);
       setRoutePlannerDestination(routeTo);
       setIsRoutePlannerOpen(true);
       setIsPanelExpanded(false);
     } else {
-      // Direct station query param (e.g. ?station=kalupur or ?st=motera_stadium) for SEO & deep linking
-      const stationParam = params.get('station') || params.get('st');
+      const stationParam = stationIdFromPath || params.get('station') || params.get('st');
       if (stationParam && stations[stationParam]) {
         setSelectedStation(stations[stationParam]);
         setIsPanelExpanded(true);
@@ -1207,11 +1228,31 @@ longPressTimer = setTimeout(() => {
       window.dispatchEvent(new CustomEvent('ahm-map-ready'));
     }
 
-    // If a specific station was requested via URL, center map on it
+    // If a specific station or route was requested via URL/path, center map on it
     const urlParams = new URLSearchParams(window.location.search);
-    const initialStationId = urlParams.get('station') || urlParams.get('st');
-    if (initialStationId && stations[initialStationId]) {
-      map.setView(stations[initialStationId].coordinates, 15);
+    let targetStationId = urlParams.get('station') || urlParams.get('st');
+    const pathLow = window.location.pathname.toLowerCase();
+    if (!targetStationId && pathLow.startsWith('/station/')) {
+      const slug = pathLow.replace(/^\/station\//, '').replace(/\/$/, '');
+      targetStationId = slugToStationId(slug);
+    } else if (!targetStationId && (pathLow === '/interchange' || pathLow === '/interchange/')) {
+      targetStationId = 'old_high_court';
+    } else if (!targetStationId && (pathLow === '/airport' || pathLow === '/airport/')) {
+      targetStationId = 'koteshwar_road';
+    }
+
+    if (targetStationId && stations[targetStationId]) {
+      map.setView(stations[targetStationId].coordinates, 15);
+    } else if (pathLow.startsWith('/route/')) {
+      const slug = pathLow.replace(/^\/route\//, '').replace(/\/$/, '');
+      const parsed = parseRouteSlug(slug);
+      if (parsed && stations[parsed.fromId] && stations[parsed.toId]) {
+        const bounds = L.latLngBounds([
+          stations[parsed.fromId].coordinates,
+          stations[parsed.toId].coordinates,
+        ]);
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
 
     // Request user location with continuous watching for movement

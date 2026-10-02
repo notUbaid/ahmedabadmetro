@@ -331,7 +331,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
             
             <div className="flex items-center justify-between w-full px-1 mt-1">
               <p className="text-xs text-muted-foreground font-medium">
-                v1.2.1 • September 2026
+                v1.2.1 • {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date())}
               </p>
               <p className="text-xs text-muted-foreground/70">
                 by{' '}

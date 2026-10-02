@@ -37,6 +37,19 @@ const App = () => (
           <Suspense fallback={<AppSplash isSuspenseFallback />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/map" element={<Index />} />
+              <Route path="/stations" element={<Index />} />
+              <Route path="/routes" element={<Index />} />
+              <Route path="/route" element={<Index />} />
+              <Route path="/fare" element={<Index />} />
+              <Route path="/fare-chart" element={<Index />} />
+              <Route path="/timings" element={<Index />} />
+              <Route path="/airport" element={<Index />} />
+              <Route path="/parking" element={<Index />} />
+              <Route path="/interchange" element={<Index />} />
+              <Route path="/station/:stationSlug" element={<Index />} />
+              <Route path="/route/:routeSlug" element={<Index />} />
+              <Route path="/line/:lineSlug" element={<Index />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
