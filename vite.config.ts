@@ -85,9 +85,21 @@ export default defineConfig(({ mode }) => ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,geojson,json}"],
-        // Exclude social previews, SEO verification, and search crawler files from offline precache
-        globIgnores: ["**/og-image*", "**/feature-graphic*", "**/google*.html", "**/robots.txt", "**/sitemap.xml", "**/llms*.txt"],
+        globPatterns: ["index.html", "assets/**/*.{js,css}", "*.{ico,png,svg,woff2,geojson,webmanifest}"],
+        // Exclude social previews, SEO verification, and search crawler SSG HTML pages from offline precache
+        globIgnores: [
+          "**/og-image*",
+          "**/feature-graphic*",
+          "**/google*.html",
+          "**/robots.txt",
+          "**/sitemap.xml",
+          "**/llms*.txt",
+          "route/**",
+          "station/**",
+          "stations/**",
+          "routes/**",
+          "timings/**"
+        ],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
