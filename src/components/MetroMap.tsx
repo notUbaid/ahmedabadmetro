@@ -1333,7 +1333,7 @@ longPressTimer = setTimeout(() => {
           }
         },
         (error) => {
-          console.warn('Initial geolocation watch unavailable:', error.message);
+          console.debug('Initial geolocation watch unavailable:', error.message);
 
           // Fit to all stations if location unavailable on startup
           if (!permissionToastShown) {
@@ -1345,8 +1345,8 @@ longPressTimer = setTimeout(() => {
           }
         },
         { 
-          enableHighAccuracy: true, 
-          timeout: 25000,
+          enableHighAccuracy: false, 
+          timeout: 10000,
           maximumAge: 300000 // Allow cached network/GPS position up to 5 minutes old for instant startup fix
         }
       );

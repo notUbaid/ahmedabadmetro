@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => ({
         protocol_handlers: [{ protocol: "web+metro", url: "/?route=%s" }],
         prefer_related_applications: false,
         related_applications: [],
-        share_target: { action: "/share", method: "GET", params: { title: "title", text: "text", url: "url" } },
+        share_target: { action: "/share", method: "GET", enctype: "application/x-www-form-urlencoded", params: { title: "title", text: "text", url: "url" } },
         iarc_rating_id: "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
         widgets: [{ name: "Metro Route", description: "Quick route", tag: "metro-widget", ms_ac_filepath: "/" }],
         edge_side_panel: { preferred_width: 400 },
@@ -147,6 +147,7 @@ export default defineConfig(({ mode }) => ({
   },
   assetsInclude: ["**/*.geojson"],
   build: {
+    modulePreload: false,
     rollupOptions: {
       output: {
         manualChunks: {
