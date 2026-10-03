@@ -118,6 +118,8 @@ describe('Timetable Utility Functions', () => {
     expect(getDirectionStr('vastral_gam')).toBe('Eastbound');
     expect(getDirectionStr('thaltej_gam')).toBe('Westbound');
     expect(getDirectionStr('gnlu')).toBe('Southbound'); // Added to Southbound
+    expect(getDirectionStr('gift_city')).toBe('Northbound');
+    expect(getDirectionStr('pdpu')).toBe('Northbound');
   });
 
   it('getCurrentHeadway calculates peak and off-peak headways correctly for Blue line', () => {

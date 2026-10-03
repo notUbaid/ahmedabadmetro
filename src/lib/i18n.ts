@@ -143,7 +143,7 @@ const translations = {
     'line.blue': 'Blue Line (Thaltej ↔ Vastral)',
     'line.red': 'Red Line (APMC ↔ Koteshwar)',
     'line.green': 'Green Line (Koteshwar ↔ Mahatma Mandir)',
-    'line.purple': 'Purple Line (GNLU ↔ GIFT City)',
+    'line.purple': 'Purple Line (APMC ↔ GIFT City)',
 
     // Commute Card
     'commute.dailyCommute': 'Daily Commute',
@@ -214,6 +214,18 @@ const translations = {
     'route.showStops': 'Show all stops',
     'route.noRouteFound': 'No route found between these stations',
     'route.selectStations': 'Select origin and destination stations',
+    'route.sameStationError': 'Origin and destination stations cannot be the same. Please select a different destination.',
+    'route.useNearest': 'Use Nearest Station',
+    'route.quickHubs': 'Popular Stations',
+    'panel.quickPlan': 'Plan Journey',
+    'panel.quickNearest': 'Nearest Metro',
+    'map.liveTrainEnRoute': 'En route to',
+    'map.liveTrainBoarding': 'Boarding at',
+    'map.speedEst': 'Estimated speed',
+    'map.trackProgress': 'Live track progress',
+    'offline.backOnline': 'Back online',
+    'offline.usingCached': "You're offline — using cached data",
+    'panel.outsideServiceArea': 'You are outside Ahmedabad & Gandhinagar Metro area',
 
     // Friend's Journey Viewer
     'friendsJourney.title': "Friend's Journey",
@@ -279,6 +291,7 @@ const translations = {
     'map.crowding': 'Crowding',
     'map.shareJourney': 'Share This Journey',
     'map.viewMetroDetails': 'View Metro Details',
+    'map.locateOnMap': 'Locate on Map',
 
     // Bottom Panel additions
     'panel.firstMetroTomorrow': 'First metro tomorrow at',
@@ -298,7 +311,7 @@ const translations = {
 
     // Welcome Overlay
     'welcome.title': 'Welcome to AhmMetro!',
-    'welcome.subtitle': 'Your digital guide to stress-free travel on the AhmMetro.',
+    'welcome.subtitle': 'Your digital guide to stress-free travel on the Ahmedabad Metro.',
     'welcome.feature1Title': 'Plan Your Journey',
     'welcome.feature1Desc': 'Get accurate timetable-based routes, fare details, and exact interchange wait times.',
     'welcome.feature2Title': 'Live Animated Map',
@@ -447,7 +460,7 @@ const translations = {
     'line.blue': 'બ્લુ લાઇન (થલતેજ ↔ વસ્ત્રાલ)',
     'line.red': 'રેડ લાઇન (APMC ↔ કોટેશ્વર)',
     'line.green': 'ગ્રીન લાઇન (કોટેશ્વર ↔ મહાત્મા મંદિર)',
-    'line.purple': 'પર્પલ લાઇન (GNLU ↔ GIFT સિટી)',
+    'line.purple': 'પર્પલ લાઇન (APMC ↔ GIFT સિટી)',
 
     // Commute Card
     'commute.dailyCommute': 'દૈનિક મુસાફરી',
@@ -518,6 +531,18 @@ const translations = {
     'route.showStops': 'બધા સ્ટેશન બતાવો',
     'route.noRouteFound': 'આ સ્ટેશનો વચ્ચે કોઈ રૂટ મળ્યો નથી',
     'route.selectStations': 'પ્રારંભ અને ગંતવ્ય સ્ટેશન પસંદ કરો',
+    'route.sameStationError': 'પ્રસ્થાન અને ગંતવ્ય સ્ટેશનો સમાન હોઈ શકતા નથી. કૃપા કરીને અલગ સ્ટેશન પસંદ કરો.',
+    'route.useNearest': 'નજીકનું સ્ટેશન વાપરો',
+    'route.quickHubs': 'મુખ્ય સ્ટેશનો',
+    'panel.quickPlan': 'રૂટ પ્લાન કરો',
+    'panel.quickNearest': 'નજીકનું મેટ્રો',
+    'map.liveTrainEnRoute': 'તરફ જઈ રહી છે',
+    'map.liveTrainBoarding': 'પર બોર્ડિંગ',
+    'map.speedEst': 'અંદાજિત ગતિ',
+    'map.trackProgress': 'લાઈવ ટ્રેક પ્રગતિ',
+    'offline.backOnline': 'ફરી ઓનલાઈન આવ્યા',
+    'offline.usingCached': 'તમે ઑફલાઇન છો — કેશ્ડ ડેટા વાપરી રહ્યા છો',
+    'panel.outsideServiceArea': 'તમે અમદાવાદ અને ગાંધીનગર મેટ્રો વિસ્તારની બહાર છો',
 
     // Friend's Journey Viewer
     'friendsJourney.title': 'મિત્રની યાત્રા',
@@ -582,6 +607,7 @@ const translations = {
     'map.crowding': 'ભીડ',
     'map.shareJourney': 'આ મુસાફરી શેર કરો',
     'map.viewMetroDetails': 'મેટ્રો વિગતો જુઓ',
+    'map.locateOnMap': 'નકશા પર શોધો',
 
     // Bottom Panel additions
     'panel.firstMetroTomorrow': 'આવતીકાલે પ્રથમ મેટ્રો',
@@ -750,7 +776,7 @@ const translations = {
     'line.blue': 'ब्लू लाइन (थलतेज ↔ वस्त्राल)',
     'line.red': 'रेड लाइन (APMC ↔ कोटेश्वर)',
     'line.green': 'ग्रीन लाइन (कोटेश्वर ↔ महात्मा मंदिर)',
-    'line.purple': 'पर्पल लाइन (GNLU ↔ GIFT सिटी)',
+    'line.purple': 'पर्पल लाइन (APMC ↔ GIFT सिटी)',
 
     // Commute Card
     'commute.dailyCommute': 'दैनिक यात्रा',
@@ -821,6 +847,18 @@ const translations = {
     'route.showStops': 'सभी स्टेशन दिखाएं',
     'route.noRouteFound': 'इन स्टेशनों के बीच कोई मार्ग नहीं मिला',
     'route.selectStations': 'प्रस्थान और गंतव्य स्टेशन चुनें',
+    'route.sameStationError': 'प्रस्थान और गंतव्य स्टेशन समान नहीं हो सकते। कृपया भिन्न स्टेशन चुनें।',
+    'route.useNearest': 'निकटतम स्टेशन चुनें',
+    'route.quickHubs': 'प्रमुख स्टेशन',
+    'panel.quickPlan': 'मार्ग खोजें',
+    'panel.quickNearest': 'निकटतम मेट्रो',
+    'map.liveTrainEnRoute': 'की ओर अग्रसर',
+    'map.liveTrainBoarding': 'पर बोर्डिंग जारी',
+    'map.speedEst': 'अनुमानित गति',
+    'map.trackProgress': 'लाइव ट्रैक प्रगति',
+    'offline.backOnline': 'वापस ऑनलाइन',
+    'offline.usingCached': 'आप ऑफ़लाइन हैं — कैश्ड डेटा का उपयोग कर रहे हैं',
+    'panel.outsideServiceArea': 'आप अहमदाबाद और गांधीनगर मेट्रो क्षेत्र से बाहर हैं',
 
     // Friend's Journey Viewer
     'friendsJourney.title': 'मित्र की यात्रा',
@@ -885,6 +923,7 @@ const translations = {
     'map.crowding': 'भीड़',
     'map.shareJourney': 'यह यात्रा साझा करें',
     'map.viewMetroDetails': 'मेट्रो विवरण देखें',
+    'map.locateOnMap': 'नक्शे पर देखें',
 
     // Bottom Panel additions
     'panel.firstMetroTomorrow': 'कल पहली मेट्रो',

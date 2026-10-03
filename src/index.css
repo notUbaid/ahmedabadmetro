@@ -160,6 +160,8 @@ All colors MUST be HSL.
   display: flex !important;
   align-items: center;
   justify-content: center;
+  cursor: pointer !important;
+  touch-action: manipulation;
 }
 
 .station-marker-rect {

@@ -167,7 +167,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  // @ts-expect-error vitest config in vite config
   test: {
     testTimeout: 25000,
     hookTimeout: 25000,

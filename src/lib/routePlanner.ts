@@ -899,11 +899,16 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
     const tomorrowDayType = getDayType(tomorrow);
     
     const tomorrowDepartures = getAvailableDepartures(originId, destinationId, tomorrowDayType);
-    possible = tomorrowDepartures.filter(d => d.departureMinutes >= 380);
+    // Metro service begins from ~06:15 (375 min). Filter for morning service starts.
+    possible = tomorrowDepartures.filter(d => d.departureMinutes >= 360);
     isTomorrow = true;
     
     if (possible.length === 0) {
-      return null;
+      // Fallback: take any available departure tomorrow
+      possible = tomorrowDepartures;
+      if (possible.length === 0) {
+        return null;
+      }
     }
   }
 
@@ -968,7 +973,7 @@ export const getOrganizedStations = (): {
     { line: 'blue', name: 'Blue Line (Thaltej ↔ Vastral)' },
     { line: 'red', name: 'Red Line (APMC ↔ Koteshwar)' },
     { line: 'green', name: 'Green Line (Koteshwar ↔ Mahatma Mandir)' },
-    { line: 'purple', name: 'Purple Line (GNLU ↔ GIFT City)' },
+    { line: 'purple', name: 'Purple Line (APMC ↔ GIFT City)' },
   ];
   
   // Get stations by line (excluding ones already in interchanges)

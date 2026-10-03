@@ -20,6 +20,7 @@ interface BottomPanelProps {
   onToggleExpand: () => void;
   onLocate: (lat: number, lng: number) => void;
   onPlanRoute?: (stationId: string) => void;
+  onOpenRoutePlanner?: () => void;
   userLocation: [number, number] | null;
   searchedLocation?: [number, number] | null;
 }
@@ -46,6 +47,7 @@ export const BottomPanel = React.memo(({
   onToggleExpand,
   onLocate,
   onPlanRoute,
+  onOpenRoutePlanner,
   userLocation,
   searchedLocation,
 }: BottomPanelProps) => {
@@ -161,6 +163,27 @@ export const BottomPanel = React.memo(({
   };
 
 
+  const touchStartYRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaY = touchEndY - touchStartYRef.current;
+    touchStartYRef.current = null;
+
+    if (Math.abs(deltaY) > 35) {
+      if (deltaY < 0 && !isExpanded) {
+        onToggleExpand();
+      } else if (deltaY > 0 && isExpanded) {
+        onToggleExpand();
+      }
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[1000] pointer-events-none">
       {/* Floating buttons */}
@@ -181,7 +204,8 @@ export const BottomPanel = React.memo(({
         <button
           onClick={() => {
             const [lat, lng] = nearestStation.coordinates;
-            let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+            const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
+            let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
             
             // Prefer searched location as origin if active, otherwise fallback to GPS location
             const originLocation = searchedLocation || userLocation;
@@ -213,10 +237,12 @@ export const BottomPanel = React.memo(({
 
       {/* Panel container */}
       <div className="glass-panel rounded-t-3xl shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t pointer-events-auto safe-p-bottom transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1) will-change-transform transform-gpu">
-        {/* Always visible header - clickable to expand/collapse */}
+        {/* Always visible header - clickable to expand/collapse and swipeable */}
         <div
-          className="px-4 pt-3 pb-3 cursor-pointer active:bg-muted/30 transition-colors"
+          className="px-4 pt-3 pb-3 cursor-pointer active:bg-muted/30 transition-colors select-none"
           onClick={() => onToggleExpand()}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Visual drag handle pill */}
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-3" />
@@ -239,19 +265,42 @@ export const BottomPanel = React.memo(({
                   {language === 'gu' && (
                     <p className="text-sm text-muted-foreground">{station.name}</p>
                   )}
+                  {language === 'hi' && (
+                    <p className="text-sm text-muted-foreground">{station.name}</p>
+                  )}
                 </div>
-                {selectedStation && (
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onClose();
+                      const [lat, lng] = station.coordinates;
+                      const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
+                      let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
+                      const originLocation = searchedLocation || userLocation;
+                      if (originLocation) {
+                        url += `&origin=${originLocation[0]},${originLocation[1]}`;
+                      }
+                      window.open(url, '_blank');
                     }}
-                    className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-                    aria-label={t('common.close', language)}
+                    className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-primary/10 text-primary transition-colors"
+                    aria-label={t('panel.directions', language)}
+                    title={t('panel.directions', language)}
                   >
-                    <X className="w-4 h-4" />
+                    <Navigation className="w-4 h-4 fill-current" />
                   </button>
-                )}
+                  {selectedStation && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                      }}
+                      className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+                      aria-label={t('common.close', language)}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Line badges */}
@@ -273,24 +322,68 @@ export const BottomPanel = React.memo(({
               </div>
 
               {/* Distance info */}
-              {!selectedStation && distance !== null && walkingTime !== null && !isNaN(distance) && !isNaN(walkingTime) && (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{formatDistance(distance)}</span>
+              {!selectedStation && distance !== null && !isNaN(distance) && (
+                distance > 30000 ? (
+                  <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{t('panel.outsideServiceArea', language)} ({formatDistance(distance)})</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{formatWalkingTime(walkingTime)} {t('panel.walk', language)}</span>
-                  </div>
-                </div>
+                ) : (
+                  walkingTime !== null && !isNaN(walkingTime) && (
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-medium">{formatDistance(distance)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{formatWalkingTime(walkingTime)} {t('panel.walk', language)}</span>
+                      </div>
+                    </div>
+                  )
+                )
               )}
             </>
           ) : (
-            <div className="text-center py-3">
-              <Train className="w-10 h-10 mx-auto mb-2 opacity-50 text-muted-foreground" />
-              <h2 className="text-base font-semibold mb-1">{t('panel.welcome', language)}</h2>
-              <p className="text-xs text-muted-foreground">{t('panel.tapStation', language)}</p>
+            <div className="text-center py-2.5">
+              <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-2 text-primary">
+                <Train className="w-6 h-6" />
+              </div>
+              <h2 className="text-base font-bold mb-0.5">{t('panel.welcome', language)}</h2>
+              <p className="text-xs text-muted-foreground mb-3">{t('panel.tapStation', language)}</p>
+
+              {/* Mobile Quick Action Pills */}
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {onOpenRoutePlanner && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenRoutePlanner();
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs shadow-md hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[40px]"
+                  >
+                    <Route className="w-4 h-4" />
+                    <span>{t('panel.quickPlan', language)}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLocate();
+                  }}
+                  disabled={isLocating}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-muted border border-border text-foreground font-medium text-xs hover:bg-muted/80 active:scale-95 transition-all cursor-pointer min-h-[40px]"
+                >
+                  {isLocating ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  ) : (
+                    <Locate className="w-4 h-4 text-primary" />
+                  )}
+                  <span>{t('panel.quickNearest', language)}</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

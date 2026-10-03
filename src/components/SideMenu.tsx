@@ -18,7 +18,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 interface SideMenuProps {
-  onOpenRoutePlanner: () => void;
+  onOpenRoutePlanner: (origin?: string, destination?: string) => void;
 }
 
 const GooglePlayIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -234,11 +234,11 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
 
       {/* Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 z-[1003] glass-panel border-l shadow-2xl transition-transform duration-300 ease-out will-change-transform transform-gpu ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 h-full w-72 z-[1003] glass-panel border-l shadow-2xl transition-transform duration-300 ease-out will-change-transform transform-gpu flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <h2 className="font-semibold text-lg">{t('menu.title', language)}</h2>
           <button
             onClick={() => setIsOpen(false)}
@@ -250,7 +250,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
 
         {/* Menu Items */}
-        <div className="p-2 space-y-1">
+        <div className="p-2 space-y-1 flex-1 overflow-y-auto">
           {menuItems.map((item, index) => (
             <button
               key={index}
@@ -322,7 +322,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50 bg-background/50 safe-p-bottom">
+        <div className="flex-shrink-0 p-4 border-t border-border/50 bg-background/50 safe-p-bottom">
           <div className="flex flex-col items-center text-center gap-2">
             <div className="bg-muted/50 p-2 rounded-lg text-[10px] text-muted-foreground leading-relaxed w-full border border-border/50">
               <span className="font-semibold block mb-1">{t('menu.disclaimer', language)}</span>

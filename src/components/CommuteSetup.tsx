@@ -47,11 +47,26 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
     }
   }, [isOpen, language]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const filteredHomeStations = useMemo(() => {
     if (!homeSearch) return [];
+    const query = homeSearch.toLowerCase().trim();
     return allStations.filter(s => 
-      s.name.toLowerCase().includes(homeSearch.toLowerCase()) ||
-      (s.nameGu && s.nameGu.includes(homeSearch))
+      s.name.toLowerCase().includes(query) ||
+      (s.nameGu && s.nameGu.includes(query)) ||
+      (s.nameHi && s.nameHi.includes(query)) ||
+      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
+      s.id.toLowerCase().includes(query)
     ).slice(0, 8);
   }, [allStations, homeSearch]);
 
@@ -61,9 +76,13 @@ export const CommuteSetup = ({ isOpen, onClose }: CommuteSetupProps) => {
 
   const filteredWorkStations = useMemo(() => {
     if (!workSearch) return [];
+    const query = workSearch.toLowerCase().trim();
     return allStations.filter(s => 
-      s.name.toLowerCase().includes(workSearch.toLowerCase()) ||
-      (s.nameGu && s.nameGu.includes(workSearch))
+      s.name.toLowerCase().includes(query) ||
+      (s.nameGu && s.nameGu.includes(query)) ||
+      (s.nameHi && s.nameHi.includes(query)) ||
+      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
+      s.id.toLowerCase().includes(query)
     ).slice(0, 8);
   }, [allStations, workSearch]);
 

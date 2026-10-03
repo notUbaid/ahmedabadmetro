@@ -223,15 +223,16 @@ export const LiveTrainTrackingDialog = ({
   useEffect(() => {
     if (!isOpen || !mapRef.current || !schedule) return;
 
+    const trainElapsed = currentTime - trainStartMins;
     const currentStationIndex = schedule.stationTimes.findIndex(
       (time, idx) => {
         const nextTime = schedule.stationTimes[idx + 1];
-        if (nextTime === undefined) return time <= currentTime;
-        return time <= currentTime && currentTime < nextTime;
+        if (nextTime === undefined) return time <= trainElapsed;
+        return time <= trainElapsed && trainElapsed < nextTime;
       }
     );
 
-    const displayIndex = Math.min(Math.max(0, currentStationIndex), schedule.stations.length - 1);
+    const displayIndex = trainElapsed < 0 ? 0 : Math.min(Math.max(0, currentStationIndex), schedule.stations.length - 1);
     const currentStation = stations[schedule.stations[displayIndex]];
 
     if (currentStation) {
@@ -244,24 +245,40 @@ export const LiveTrainTrackingDialog = ({
             icon: L.divIcon({
               html: `
                 <div class="relative flex items-center justify-center">
-                  <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-amber-400 opacity-60"></span>
-                  <div class="p-1 rounded-full shadow-lg border-2 border-white" style="background-color: ${LINE_COLORS[line as keyof typeof LINE_COLORS] || '#FFB347'}">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                      <path d="m18 15-6-6-6 6"/>
+                  <div class="p-1.5 rounded-full shadow-xl border-2 border-white flex items-center justify-center" style="background-color: ${LINE_COLORS[line as keyof typeof LINE_COLORS] || '#FFB347'}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="16" height="16" x="4" y="3" rx="2"/>
+                      <path d="M4 11h16"/>
+                      <path d="M12 3v8"/>
+                      <path d="m8 19-2 3"/>
+                      <path d="m18 22-2-3"/>
+                      <circle cx="8" cy="15" r="1" fill="white"/>
+                      <circle cx="16" cy="15" r="1" fill="white"/>
                     </svg>
                   </div>
                 </div>
               `,
               className: 'live-train-marker',
-              iconSize: [32, 32],
-              iconAnchor: [16, 16]
+              iconSize: [36, 36],
+              iconAnchor: [18, 18]
             }),
             zIndexOffset: 1000
           }
         ).addTo(mapRef.current);
       }
     }
-  }, [isOpen, schedule, line, currentTime]);
+  }, [isOpen, schedule, line, currentTime, trainStartMins]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !schedule) return null;
 
@@ -279,7 +296,9 @@ export const LiveTrainTrackingDialog = ({
   const lineTitle = t(`route.${line}Line` as Parameters<typeof t>[0], language);
 
   const getShareUrl = () => {
-    return `${window.location.origin}${window.location.pathname}?orig=${originStationId || schedule.stations[0]}&dest=${destStationId || schedule.stations[schedule.stations.length - 1]}&depMins=${fromDepMins}`;
+    const orig = originStationId || schedule.stations[0];
+    const dest = destStationId || schedule.stations[schedule.stations.length - 1];
+    return `${window.location.origin}/api/share?orig=${encodeURIComponent(orig)}&dest=${encodeURIComponent(dest)}&depMins=${encodeURIComponent(fromDepMins.toString())}`;
   };
 
   const handleShare = async () => {
@@ -322,17 +341,14 @@ export const LiveTrainTrackingDialog = ({
         >
           <div>
             <h2 className="font-bold text-lg flex items-center gap-2">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-              </span>
+              <span className="w-2.5 h-2.5 rounded-full bg-white inline-block"></span>
               {t('dialog.liveTracking', language)}
             </h2>
             <p className="text-xs text-white/80 font-medium">{lineTitle} · {t('common.estimated', language)}</p>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/20 rounded-full transition-colors"
             aria-label="Close"
           >
             <X size={20} />

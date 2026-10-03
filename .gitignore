@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 coverage/
 .session-checkpoint.md
+test-results/

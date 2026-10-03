@@ -4,12 +4,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { stations, LINE_COLORS, Station } from '@/data/metroData';
 import { getCurrentTrainPositions, trainSchedules, lineStations, TrainPosition } from '@/data/timetable';
-import { findNearestByWalking, findClosestStations } from '@/lib/walkingRoute';
+import { findNearestByWalking, findClosestStations, getHaversineDistance, estimateWalkingTime } from '@/lib/walkingRoute';
 import { planRouteWithDeparture, PlannedRoute } from '@/lib/routePlanner';
 import { slugToStationId, parseRouteSlug } from '@/lib/seoRoutes';
 import { getCrowdLevel } from '@/lib/crowding';
 import { getCommuteSettings, shouldShowCommuteCard, markCommuteCardShown } from '@/lib/commuteStorage';
 import staticRouteSegments from '@/data/routeSegments.generated.json';
+import { cn } from '@/lib/utils';
 import SearchBar from './SearchBar';
 import BottomPanel from './BottomPanel';
 import RoutePlanner from './RoutePlanner';
@@ -36,6 +37,35 @@ const getStationBorderColor = (station: Station): string => {
   return LINE_COLORS[station.lines[0]];
 };
 
+const LINE_TRAIN_THEMES: Record<string, { lineColor: string; accentColor: string; badgeColor: string }> = {
+  blue: {
+    lineColor: '#2563EB',
+    accentColor: '#93C5FD',
+    badgeColor: '#1D4ED8',
+  },
+  red: {
+    lineColor: '#DC2626',
+    accentColor: '#FCA5A5',
+    badgeColor: '#B91C1C',
+  },
+  green: {
+    lineColor: '#16A34A',
+    accentColor: '#86EFAC',
+    badgeColor: '#15803D',
+  },
+  purple: {
+    lineColor: '#9333EA',
+    accentColor: '#D8B4FE',
+    badgeColor: '#7E22CE',
+  },
+};
+
+const DEFAULT_TRAIN_THEME = {
+  lineColor: '#2563EB',
+  accentColor: '#93C5FD',
+  badgeColor: '#1D4ED8',
+};
+
 export const MetroMap = () => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -47,12 +77,17 @@ export const MetroMap = () => {
   // Use a ref to store precise route segments between stations: "stationA-stationB" -> coordinates[]
   // Cache route geometry plus precomputed distances to avoid per-frame recomputation
   const routeSegmentsRef = useRef<Map<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>>(
-    new Map(Object.entries(staticRouteSegments as Record<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>))
+    new Map(Object.entries(staticRouteSegments as unknown as Record<string, { geometry: [number, number][]; dists: number[]; totalDist: number }>))
   );
   const latestPositionsRef = useRef<Map<string, TrainPosition>>(new Map());
   const stationLabelsRef = useRef<Map<string, L.Marker>>(new Map());
+  const trainBearingsRef = useRef<Map<string, number>>(new Map());
+  const trainRotatorsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const selectedTrainIdRef = useRef<string | null>(null);
 
   const { language } = useLanguage();
+  const languageRef = useRef(language);
+  languageRef.current = language;
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [searchedLocation, setSearchedLocation] = useState<[number, number] | null>(null);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
@@ -91,6 +126,10 @@ export const MetroMap = () => {
   // Train dialogs state
   const [trainDetailsDialogOpen, setTrainDetailsDialogOpen] = useState(false);
   const [liveTrackingDialogOpen, setLiveTrackingDialogOpen] = useState(false);
+
+  useEffect(() => {
+    selectedTrainIdRef.current = selectedTrain?.id ?? null;
+  }, [selectedTrain]);
 
   // Commute card state
   const [commuteCard, setCommuteCard] = useState<{
@@ -187,6 +226,17 @@ export const MetroMap = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!selectedTrain) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedTrain(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedTrain]);
+
   // Check if user is near commute stations and show card
   const checkCommuteCard = useCallback((lat: number, lng: number, walkingTime: number | null) => {
     if (commuteCardShownRef.current) return;
@@ -251,8 +301,9 @@ export const MetroMap = () => {
     stationLabelsRef.current.forEach((marker, stationId) => {
       const station = stations[stationId];
       if (station) {
+        const isHub = station.isInterchange || ['apmc', 'thaltej_gam', 'vastral_gam', 'mahatma_mandir', 'gift_city', 'kalupur'].includes(station.id);
         const labelIcon = L.divIcon({
-          className: 'station-label',
+          className: `station-label ${isHub ? 'hub-label' : ''}`,
           html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${getStationName(station, language)}</div>`,
           iconSize: [100, 20],
           iconAnchor: [50, -8],
@@ -276,7 +327,19 @@ export const MetroMap = () => {
       nearestLineRef.current = null;
     }
 
-    // Get walking route (includes fallback calculation)
+    // 1. Instant zero-latency nearest station calculation (straight-line)
+    const closestStations = findClosestStations(lat, lng, 3);
+    const primaryStation = closestStations[0];
+    if (primaryStation) {
+      const straightDist = getHaversineDistance(lat, lng, primaryStation.coordinates[0], primaryStation.coordinates[1]);
+      const estimatedWalkingDist = straightDist * 1.6;
+      setNearestStation(primaryStation);
+      setNearestDistance(estimatedWalkingDist);
+      setNearestWalkingTime(estimateWalkingTime(estimatedWalkingDist));
+      setIsPanelExpanded(true);
+    }
+
+    // 2. Asynchronous walking route refinement
     const walkingRoute = await findNearestByWalking(lat, lng);
 
     // If a new update was triggered while we were waiting, ignore this one
@@ -287,24 +350,36 @@ export const MetroMap = () => {
       setNearestDistance(walkingRoute.distance);
       setNearestWalkingTime(walkingRoute.duration);
 
-      // Draw the walking route on the map
-      walkingRouteRef.current = L.polyline(walkingRoute.geometry, {
-        color: '#3B82F6',
-        weight: 4,
-        dashArray: '8, 12',
-        opacity: 0.8,
-        lineCap: 'round'
-      }).addTo(mapRef.current);
+      // Draw the walking route on the map only if user is within service area (<= 30km)
+      if (walkingRoute.distance <= 30000) {
+        walkingRouteRef.current = L.polyline(walkingRoute.geometry, {
+          color: '#3B82F6',
+          weight: 4.5,
+          dashArray: '6, 8',
+          opacity: 0.9,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(mapRef.current);
 
-      // Check for commute card
-      checkCommuteCard(lat, lng, walkingRoute.duration);
+        // Check for commute card
+        checkCommuteCard(lat, lng, walkingRoute.duration);
+      }
     }
   }, [checkCommuteCard]);
 
   // Handle location update (from locate button)
   const handleLocationUpdate = useCallback((lat: number, lng: number) => {
     if (mapRef.current) {
-      mapRef.current.setView([lat, lng], 15);
+      const isInsideServiceArea = lat >= 22.8 && lat <= 23.3 && lng >= 72.4 && lng <= 72.75;
+      if (isInsideServiceArea) {
+        mapRef.current.setView([lat, lng], 15);
+      } else {
+        // Outside Ahmedabad/Gandhinagar: preserve network view
+        const allCoords = Object.values(stations).map(s => s.coordinates);
+        if (allCoords.length > 0) {
+          mapRef.current.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50] });
+        }
+      }
 
       // Clear searched location if any
       if (searchedLocationMarkerRef.current) {
@@ -314,29 +389,31 @@ export const MetroMap = () => {
       setSearchedLocation(null);
       setUserLocation([lat, lng]);
 
-      // Ensure user marker and pulse effect exist on map
-      if (userMarkerRef.current) {
-        userMarkerRef.current.setLatLng([lat, lng]);
-        if (userPulseRef.current) {
-          userPulseRef.current.setLatLng([lat, lng]);
-        }
-      } else if (mapRef.current) {
-        userMarkerRef.current = L.circleMarker([lat, lng], {
-          radius: 8,
-          fillColor: '#2563EB',
-          color: '#FFFFFF',
-          weight: 3,
-          fillOpacity: 1,
-        }).addTo(mapRef.current);
+      // Ensure user marker and pulse effect exist on map if in service area
+      if (isInsideServiceArea) {
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLatLng([lat, lng]);
+          if (userPulseRef.current) {
+            userPulseRef.current.setLatLng([lat, lng]);
+          }
+        } else if (mapRef.current) {
+          userMarkerRef.current = L.circleMarker([lat, lng], {
+            radius: 8,
+            fillColor: '#2563EB',
+            color: '#FFFFFF',
+            weight: 3,
+            fillOpacity: 1,
+          }).addTo(mapRef.current);
 
-        userPulseRef.current = L.circleMarker([lat, lng], {
-          radius: 22,
-          fillColor: '#3B82F6',
-          color: '#60A5FA',
-          weight: 1,
-          fillOpacity: 0.15,
-          opacity: 0.35,
-        }).addTo(mapRef.current);
+          userPulseRef.current = L.circleMarker([lat, lng], {
+            radius: 22,
+            fillColor: '#3B82F6',
+            color: '#60A5FA',
+            weight: 1,
+            fillOpacity: 0.15,
+            opacity: 0.35,
+          }).addTo(mapRef.current);
+        }
       }
 
       updateNearestStation(lat, lng);
@@ -537,8 +614,8 @@ export const MetroMap = () => {
           </div>
         </div>
       `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
     });
     const originMarker = L.marker(route.origin.coordinates, {
       pane: 'routeHighlight',
@@ -557,8 +634,8 @@ export const MetroMap = () => {
           </div>
         </div>
       `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
     });
     const destMarker = L.marker(route.destination.coordinates, {
       pane: 'routeHighlight',
@@ -577,8 +654,8 @@ export const MetroMap = () => {
               <div class="interchange-inner" style="background-color: #F59E0B; width: 14px; height: 14px;"></div>
             </div>
           `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
+          iconSize: [44, 44],
+          iconAnchor: [22, 22],
         });
         const interchangeMarker = L.marker(step.station.coordinates, {
           pane: 'routeHighlight',
@@ -646,11 +723,16 @@ export const MetroMap = () => {
       latestPositionsRef.current.clear();
       positions.forEach(p => latestPositionsRef.current.set(p.id, p));
 
-      // Update active train count only when it changes (avoids re-render per tick)
+      // Update active train count and line counts only when count changes
       if (positions.length !== lastTrainCount) {
         lastTrainCount = positions.length;
         setActiveTrainCount(positions.length);
       }
+
+      // Precalculate frame constants outside of the positions loop
+      const currentZoom = mapRef.current?.getZoom() ?? DEFAULT_ZOOM;
+      const zoomScale = currentZoom <= 12 ? 0.68 : currentZoom <= 14 ? 0.85 : 1.0;
+      const activeSelectedId = selectedTrainIdRef.current;
 
       positions.forEach(pos => {
         // Calculate precise position using cached geometry
@@ -794,52 +876,141 @@ export const MetroMap = () => {
           }
         }
 
-        const trainColor = '#FFB347'; // Light orange for all Metros
-        const isMoving = pos.status === 'moving';
-        const trainIconHtml = `
-          <div class="train-icon-wrapper" style="padding: 6px;">
-            <svg width="44" height="22" viewBox="0 0 44 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="g${pos.id}" x1="0" x2="1">
-                  <stop offset="0%" stop-color="#FFD07A" />
-                  <stop offset="100%" stop-color="#FF9A3D" />
-                </linearGradient>
-                <filter id="s${pos.id}" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.35" />
-                </filter>
-              </defs>
-              <!-- Train body -->
-              <rect x="2" y="4" width="28" height="12" rx="4" fill="url(#g${pos.id})" stroke="#E08A2A" stroke-width="0.8" filter="url(#s${pos.id})" />
-              <!-- Sleek nose -->
-              <path d="M30 4 C36 11 36 11 30 18 L34 18 L40 11 L34 4 L30 4 Z" fill="url(#g${pos.id})" stroke="#E08A2A" stroke-width="0.8" />
-              <!-- Highlights -->
-              <rect x="5" y="6" width="12" height="3" rx="1.5" fill="rgba(255,255,255,0.32)" />
-              <!-- Windows -->
-              <rect x="8" y="9" width="3" height="3" rx="0.8" fill="rgba(255,255,255,0.95)" />
-              <rect x="13" y="9" width="3" height="3" rx="0.8" fill="rgba(255,255,255,0.95)" />
-              <rect x="18" y="9" width="3" height="3" rx="0.8" fill="rgba(255,255,255,0.95)" />
-              ${isMoving ? '' : '<circle cx="18" cy="10" r="5" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="0.8" />'}
-            </svg>
-          </div>
-        `;
+        // Shortest-arc angular smoothing (prevents 360-degree reverse spin when bearing crosses North)
+        const prevBearing = trainBearingsRef.current.get(pos.id) ?? bearing;
+        const diff = ((bearing - prevBearing + 540) % 360) - 180;
+        const smoothBearing = prevBearing + diff;
+        trainBearingsRef.current.set(pos.id, smoothBearing);
 
+        // Check if marker already exists for fast path
         if (trainMarkersRef.current.has(pos.id)) {
-          // Update existing marker position and rotation without recreating DOM icon
+          // FAST PATH: Marker already exists! Update coordinates & rotation without rebuilding DOM
           const marker = trainMarkersRef.current.get(pos.id)!;
           marker.setLatLng([lat, lng]);
-          const el = marker.getElement();
-          if (el) {
-            const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-            if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
+
+          // Direct rotator transform update without querySelector
+          const rotator = trainRotatorsRef.current.get(pos.id);
+          if (rotator) {
+            rotator.style.transform = `rotate(${smoothBearing - 90}deg) scale(${zoomScale})`;
           }
+
+          // Direct marker element opacity/filter updates for selection
+          const markerEl = marker.getElement();
+          if (markerEl) {
+            if (activeSelectedId === pos.id) {
+              markerEl.classList.add('selected-train');
+            } else {
+              markerEl.classList.remove('selected-train');
+            }
+          }
+
           existingIds.delete(pos.id);
         } else {
-          // Create new train marker with modern directional icon
+          // SLOW PATH: First time this train appears
+          const theme = LINE_TRAIN_THEMES[pos.line] || DEFAULT_TRAIN_THEME;
+
+          const trainIconHtml = `
+            <div class="train-marker-inner" style="position: relative; width: 68px; height: 24px; pointer-events: auto;">
+              <!-- Rotating 3-Car Articulated EMU Trainset -->
+              <div class="train-icon-wrapper" style="width: 68px; height: 24px; transform: rotate(${smoothBearing - 90}deg) scale(${zoomScale}); will-change: transform;">
+                <svg width="68" height="24" viewBox="0 0 68 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="bodyGrad-${pos.id}" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#FFFFFF" />
+                      <stop offset="35%" stop-color="#F8FAFC" />
+                      <stop offset="70%" stop-color="#E2E8F0" />
+                      <stop offset="100%" stop-color="#CBD5E1" />
+                    </linearGradient>
+                    <linearGradient id="roofGrad-${pos.id}" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+                      <stop offset="100%" stop-color="#E2E8F0" stop-opacity="0.3" />
+                    </linearGradient>
+                    <linearGradient id="glassGrad-${pos.id}" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#0F172A" />
+                      <stop offset="60%" stop-color="#1E293B" />
+                      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.75" />
+                    </linearGradient>
+                  </defs>
+
+                  <g>
+                    <!-- Car 3: Rear Driving Motor Car -->
+                    <path d="M 6.5 4.5 L 21 4.5 L 21 16.5 L 6.5 16.5 C 5 16.5 4 15 4 13.5 L 4 7.5 C 4 6 5 4.5 6.5 4.5 Z" fill="url(#bodyGrad-${pos.id})" stroke="#0F172A" stroke-width="0.8" />
+                    <rect x="5.5" y="4.5" width="15.5" height="2" fill="url(#roofGrad-${pos.id})" />
+                    <!-- Windows & Door Posts -->
+                    <rect x="7" y="7.5" width="13" height="4.5" rx="0.5" fill="#0F172A" />
+                    <rect x="7.8" y="8" width="4.8" height="3.5" rx="0.4" fill="#334155" />
+                    <rect x="14.2" y="8" width="4.8" height="3.5" rx="0.4" fill="#334155" />
+                    <line x1="13.5" y1="7.5" x2="13.5" y2="16.5" stroke="#94A3B8" stroke-width="0.5" opacity="0.6" />
+                    <!-- Livery Striping -->
+                    <line x1="4.8" y1="13.2" x2="21" y2="13.2" stroke="${theme.lineColor}" stroke-width="1.6" />
+                    <line x1="6.5" y1="6.5" x2="21" y2="6.5" stroke="${theme.accentColor}" stroke-width="0.6" />
+                    <!-- Rear Red Marker Taillights -->
+                    <circle cx="4.6" cy="7.8" r="0.85" fill="#EF4444" />
+                    <circle cx="4.6" cy="13.2" r="0.85" fill="#EF4444" />
+
+                    <!-- Coupler / Gangway Bellows 1 -->
+                    <rect x="21" y="6" width="2.5" height="9" rx="0.3" fill="#0F172A" />
+                    <line x1="22.2" y1="6" x2="22.2" y2="15" stroke="#334155" stroke-width="0.6" />
+
+                    <!-- Car 2: Intermediate Motor Car (Pantograph + HVAC) -->
+                    <rect x="23.5" y="4.5" width="18" height="12" rx="0.5" fill="url(#bodyGrad-${pos.id})" stroke="#0F172A" stroke-width="0.8" />
+                    <rect x="23.5" y="4.5" width="18" height="2" fill="url(#roofGrad-${pos.id})" />
+                    <!-- Rooftop HVAC Unit -->
+                    <rect x="26.5" y="2.7" width="12" height="1.8" rx="0.4" fill="#475569" stroke="#334155" stroke-width="0.3" />
+                    <line x1="28.5" y1="3.6" x2="36.5" y2="3.6" stroke="#94A3B8" stroke-width="0.5" stroke-dasharray="1.2,1" />
+                    <!-- Pantograph Collector Arm -->
+                    <line x1="31.5" y1="2.7" x2="33.5" y2="1.1" stroke="#64748B" stroke-width="0.75" />
+                    <line x1="33.5" y1="1.1" x2="36.5" y2="1.1" stroke="#CBD5E1" stroke-width="0.8" />
+                    <!-- Windows & Door Posts -->
+                    <rect x="24.5" y="7.5" width="16" height="4.5" rx="0.5" fill="#0F172A" />
+                    <rect x="25.2" y="8" width="4" height="3.5" rx="0.4" fill="#334155" />
+                    <rect x="30.5" y="8" width="4" height="3.5" rx="0.4" fill="#334155" />
+                    <rect x="35.8" y="8" width="4" height="3.5" rx="0.4" fill="#334155" />
+                    <line x1="30" y1="7.5" x2="30" y2="16.5" stroke="#94A3B8" stroke-width="0.5" opacity="0.6" />
+                    <line x1="35.3" y1="7.5" x2="35.3" y2="16.5" stroke="#94A3B8" stroke-width="0.5" opacity="0.6" />
+                    <!-- Livery Striping -->
+                    <line x1="23.5" y1="13.2" x2="41.5" y2="13.2" stroke="${theme.lineColor}" stroke-width="1.6" />
+                    <line x1="23.5" y1="6.5" x2="41.5" y2="6.5" stroke="${theme.accentColor}" stroke-width="0.6" />
+
+                    <!-- Coupler / Gangway Bellows 2 -->
+                    <rect x="41.5" y="6" width="2.5" height="9" rx="0.3" fill="#0F172A" />
+                    <line x1="42.7" y1="6" x2="42.7" y2="15" stroke="#334155" stroke-width="0.6" />
+
+                    <!-- Car 1: Lead Driving Motor Car (Aerodynamic Bullet Cab) -->
+                    <path d="M 44 4.5 L 54.5 4.5 Q 61.5 4.5 63.5 10.5 Q 61.5 16.5 54.5 16.5 L 44 16.5 Z" fill="url(#bodyGrad-${pos.id})" stroke="#0F172A" stroke-width="0.8" />
+                    <path d="M 44 4.5 L 53.5 4.5 Q 57.5 4.5 59.5 6.5 L 44 6.5 Z" fill="url(#roofGrad-${pos.id})" />
+                    <!-- Passenger Windows -->
+                    <rect x="45" y="7.5" width="6.5" height="4.5" rx="0.5" fill="#0F172A" />
+                    <rect x="45.6" y="8" width="5.2" height="3.5" rx="0.4" fill="#334155" />
+                    <!-- Aerodynamic Windshield Mask & Glass -->
+                    <path d="M 52.5 6.2 Q 59 6.8 61 10.5 Q 59 14.2 52.5 14.8 L 51.5 14.8 L 51.5 6.2 Z" fill="#0B132B" stroke="#0F172A" stroke-width="0.5" />
+                    <path d="M 53 7.2 Q 57.5 7.8 59 10.5 L 57 10.5 Q 55.5 8.8 53 8 Z" fill="url(#glassGrad-${pos.id})" opacity="0.85" />
+                    <!-- Destination Display Board -->
+                    <path d="M 54.5 5.5 Q 58 5.7 59.5 6.8 L 58.5 7.1 Q 57 6.2 54.5 6 Z" fill="${theme.badgeColor}" />
+                    <!-- Livery Striping along Nose Curve -->
+                    <path d="M 44 13.2 L 53.5 13.2 Q 59 13.2 62 10.5" stroke="${theme.lineColor}" stroke-width="1.6" fill="none" />
+                    <path d="M 44 6.5 L 53.5 6.5 Q 57 6.5 58.5 7.5" stroke="${theme.accentColor}" stroke-width="0.6" fill="none" />
+                    <!-- High-Intensity Xenon LED Headlights with White Cores -->
+                    <circle cx="61.8" cy="8.6" r="1.15" fill="#FEF08A" />
+                    <circle cx="61.8" cy="12.4" r="1.15" fill="#FEF08A" />
+                    <circle cx="61.8" cy="8.6" r="0.55" fill="#FFFFFF" />
+                    <circle cx="61.8" cy="12.4" r="0.55" fill="#FFFFFF" />
+
+                    <!-- Sleek Undercarriage Bogie Skirts -->
+                    <line x1="7" y1="16.9" x2="20" y2="16.9" stroke="#0F172A" stroke-width="0.9" />
+                    <line x1="24.5" y1="16.9" x2="40.5" y2="16.9" stroke="#0F172A" stroke-width="0.9" />
+                    <line x1="45" y1="16.9" x2="56" y2="16.9" stroke="#0F172A" stroke-width="0.9" />
+                  </g>
+                </svg>
+              </div>
+            </div>
+          `;
+
           const trainIcon = L.divIcon({
             className: 'train-marker-icon',
             html: trainIconHtml,
-            iconSize: [56, 36],
-            iconAnchor: [28, 18],
+            iconSize: [68, 24],
+            iconAnchor: [34, 12],
           });
 
           const marker = L.marker([lat, lng], {
@@ -853,8 +1024,12 @@ export const MetroMap = () => {
           // Create click handler that uses latest position
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const handleClick = (e?: any) => {
-            if (e && e.stopPropagation) e.stopPropagation();
-            if (e && e.preventDefault) e.preventDefault();
+            if (e) {
+              if (e.stopPropagation) e.stopPropagation();
+              if (e.preventDefault) e.preventDefault();
+              try { L.DomEvent.stopPropagation(e); } catch { /* ignore */ }
+              try { L.DomEvent.preventDefault(e); } catch { /* ignore */ }
+            }
             const currentPos = latestPositionsRef.current.get(pos.id);
             if (currentPos) {
               setSelectedTrain({
@@ -884,8 +1059,17 @@ export const MetroMap = () => {
             if (el) {
               el.style.cursor = 'pointer';
               el.style.pointerEvents = 'auto';
+
               const wrapper = el.querySelector('.train-icon-wrapper') as HTMLElement | null;
-              if (wrapper) wrapper.style.transform = `rotate(${bearing - 90}deg)`;
+              if (wrapper) {
+                wrapper.style.transform = `rotate(${smoothBearing - 90}deg) scale(${zoomScale})`;
+                trainRotatorsRef.current.set(pos.id, wrapper);
+              }
+
+              if (activeSelectedId === pos.id) {
+                el.classList.add('selected-train');
+              }
+
               el.onclick = handleClick;
             }
           });
@@ -898,6 +1082,8 @@ export const MetroMap = () => {
       existingIds.forEach(id => {
         trainMarkersRef.current.get(id)?.remove();
         trainMarkersRef.current.delete(id);
+        trainBearingsRef.current.delete(id);
+        trainRotatorsRef.current.delete(id);
       });
       
       // Keep loop running
@@ -931,6 +1117,25 @@ export const MetroMap = () => {
 
     // Add zoom control to bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Dynamic zoom state for decluttering station labels and sizing trains
+    const updateZoomState = () => {
+      const currentZoom = map.getZoom();
+      const el = mapContainerRef.current;
+      if (!el) return;
+      if (currentZoom <= 12) {
+        el.classList.add('map-zoom-low');
+        el.classList.remove('map-zoom-mid', 'map-zoom-high');
+      } else if (currentZoom <= 14) {
+        el.classList.add('map-zoom-mid');
+        el.classList.remove('map-zoom-low', 'map-zoom-high');
+      } else {
+        el.classList.add('map-zoom-high');
+        el.classList.remove('map-zoom-low', 'map-zoom-mid');
+      }
+    };
+    map.on('zoomend', updateZoomState);
+    updateZoomState();
 
     // Collapse panel only on direct map background click (not on station markers, drag, or zoom)
     map.on('click', () => {
@@ -1171,6 +1376,7 @@ longPressTimer = setTimeout(() => {
       const isInterchange = station.isInterchange;
       const isUnderground = station.isUnderground;
 
+      const isHub = station.isInterchange || ['apmc', 'thaltej_gam', 'vastral_gam', 'mahatma_mandir', 'gift_city', 'kalupur'].includes(station.id);
       const stationIcon = L.divIcon({
         className: 'station-marker-container',
         html: `
@@ -1179,8 +1385,8 @@ longPressTimer = setTimeout(() => {
             ${isInterchange ? `<div class="interchange-inner" style="background-color: ${LINE_COLORS[station.lines[0]]}"></div>` : ''}
           </div>
         `,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
       });
 
       const marker = L.marker(station.coordinates, {
@@ -1191,7 +1397,7 @@ longPressTimer = setTimeout(() => {
 
       // Station label
       const labelIcon = L.divIcon({
-        className: 'station-label',
+        className: `station-label ${isHub ? 'hub-label' : ''}`,
         html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${getStationName(station, language)}</div>`,
         iconSize: [100, 20],
         iconAnchor: [50, -8],
@@ -1215,6 +1421,9 @@ longPressTimer = setTimeout(() => {
         setSelectedStation(station);
         setIsPanelExpanded(true);
         map.setView(station.coordinates, 15);
+        if (window.innerWidth <= 768) {
+          map.panBy([0, 95], { animate: true });
+        }
         try {
           track('station_tap', { stationId: station.id, stationName: station.name, source: 'map_marker' });
         } catch {
@@ -1255,7 +1464,7 @@ longPressTimer = setTimeout(() => {
       }
     }
 
-    // Request user location with continuous watching for movement
+    // Request user location with proactive initial fix and continuous watching for movement
     if ('geolocation' in navigator) {
       let isFirstPosition = true;
       let permissionToastShown = false;
@@ -1263,67 +1472,56 @@ longPressTimer = setTimeout(() => {
       let lastPushedLat = 0;
       let lastPushedLng = 0;
 
-      // Use watchPosition for continuous tracking (updates when user moves)
+      const onPositionAcquired = (position: GeolocationPosition) => {
+        const { latitude, longitude } = position.coords;
+        if (!targetStationId) {
+          handleLocationUpdate(latitude, longitude);
+        } else {
+          setUserLocation([latitude, longitude]);
+          updateNearestStation(latitude, longitude);
+        }
+      };
+
+      // 1. Proactively query user location immediately on mount for instant nearest station display
+      navigator.geolocation.getCurrentPosition(
+        onPositionAcquired,
+        (err) => {
+          console.debug('Initial getCurrentPosition unavailable:', err.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 180000,
+        }
+      );
+
+      // 2. Use watchPosition for continuous tracking (updates when user moves)
       geoWatchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
 
-          if (!isFirstPosition && position.coords.accuracy > 30) {
-            // Low-confidence fix — moving the marker here causes visible jumps.
-            // Escape hatch: accept it anyway if the user clearly moved (~50 m),
-            // else devices with sustained >30 m accuracy would freeze the dot
-            // at the first fix forever.
+          if (isFirstPosition) {
+            isFirstPosition = false;
+            onPositionAcquired(position);
+            return;
+          }
+
+          if (position.coords.accuracy > 30) {
             const farMoved =
               Math.abs(latitude - lastPushedLat) > 0.0005 ||
               Math.abs(longitude - lastPushedLng) > 0.0005;
             if (!farMoved) return;
           }
 
-          // Markers update imperatively below; throttle the React state push
-          // (which re-renders this whole component) to once per 2 seconds, and
-          // skip entirely when stationary (<10 m) so BottomPanel/SearchBar memo
-          // isn't defeated by fresh array identity every tick.
           const now = Date.now();
           const movedEnough =
             Math.abs(latitude - lastPushedLat) > 0.0001 ||
             Math.abs(longitude - lastPushedLng) > 0.0001;
-          if (now - lastStatePushAt > 2000 && (isFirstPosition || movedEnough)) {
+          if (now - lastStatePushAt > 2000 && movedEnough) {
             lastStatePushAt = now;
             lastPushedLat = latitude;
             lastPushedLng = longitude;
             setUserLocation([latitude, longitude]);
-          }
-
-          if (isFirstPosition) {
-            // First time: create markers and center map
-            isFirstPosition = false;
-            
-            // Add user marker
-            userMarkerRef.current = L.circleMarker([latitude, longitude], {
-              radius: 8,
-              fillColor: '#2563EB',
-              color: '#FFFFFF',
-              weight: 3,
-              fillOpacity: 1,
-            }).addTo(map);
-
-            // Add user location halo (calm, static translucent accuracy ring)
-            userPulseRef.current = L.circleMarker([latitude, longitude], {
-              radius: 22,
-              fillColor: '#3B82F6',
-              color: '#60A5FA',
-              weight: 1,
-              fillOpacity: 0.15,
-              opacity: 0.35,
-            }).addTo(map);
-
-            // Center on user
-            map.setView([latitude, longitude], 14);
-            
-            // Update nearest station only on initial position fix
-            updateNearestStation(latitude, longitude);
-          } else {
-            // Update existing markers to new position (no nearest station update)
             if (userMarkerRef.current) {
               userMarkerRef.current.setLatLng([latitude, longitude]);
             }
@@ -1336,7 +1534,7 @@ longPressTimer = setTimeout(() => {
           console.debug('Initial geolocation watch unavailable:', error.message);
 
           // Fit to all stations if location unavailable on startup
-          if (!permissionToastShown) {
+          if (!permissionToastShown && !targetStationId) {
             permissionToastShown = true;
             const allCoords = Object.values(stations).map(s => s.coordinates);
             if (allCoords.length > 0) {
@@ -1346,8 +1544,8 @@ longPressTimer = setTimeout(() => {
         },
         { 
           enableHighAccuracy: false, 
-          timeout: 10000,
-          maximumAge: 300000 // Allow cached network/GPS position up to 5 minutes old for instant startup fix
+          timeout: 12000,
+          maximumAge: 300000
         }
       );
     }
@@ -1382,6 +1580,14 @@ longPressTimer = setTimeout(() => {
           background: transparent;
           border: none;
           pointer-events: none;
+          transition: opacity 0.25s ease;
+        }
+        .map-zoom-low .station-label:not(.hub-label) {
+          opacity: 0;
+          pointer-events: none;
+        }
+        .map-zoom-low .station-label.hub-label {
+          opacity: 0.95;
         }
         .station-name {
           font-size: 10px;
@@ -1425,32 +1631,41 @@ longPressTimer = setTimeout(() => {
         .train-tooltip::before {
           display: none;
         }
-        @keyframes train-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.2); opacity: 0.8; }
-        }
         .train-marker-icon {
           background: transparent !important;
           border: none !important;
           cursor: pointer !important;
           pointer-events: auto !important;
           z-index: 1000 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          overflow: visible !important;
+          transition: opacity 0.25s ease, filter 0.25s ease;
         }
-        .train-marker-icon,
-        .train-marker-icon *,
-        .train-marker-icon div,
-        .train-marker-icon svg {
-          pointer-events: auto !important;
-          cursor: pointer !important;
+        .train-marker-inner {
+          position: relative;
+          width: 68px;
+          height: 24px;
+          overflow: visible;
+        .train-marker-icon.selected-train .train-icon-wrapper {
+          filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.95)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0.6)) !important;
+          z-index: 1050;
+        }
+        .train-marker-icon svg,
+        .train-marker-icon svg * {
+          pointer-events: none !important;
         }
         .train-icon-wrapper {
-          filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
-          transition: transform 0.15s ease-out;
+          filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
           cursor: pointer !important;
           pointer-events: auto !important;
+          will-change: transform;
+          transform-origin: center center;
+          transition: filter 0.2s ease;
         }
         .train-icon-wrapper:hover {
-          transform: scale(1.1);
+          filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.65));
         }
         .train-icon-wrapper svg {
           display: block;
@@ -1526,6 +1741,7 @@ longPressTimer = setTimeout(() => {
         isCoordinating={isCoordinating}
         sharedSegments={friendsJourneyData?.segments}
         friendDepMins={friendsJourneyData?.depMins}
+        nearestStation={nearestStation}
       />
 
       <BottomPanel
@@ -1538,6 +1754,10 @@ longPressTimer = setTimeout(() => {
         onToggleExpand={() => setIsPanelExpanded(!isPanelExpanded)}
         onLocate={handleLocationUpdate}
         onPlanRoute={handlePlanRouteFromStation}
+        onOpenRoutePlanner={() => {
+          setIsRoutePlannerOpen(true);
+          setIsPanelExpanded(false);
+        }}
         userLocation={userLocation}
         searchedLocation={searchedLocation}
       />
@@ -1575,103 +1795,154 @@ longPressTimer = setTimeout(() => {
       )}
 
       {/* Train Share Popup */}
-      {selectedTrain && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedTrain(null)}>
-          <div 
-            className="bg-background rounded-2xl shadow-2xl border border-border max-w-sm w-full overflow-hidden animate-in zoom-in-95 duration-200"
-            onClick={e => e.stopPropagation()}
-          >
+      {selectedTrain && (() => {
+        const livePos = latestPositionsRef.current.get(selectedTrain.id);
+        const isMoving = livePos ? livePos.status === 'moving' : true;
+        const progressPercent = livePos ? Math.max(5, Math.min(95, Math.round(livePos.progress * 100))) : 50;
+        const fromStation = stations[selectedTrain.fromStationId];
+        const toStation = stations[selectedTrain.toStationId];
+        const lineColor = LINE_COLORS[selectedTrain.line as keyof typeof LINE_COLORS] || '#2563EB';
+
+        return (
+          <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedTrain(null)}>
             <div 
-              className="p-4 text-white"
-              style={{ backgroundColor: LINE_COLORS[selectedTrain.line as keyof typeof LINE_COLORS] }}
+              className="bg-background rounded-t-3xl sm:rounded-2xl shadow-2xl border border-border max-w-sm w-full overflow-hidden animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 safe-p-bottom"
+              onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white/20 rounded-xl">
-                    <svg width="24" height="12" viewBox="0 0 36 18" fill="none">
-                      <rect x="2" y="3" width="24" height="12" rx="3" fill="white" />
-                      <path d="M26 3 L34 9 L26 15 Z" fill="white" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{t(`line.${selectedTrain.line}` as Parameters<typeof t>[0], language)}</h3>
-                    <p className="text-sm text-white/80">
-                      {t('map.towards', language)}{' '}
-                      {(() => {
-                        const sched = trainSchedules.find(s => s.id === selectedTrain.id);
-                        const destSt = sched ? stations[sched.stations[sched.stations.length - 1]] : null;
-                        return destSt ? getStationName(destSt, language) : selectedTrain.destination;
-                      })()}
-                    </p>
-                  </div>
+              {/* Header with aerodynamic train theme */}
+              <div 
+                className="p-4 text-white relative overflow-hidden"
+                style={{ backgroundColor: lineColor }}
+              >
+                <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-2">
+                  <Train size={110} />
                 </div>
-                <button 
-                  onClick={() => setSelectedTrain(null)}
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin size={16} className="text-muted-foreground" />
-                <span>
-                  {stations[selectedTrain.fromStationId] ? getStationName(stations[selectedTrain.fromStationId], language) : 'Unknown'}
-                  {' → '}
-                  {stations[selectedTrain.toStationId] ? getStationName(stations[selectedTrain.toStationId], language) : 'Unknown'}
-                </span>
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                      <Train size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg leading-tight">
+                        {(() => {
+                          const sched = trainSchedules.find(s => s.id === selectedTrain.id);
+                          if (sched && sched.stations.length > 1) {
+                            const originSt = stations[sched.stations[0]];
+                            const destSt = stations[sched.stations[sched.stations.length - 1]];
+                            const lineBase = t(`route.${selectedTrain.line}Line` as Parameters<typeof t>[0], language);
+                            if (originSt && destSt) {
+                              return `${lineBase} (${getStationName(originSt, language)} ↔ ${getStationName(destSt, language)})`;
+                            }
+                          }
+                          return t(`line.${selectedTrain.line}` as Parameters<typeof t>[0], language);
+                        })()}
+                      </h3>
+                      <p className="text-xs text-white/85 font-medium mt-0.5">
+                        {t('map.towards', language)}{' '}
+                        {(() => {
+                          const sched = trainSchedules.find(s => s.id === selectedTrain.id);
+                          const destSt = sched ? stations[sched.stations[sched.stations.length - 1]] : null;
+                          return destSt ? getStationName(destSt, language) : selectedTrain.destination;
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedTrain(null)}
+                    className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+                    aria-label={t('common.close', language)}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
               
-              {(() => {
-                const schedule = trainSchedules.find(s => s.id === selectedTrain.id);
-                if (schedule) {
-                  const currentStationIndex = schedule.stations.indexOf(selectedTrain.fromStationId);
-                  const crowd = getCrowdLevel(selectedTrain.line, selectedTrain.id, {
-                    stationIndex: currentStationIndex >= 0 ? currentStationIndex : 0,
-                    totalStations: schedule.stations.length,
-                    stationList: schedule.stations,
-                    originStationId: schedule.stations[0],
-                    destinationStationId: schedule.stations[schedule.stations.length - 1]
-                  });
-                  return (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Users size={16} className="text-muted-foreground" />
-                      <span>{t('map.crowding', language)}: </span>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${crowd.bgClass} ${crowd.textClass}`}>
-                        {crowd.label}
+              <div className="p-4 space-y-3.5">
+                {/* Live Real-Time Segment & Progress Card */}
+                <div className="bg-muted/40 p-3 rounded-2xl border border-border/70 space-y-2.5">
+                  <div className="flex items-center text-xs">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
+                      <span className={cn("w-2 h-2 rounded-full", isMoving ? "bg-emerald-500" : "bg-amber-500")} />
+                      {isMoving ? t('map.liveTrainEnRoute', language) : t('map.liveTrainBoarding', language)} {toStation ? getStationName(toStation, language) : ''}
+                    </span>
+                  </div>
+
+                  {/* Animated Visual Track Progress Bar */}
+                  <div className="space-y-1">
+                    <div className="relative h-2 bg-muted/80 rounded-full overflow-hidden">
+                      <div 
+                        className="absolute top-0 bottom-0 left-0 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${progressPercent}%`,
+                          backgroundColor: lineColor
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[11px] text-muted-foreground font-medium pt-0.5">
+                      <span className="truncate max-w-[48%] flex items-center gap-1">
+                        <MapPin size={10} className="text-muted-foreground flex-shrink-0" />
+                        {fromStation ? getStationName(fromStation, language) : 'Unknown'}
+                      </span>
+                      <span className="truncate max-w-[48%] text-right font-semibold text-foreground">
+                        {toStation ? getStationName(toStation, language) : 'Unknown'}
                       </span>
                     </div>
-                  );
-                }
-                return null;
-              })()}
-              
-              <button
-                onClick={() => {
-                  setLiveTrackingDialogOpen(true);
-                }}
-                className="w-full py-3 px-4 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ backgroundColor: '#FFB347' }}
-              >
-                <Share2 size={18} />
-                {t('map.shareJourney', language)}
-              </button>
-              
-              <button
-                onClick={() => {
-                  setTrainDetailsDialogOpen(true);
-                }}
-                className="w-full py-3 px-4 rounded-xl font-medium border border-border bg-muted/50 flex items-center justify-center gap-2 transition-all hover:bg-muted active:scale-[0.98]"
-              >
-                <Train size={18} />
-                {t('map.viewMetroDetails', language)}
-              </button>
+                  </div>
+                </div>
+                
+                {(() => {
+                  const schedule = trainSchedules.find(s => s.id === selectedTrain.id);
+                  if (schedule) {
+                    const currentStationIndex = schedule.stations.indexOf(selectedTrain.fromStationId);
+                    const crowd = getCrowdLevel(selectedTrain.line, selectedTrain.id, {
+                      stationIndex: currentStationIndex >= 0 ? currentStationIndex : 0,
+                      totalStations: schedule.stations.length,
+                      stationList: schedule.stations,
+                      originStationId: schedule.stations[0],
+                      destinationStationId: schedule.stations[schedule.stations.length - 1]
+                    });
+                    return (
+                      <div className="flex items-center justify-between p-2.5 bg-muted/20 rounded-xl border border-border/40 text-xs">
+                        <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                          <Users size={14} className="text-muted-foreground" />
+                          {t('map.crowding', language)}
+                        </span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${crowd.bgClass} ${crowd.textClass}`}>
+                          {crowd.label}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setLiveTrackingDialogOpen(true);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] shadow-sm cursor-pointer min-h-[44px]"
+                    style={{ backgroundColor: lineColor }}
+                  >
+                    <Share2 size={18} />
+                    {t('map.shareJourney', language)}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setTrainDetailsDialogOpen(true);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl font-medium border border-border bg-muted/40 hover:bg-muted text-foreground flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer min-h-[44px]"
+                  >
+                    <Train size={18} />
+                    {t('map.viewMetroDetails', language)}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Metro Details Dialog */}
       {selectedTrain && (

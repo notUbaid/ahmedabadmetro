@@ -43,6 +43,16 @@ export const CommuteCard = ({
     return () => clearTimeout(timeoutId);
   }, [fromStation, toStation]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onDismiss]);
+
   const MetrosToDestination = useMemo(() => {
     if (departures.length === 0) return [];
 
@@ -114,7 +124,7 @@ export const CommuteCard = ({
           </div>
           <button 
             onClick={onDismiss}
-            className="p-1.5 hover:bg-white/20 rounded-full transition-colors text-white"
+            className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/20 rounded-full transition-colors text-white"
             aria-label={t('common.close', language)}
           >
             <X className="w-4 h-4" />

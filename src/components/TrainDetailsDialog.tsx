@@ -29,6 +29,17 @@ export const TrainDetailsDialog = ({
     return trainSchedules.find(s => s.id === trainId);
   }, [trainId]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !schedule) return null;
 
   // Convert minutes to HH:MM format
@@ -80,7 +91,8 @@ export const TrainDetailsDialog = ({
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/20 rounded-full transition-colors"
+              aria-label="Close"
             >
               <X size={20} />
             </button>

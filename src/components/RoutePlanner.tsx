@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
-  CircleDot, Circle, Bus, Share2, Check, Info
+  CircleDot, Circle, Bus, Share2, Check, Info, Locate, Sparkles
 } from 'lucide-react';
-import { stations, LINE_COLORS } from '@/data/metroData';
+import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
 import { cn, getISTDate } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
@@ -132,6 +132,7 @@ interface RoutePlannerProps {
   isCoordinating?: boolean;
   sharedSegments?: { trainId: string; stations: string[] }[];
   friendDepMins?: number; // Friend's departure time in minutes for coordination
+  nearestStation?: Station | null;
 }
 
 export const RoutePlanner = React.memo(({
@@ -142,7 +143,8 @@ export const RoutePlanner = React.memo(({
   onRouteChange,
   isCoordinating = false,
   sharedSegments,
-  friendDepMins
+  friendDepMins,
+  nearestStation
 }: RoutePlannerProps) => {
   const { getDiscountedFare, hasMetroCard } = useMetroCard();
   const { language } = useLanguage();
@@ -180,6 +182,24 @@ export const RoutePlanner = React.memo(({
   useEffect(() => {
     setInternalIsCoordinating(isCoordinating);
   }, [isCoordinating]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showOriginDropdown || showDestDropdown || showDepartDropdown || showArriveDropdown) {
+          setShowOriginDropdown(false);
+          setShowDestDropdown(false);
+          setShowDepartDropdown(false);
+          setShowArriveDropdown(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, showOriginDropdown, showDestDropdown, showDepartDropdown, showArriveDropdown]);
 
   const stationOptions = useMemo(() => getStationOptions(), []);
   const organizedStations = useMemo(() => getOrganizedStations(), []);
@@ -805,6 +825,20 @@ export const RoutePlanner = React.memo(({
                 onFocus={() => setShowOriginDropdown(true)}
                 className="flex-1 bg-transparent outline-none text-sm"
               />
+              {originSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrigin('');
+                    setOriginSearch('');
+                    setShowOriginDropdown(true);
+                  }}
+                  className="p-1 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Clear origin"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             {showOriginDropdown && (
               <StationDropdown
@@ -815,6 +849,16 @@ export const RoutePlanner = React.memo(({
                 onSelectStation={selectOrigin}
                 language={language}
               />
+            )}
+            {nearestStation && origin !== nearestStation.id && (
+              <button
+                type="button"
+                onClick={() => selectOrigin(nearestStation.id)}
+                className="mt-1.5 flex items-center gap-1.5 text-xs text-primary font-medium hover:underline bg-primary/10 hover:bg-primary/15 px-2.5 py-1.5 rounded-lg border border-primary/20 transition-all min-h-[36px]"
+              >
+                <Locate className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                <span>{t('route.useNearest', language)}: <span className="font-bold">{getStationName(nearestStation, language)}</span></span>
+              </button>
             )}
           </div>
 
@@ -845,6 +889,20 @@ export const RoutePlanner = React.memo(({
                 onFocus={() => setShowDestDropdown(true)}
                 className="flex-1 bg-transparent outline-none text-sm"
               />
+              {destSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDestination('');
+                    setDestSearch('');
+                    setShowDestDropdown(true);
+                  }}
+                  className="p-1 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Clear destination"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             {showDestDropdown && (
               <StationDropdown
@@ -857,6 +915,48 @@ export const RoutePlanner = React.memo(({
               />
             )}
           </div>
+
+          {/* Quick Hub Station Chips */}
+          {(!origin || !destination) && (
+            <div className="pt-1">
+              <p className="text-[11px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                {t('route.quickHubs', language)}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { id: 'kalupur' },
+                  { id: 'old_high_court' },
+                  { id: 'thaltej' },
+                  { id: 'apmc' },
+                  { id: 'infocity' },
+                  { id: 'gift_city' },
+                ].map(hub => {
+                  const st = stations[hub.id];
+                  if (!st) return null;
+                  const isSelected = origin === hub.id || destination === hub.id;
+                  if (isSelected) return null;
+                  return (
+                    <button
+                      key={hub.id}
+                      type="button"
+                      onClick={() => {
+                        if (!origin) {
+                          selectOrigin(hub.id);
+                        } else if (!destination && destination !== hub.id) {
+                          selectDestination(hub.id);
+                        }
+                      }}
+                      className="text-xs bg-muted/60 hover:bg-muted border border-border/80 text-foreground px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 hover:border-primary/50 min-h-[36px]"
+                    >
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: LINE_COLORS[st.lines[0]] }} />
+                      <span className="font-medium">{getStationName(st, language)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Route Result Loading Skeleton */}
@@ -894,9 +994,9 @@ export const RoutePlanner = React.memo(({
             <div className="p-4 bg-muted/30">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">{route.origin.name}</span>
+                  <span className="text-sm font-medium">{getStationName(route.origin, language)}</span>
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{route.destination.name}</span>
+                  <span className="text-sm font-medium">{getStationName(route.destination, language)}</span>
                   {route.isDirect && (
                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium ml-2">
                       {t('route.directMetro', language)}
@@ -941,7 +1041,9 @@ export const RoutePlanner = React.memo(({
                                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
                                 : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
                           )}>
-                            {dep.interchangeCount === 0 ? t('commute.direct', language) : `${dep.interchangeCount} ${t('commute.changes', language)}`}
+                            {dep.interchangeCount === 0 
+                              ? t('commute.direct', language) 
+                              : `${dep.interchangeCount} ${t(dep.interchangeCount === 1 ? 'commute.change' : 'commute.changes', language)}`}
                           </div>
                         </button>
                       );
@@ -1079,6 +1181,16 @@ export const RoutePlanner = React.memo(({
           <div className="p-8 text-center text-muted-foreground">
             <Route className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>{t('route.noRouteFound', language)}</p>
+          </div>
+        )}
+
+        {/* Same station state */}
+        {origin && destination && origin === destination && !isCalculating && (
+          <div className="p-8 text-center text-muted-foreground animate-in fade-in duration-200">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <ArrowDownUp className="w-6 h-6" />
+            </div>
+            <p className="font-semibold text-foreground mb-1">{t('route.sameStationError', language)}</p>
           </div>
         )}
 

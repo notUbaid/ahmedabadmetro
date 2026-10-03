@@ -164,7 +164,11 @@ export const getDirectionStr = (destinationId: string, language: Language = 'en'
   const dest = destinationId.toLowerCase();
   if (['apmc', 'vasna', 'gyaspur', 'jivraj_park', 'shreyas', 'gnlu'].includes(dest)) {
     return t('direction.southbound', language);
-  } else if (['koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec', 'gift_city'].includes(dest)) {
+  } else if ([
+    'koteshwar_road', 'mahatma_mandir', 'motera_stadium', 'sabarmati', 'aec',
+    'sachivalaya', 'sector_1', 'sector_10a', 'sector_16', 'sector_24',
+    'infocity', 'akshardham', 'juna_sachivalaya', 'gift_city', 'pdpu'
+  ].includes(dest)) {
     return t('direction.northbound', language);
   } else if (['vastral_gam', 'vastral', 'nirant_cross_roads', 'rabari_colony'].includes(dest)) {
     return t('direction.eastbound', language);
@@ -440,52 +444,51 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
 
     let fromIdx = 0;
     let toIdx = 1;
+    let status: 'stopped' | 'moving' = 'moving';
+    let progress = 0;
 
-    // stationTimes are cumulative arrivals; find segment by elapsed in [arr(i), arr(i+1)]
-    for (let i = 0; i < schedule.stationTimes.length - 1; i++) {
-      // Use half-open intervals to avoid segment-flipping at exact boundaries.
-      // This prevents flicker / duplicate segment selection around dwell edges.
-      if (elapsedMinutes >= schedule.stationTimes[i] && elapsedMinutes < schedule.stationTimes[i + 1]) {
-        fromIdx = i;
-        toIdx = i + 1;
-        break;
+    if (elapsedMinutes >= journeyTime) {
+      // Train has reached the final terminus and is dwelling at the platform
+      fromIdx = Math.max(0, schedule.stationTimes.length - 2);
+      toIdx = schedule.stationTimes.length - 1;
+      status = 'stopped';
+      progress = 1;
+    } else {
+      // stationTimes are cumulative arrivals; find segment by elapsed in [arr(i), arr(i+1)]
+      for (let i = 0; i < schedule.stationTimes.length - 1; i++) {
+        // Use half-open intervals to avoid segment-flipping at exact boundaries.
+        if (elapsedMinutes >= schedule.stationTimes[i] && elapsedMinutes < schedule.stationTimes[i + 1]) {
+          fromIdx = i;
+          toIdx = i + 1;
+          break;
+        }
       }
 
-      // If we are exactly at the final station time, clamp to the last segment's endpoint.
-      if (i === schedule.stationTimes.length - 2 && elapsedMinutes === schedule.stationTimes[i + 1]) {
-        fromIdx = i;
-        toIdx = i + 1;
+      const arrivalAtA = schedule.stationTimes[fromIdx];
+      const arrivalAtB = schedule.stationTimes[toIdx];
+
+      // Dwell begins after arrivalAtA at station A (except start station)
+      let dwellMinutes = 0;
+      if (fromIdx > 0) {
+        const isInterchange = INTERCHANGE_STATIONS.includes(schedule.stations[fromIdx]);
+        dwellMinutes = (isInterchange ? INTERCHANGE_STOP : NORMAL_STOP) / 60;
+      }
+
+      const departureFromA = arrivalAtA + dwellMinutes;
+
+      if (elapsedMinutes < departureFromA) {
+        status = 'stopped';
+        progress = 0;
+      } else {
+        status = 'moving';
+        const travelDuration = arrivalAtB - departureFromA;
+        progress = travelDuration > 0 ? (elapsedMinutes - departureFromA) / travelDuration : 0;
       }
     }
-
 
     const fromStationId = schedule.stations[fromIdx];
     const toStationId = schedule.stations[toIdx];
     if (!fromStationId || !toStationId) continue;
-
-    const arrivalAtA = schedule.stationTimes[fromIdx];
-    const arrivalAtB = schedule.stationTimes[toIdx];
-
-    // Dwell begins after arrivalAtA at station A (except start station)
-    let dwellMinutes = 0;
-    if (fromIdx > 0) {
-      const isInterchange = INTERCHANGE_STATIONS.includes(fromStationId);
-      dwellMinutes = (isInterchange ? INTERCHANGE_STOP : NORMAL_STOP) / 60;
-    }
-
-    const departureFromA = arrivalAtA + dwellMinutes;
-
-    let status: 'stopped' | 'moving' = 'moving';
-    let progress = 0;
-
-    if (elapsedMinutes < departureFromA) {
-      status = 'stopped';
-      progress = 0;
-    } else {
-      status = 'moving';
-      const travelDuration = arrivalAtB - departureFromA;
-      progress = travelDuration > 0 ? (elapsedMinutes - departureFromA) / travelDuration : 0;
-    }
 
     const destinationId = schedule.stations[schedule.stations.length - 1];
 

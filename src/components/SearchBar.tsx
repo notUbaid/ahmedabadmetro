@@ -223,12 +223,17 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   const [showResults, setShowResults] = useState(false);
   const [showRecent, setShowRecent] = useState(false);
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isSelectedRef = useRef(false);
   const activeSearchIdRef = useRef(0);
   const [isOfflineExpanded, setIsOfflineExpanded] = useState(!navigator.onLine);
   const { language } = useLanguage();
+
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [results, showResults, showRecent]);
 
   useEffect(() => {
     let timeout: number | undefined;
@@ -580,12 +585,46 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setShowResults(false);
+      setShowRecent(false);
+      inputRef.current?.blur();
+      return;
+    }
+
+    const currentListLength = showResults ? results.length : (showRecent ? recentSearches.length : 0);
+    if (currentListLength === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1) % currentListLength);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev <= 0 ? currentListLength - 1 : prev - 1));
+    } else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && selectedIndex < currentListLength) {
+        e.preventDefault();
+        if (showResults) {
+          handleSelect(results[selectedIndex]);
+        } else if (showRecent) {
+          handleRecentSelect(recentSearches[selectedIndex]);
+        }
+      }
+    }
+  };
+
   return (
     <div ref={containerRef} className={cn(
-      "fixed left-4 right-4 z-[1001] max-w-md mx-auto pointer-events-none safe-m-top transition-all duration-300",
+      "fixed left-4 right-16 sm:right-4 z-[1001] max-w-md sm:mx-auto pointer-events-none safe-m-top transition-all duration-300",
       isOfflineExpanded ? "top-12" : "top-4"
     )}>
-      <div className="relative pointer-events-auto">
+      <div 
+        className="relative pointer-events-auto"
+        role="combobox"
+        aria-expanded={showResults || showRecent}
+        aria-haspopup="listbox"
+      >
         <div className="flex items-center bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
           <Search className="w-5 h-5 text-muted-foreground ml-3 flex-shrink-0" />
           <input
@@ -596,9 +635,13 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
               setQuery(e.target.value);
               setShowRecent(false);
             }}
+            onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             placeholder={t('search.placeholder', language)}
             enterKeyHint="search"
+            aria-autocomplete="list"
+            aria-controls="search-results-list"
+            aria-activedescendant={selectedIndex >= 0 ? `search-item-${selectedIndex}` : undefined}
             className="flex-1 px-3 py-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {isLoading && <Loader2 className="w-4 h-4 text-muted-foreground mr-2 animate-spin" />}
@@ -614,15 +657,25 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
         {/* Recent searches dropdown */}
         {showRecent && recentSearches.length > 0 && !query && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden">
+          <div 
+            id="search-results-list"
+            role="listbox"
+            className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden"
+          >
             <div className="px-4 py-2 text-xs text-muted-foreground font-medium border-b border-border">
               {t('search.recentSearches', language)}
             </div>
             {recentSearches.map((recent, index) => (
               <button
                 key={`${recent.name}-${index}`}
+                id={`search-item-${index}`}
+                role="option"
+                aria-selected={selectedIndex === index}
                 onClick={() => handleRecentSelect(recent)}
-                className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border last:border-0 flex items-center gap-3"
+                className={cn(
+                  "w-full px-4 py-3 text-left transition-colors border-b border-border last:border-0 flex items-center gap-3",
+                  selectedIndex === index ? "bg-primary/10 text-foreground" : "hover:bg-muted"
+                )}
               >
                 <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -636,12 +689,22 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
 
         {/* Results dropdown */}
         {showResults && (results.length > 0 || isLoading) && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden max-h-80 overflow-y-auto">
-            {results.map((result) => (
+          <div 
+            id="search-results-list"
+            role="listbox"
+            className="absolute top-full left-0 right-0 mt-2 bg-background/70 backdrop-blur-md rounded-xl shadow-lg border border-border overflow-hidden max-h-80 overflow-y-auto"
+          >
+            {results.map((result, index) => (
               <button
                 key={result.id}
+                id={`search-item-${index}`}
+                role="option"
+                aria-selected={selectedIndex === index}
                 onClick={() => handleSelect(result)}
-                className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border last:border-0 flex items-start gap-3"
+                className={cn(
+                  "w-full px-4 py-3 text-left transition-colors border-b border-border last:border-0 flex items-start gap-3",
+                  selectedIndex === index ? "bg-primary/10 text-foreground" : "hover:bg-muted"
+                )}
               >
                 <div className="mt-0.5 flex-shrink-0">
                   {getIcon(result.type)}

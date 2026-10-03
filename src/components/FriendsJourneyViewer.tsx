@@ -55,7 +55,7 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
         const pRoute = planRouteWithDeparture(data.origin, data.dest, data.depMins);
         setRoute(pRoute);
         setCustomDest(data.dest);
-        setDestSearch(stations[data.dest]?.name || '');
+        setDestSearch(stations[data.dest] ? (getStationName(stations[data.dest], language) || stations[data.dest].name) : '');
         
         if (pRoute) {
             const now = getISTDate();
@@ -63,6 +63,21 @@ export const FriendsJourneyViewer = ({ isOpen, onClose, data, onCoordinate }: Fr
             setJourneyProgress(calculateJourneyProgress(pRoute, currentMins, language));
         }
     }, [data, isOpen, language]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (showDestDropdown) {
+                    setShowDestDropdown(false);
+                } else {
+                    onClose();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose, showDestDropdown]);
     
     // Update progress continuously every second with zero delay
     useEffect(() => {

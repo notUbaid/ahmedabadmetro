@@ -9,10 +9,37 @@ export const WelcomeOverlay = () => {
 
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-    if (!hasSeenWelcome) {
+    if (hasSeenWelcome) return;
+
+    // Suppress welcome modal if user came in via a shared route, station, or deep link
+    const pathname = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    const isDeepLink = 
+      pathname.includes('/station/') || 
+      pathname.includes('/route/') || 
+      searchParams.has('orig') || 
+      searchParams.has('from') || 
+      searchParams.has('dest') || 
+      searchParams.has('to') || 
+      searchParams.has('station') || 
+      searchParams.has('st') || 
+      searchParams.has('joinTrain');
+
+    if (!isDeepLink) {
       setIsOpen(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handleClose = () => {
     localStorage.setItem('hasSeenWelcome', 'true');
@@ -22,7 +49,12 @@ export const WelcomeOverlay = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+    <div 
+      className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-title"
+    >
       <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-300">
         <button 
           onClick={handleClose} 
@@ -36,7 +68,7 @@ export const WelcomeOverlay = () => {
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
             <Train className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">{t('welcome.title', language)}</h2>
+          <h2 id="welcome-title" className="text-2xl font-bold text-foreground">{t('welcome.title', language)}</h2>
           <p className="text-muted-foreground mt-2 text-sm">{t('welcome.subtitle', language)}</p>
         </div>
 

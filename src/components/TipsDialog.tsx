@@ -121,7 +121,7 @@ export const TipsDialog = ({ isOpen, onOpenChange }: TipsDialogProps) => {
                     </div>
                     <button
                         onClick={() => onOpenChange(false)}
-                        className="rounded-full p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        className="rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         aria-label="Close"
                     >
                         <X className="w-5 h-5" />

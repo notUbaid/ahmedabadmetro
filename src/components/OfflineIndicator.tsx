@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { WifiOff, Wifi } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { t } from '@/lib/i18n';
 
 export const OfflineIndicator = () => {
+  const { language } = useLanguage();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showBanner, setShowBanner] = useState(false);
   const [isSlim, setIsSlim] = useState(false);
@@ -50,19 +53,19 @@ export const OfflineIndicator = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-[9999] text-center font-medium transition-all duration-300 flex items-center justify-center gap-2",
         isOnline ? "bg-green-500 text-white" : "bg-amber-500 text-white",
-        isSlim ? "h-1.5 p-0" : "px-4 py-2 text-sm"
+        isSlim ? "h-1.5 p-0" : "px-4 py-2 text-sm safe-p-top"
       )}
     >
       {!isSlim && (
         isOnline ? (
           <>
             <Wifi className="w-4 h-4" />
-            Back online
+            {t('offline.backOnline', language)}
           </>
         ) : (
           <>
             <WifiOff className="w-4 h-4" />
-            You're offline — using cached data
+            {t('offline.usingCached', language)}
           </>
         )
       )}
