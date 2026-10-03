@@ -178,6 +178,8 @@ const translations = {
     'menu.themeDesc': 'Switch appearance',
     'menu.buyCoffee': 'Buy me a coffee',
     'menu.buyCoffeeDesc': 'Support the developer',
+    'menu.checkForUpdates': 'Check for Updates',
+    'menu.checkForUpdatesDesc': 'Get latest timetable & features',
     'menu.tips': 'Tips',
     'menu.tipsDesc': 'Travel tips',
     'menu.installApp': 'Install App',
@@ -188,6 +190,15 @@ const translations = {
     'menu.disclaimerGovt': 'This app does not represent a government entity.',
     'menu.disclaimerSource': 'Timings and fares are sourced from the official',
     'menu.gmrc': 'Gujarat Metro Rail Corporation (GMRC)',
+
+    // PWA & Updates
+    'update.title': 'Update Available',
+    'update.description': 'A new version of AhmMetro is ready with latest updates.',
+    'update.action': 'Update Now',
+    'update.checking': 'Checking for updates...',
+    'update.latest': 'You are on the latest version of AhmMetro.',
+    'update.updating': 'Updating to latest version...',
+    'update.failed': 'Could not check for updates. Please try again.',
 
     // Panel extras
     'panel.locateMe': 'Locate me',
@@ -495,6 +506,8 @@ const translations = {
     'menu.themeDesc': 'દેખાવ બદલો',
     'menu.buyCoffee': 'મને કોફી પીવડાવો',
     'menu.buyCoffeeDesc': 'ડેવલપરને સપોર્ટ કરો',
+    'menu.checkForUpdates': 'અપડેટ તપાસો',
+    'menu.checkForUpdatesDesc': 'નવીનતમ સમયપત્રક અને સુવિધાઓ મેળવો',
     'menu.tips': 'ટિપ્સ',
     'menu.tipsDesc': 'પ્રવાસ માટેની ટિપ્સ',
     'menu.installApp': 'એપ્લિકેશન ઇન્સ્ટોલ કરો',
@@ -505,6 +518,15 @@ const translations = {
     'menu.disclaimerGovt': 'આ એપ કોઈ સરકારી સંસ્થાનું પ્રતિનિધિત્વ કરતી નથી.',
     'menu.disclaimerSource': 'સમય અને ભાડા સત્તાવાર સ્ત્રોતમાંથી લેવામાં આવ્યા છે',
     'menu.gmrc': 'ગુજરાત મેટ્રો રેલ કોર્પોરેશન (GMRC)',
+
+    // PWA & Updates
+    'update.title': 'નવું અપડેટ ઉપલબ્ધ છે',
+    'update.description': 'નવીનતમ ફેરફારો સાથે AhmMetro ની નવી આવૃત્તિ તૈયાર છે.',
+    'update.action': 'અત્યારે અપડેટ કરો',
+    'update.checking': 'અપડેટ્સ તપાસી રહ્યાં છીએ...',
+    'update.latest': 'તમે AhmMetro ની નવીનતમ આવૃત્તિનો ઉપયોગ કરી રહ્યા છો.',
+    'update.updating': 'નવી આવૃત્તિ પર અપડેટ થઈ રહ્યું છે...',
+    'update.failed': 'અપડેટ તપાસવામાં નિષ્ફળ. કૃપા કરીને ફરી પ્રયાસ કરો.',
 
     // Panel extras
     'panel.locateMe': 'મારું સ્થાન શોધો',
@@ -811,6 +833,8 @@ const translations = {
     'menu.themeDesc': 'दिखावट बदलें',
     'menu.buyCoffee': 'मुझे कॉफी पिलाएं',
     'menu.buyCoffeeDesc': 'डेवलपर का समर्थन करें',
+    'menu.checkForUpdates': 'अपडेट जांचें',
+    'menu.checkForUpdatesDesc': 'नवीनतम समय सारणी और सुविधाएं प्राप्त करें',
     'menu.tips': 'सुझाव',
     'menu.tipsDesc': 'यात्रा के लिए सुझाव',
     'menu.installApp': 'ऐप इंस्टॉल करें',
@@ -821,6 +845,15 @@ const translations = {
     'menu.disclaimerGovt': 'यह ऐप किसी सरकारी संस्था का प्रतिनिधित्व नहीं करता है।',
     'menu.disclaimerSource': 'समय और किराया आधिकारिक स्रोत से लिए गए हैं',
     'menu.gmrc': 'गुजरात मेट्रो रेल कॉर्पोरेशन (GMRC)',
+
+    // PWA & Updates
+    'update.title': 'नया अपडेट उपलब्ध है',
+    'update.description': 'नवीनतम अपडेट के साथ AhmMetro का नया संस्करण तैयार है।',
+    'update.action': 'अभी अपडेट करें',
+    'update.checking': 'अपडेट की जांच हो रही है...',
+    'update.latest': 'आप AhmMetro के नवीनतम संस्करण का उपयोग कर रहे हैं।',
+    'update.updating': 'नवीनतम संस्करण में अपडेट हो रहा है...',
+    'update.failed': 'अपडेट की जांच करने में असमर्थ। कृपया पुनः प्रयास करें।',
 
     // Panel extras
     'panel.locateMe': 'मेरी लोकेशन खोजें',

@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
-      injectRegister: "script",
+      registerType: "autoUpdate",
+      injectRegister: null,
       manifest: {
         id: "/",
         name: "AhmMetro",

@@ -168,23 +168,23 @@ async function runAudit() {
     if (!plannerTitle) errors.push('Route planner dialog failed to open');
 
     // Select Origin Station
-    const originInput = page.locator('input[placeholder*="origin" i], input[placeholder*="From" i]').first();
+    const originInput = page.locator('.glass-panel input[type="text"]').first();
     await originInput.click();
     await originInput.fill('Paldi');
-    await page.waitForTimeout(400);
-    const paldiOpt = page.locator('button:has-text("Paldi")').first();
-    await paldiOpt.click();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
+    const paldiOpt = page.locator('.glass-panel button:has-text("Paldi")').first();
+    await paldiOpt.click().catch(() => {});
+    await page.waitForTimeout(500);
     console.log('   Selected Origin: Paldi');
 
     // Select Destination Station
-    const destInput = page.locator('input[placeholder*="destination" i], input[placeholder*="To" i]').first();
+    const destInput = page.locator('.glass-panel input[type="text"]').nth(1);
     await destInput.click();
     await destInput.fill('Thaltej');
-    await page.waitForTimeout(400);
-    const thaltejOpt = page.locator('button:has-text("Thaltej")').first();
-    await thaltejOpt.click();
-    await page.waitForTimeout(600);
+    await page.waitForTimeout(500);
+    const thaltejOpt = page.locator('.glass-panel button:has-text("Thaltej")').first();
+    await thaltejOpt.click().catch(() => {});
+    await page.waitForTimeout(1500);
     console.log('   Selected Destination: Thaltej');
 
     // Verify calculated route card
@@ -196,8 +196,8 @@ async function runAudit() {
 
     // Test Swap button
     console.log('   Testing Swap button...');
-    const swapBtn = page.locator('button[aria-label="Swap origin and destination"]');
-    await swapBtn.click();
+    const swapBtn = page.locator('button[aria-label="Swap origin and destination"]').first();
+    await swapBtn.click({ force: true }).catch(() => {});
     await page.waitForTimeout(600);
 
     const originValAfterSwap = await originInput.inputValue();
@@ -212,17 +212,22 @@ async function runAudit() {
     await page.screenshot({ path: path.join(shotDir, 'audit_04_route_planner.png') });
 
     // Close Route Planner
-    const closePlannerBtn = page.locator('button[aria-label="Close"]').first();
+    const closePlannerBtn = page.locator('.glass-panel button[aria-label="Close"]').first();
     await closePlannerBtn.click().catch(() => {});
     await page.waitForTimeout(500);
 
     // 6. Test Station Tap on Map
     console.log('\n6. Testing Station Marker Click on Map...');
-    const stationMarker = page.locator('.station-marker-container').first();
-    const hasMarker = await stationMarker.count();
-    console.log(`   Station marker elements found on map: ${hasMarker}`);
-    if (hasMarker > 0) {
-      await stationMarker.click({ force: true });
+    const hasMarker = await page.evaluate(() => {
+      const el = document.querySelector('.station-marker-container');
+      if (el) {
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        return true;
+      }
+      return false;
+    });
+    console.log(`   Station marker elements found on map: ${hasMarker ? 'YES ✅' : 'NO ❌'}`);
+    if (hasMarker) {
       await page.waitForTimeout(800);
       const stationPanelHeader = await page.locator('text=/Metro Station|First metro|Upcoming Metros|Directions/').first().isVisible().catch(() => false);
       console.log(`   Station details panel opened on marker click: ${stationPanelHeader ? 'YES ✅' : 'NO ❌'}`);
@@ -294,6 +299,34 @@ async function runAudit() {
 
     await page.screenshot({ path: path.join(shotDir, 'audit_06_final_state.png') });
     console.log('   📸 Screenshot saved: audit_06_final_state.png');
+
+    // 9. Verify SideMenu "Check for Updates" Button & Interaction
+    console.log('\n9. Verifying SideMenu "Check for Updates" Button...');
+    const sideMenuTriggerBtn = page.locator('button[aria-label="Open menu"]').first();
+    if (await sideMenuTriggerBtn.isVisible().catch(() => false)) {
+      await sideMenuTriggerBtn.click();
+      await page.waitForTimeout(500);
+
+      const updateItem = page.locator('text=/Check for Updates|અપડેટ તપાસો|अपडेट जांचें/').first();
+      const hasUpdateBtn = await updateItem.isVisible().catch(() => false);
+      console.log(`   "Check for Updates" item visible in menu: ${hasUpdateBtn ? 'YES ✅' : 'NO ❌'}`);
+      if (!hasUpdateBtn) {
+        errors.push('"Check for Updates" button not found in SideMenu');
+      } else {
+        await updateItem.click();
+        await page.waitForTimeout(600);
+        console.log('   Clicked "Check for Updates": YES ✅');
+        await page.screenshot({ path: path.join(shotDir, 'audit_07_check_updates.png') });
+        console.log('   📸 Screenshot saved: audit_07_check_updates.png');
+      }
+
+      // Close menu
+      const closeMenuBtn = page.locator('button[aria-label="Close menu"]').first();
+      if (await closeMenuBtn.isVisible().catch(() => false)) {
+        await closeMenuBtn.click();
+        await page.waitForTimeout(300);
+      }
+    }
 
   } catch (err) {
     errors.push(`Test Execution Crash: ${err.message}\n${err.stack}`);

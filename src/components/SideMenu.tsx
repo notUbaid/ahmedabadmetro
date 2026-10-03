@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowLeftRight, Download } from 'lucide-react';
+import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowLeftRight, Download, RefreshCw } from 'lucide-react';
 import { TipsDialog } from './TipsDialog';
 import { CommuteSetup } from './CommuteSetup';
 import { useMetroCard } from '@/contexts/MetroCardContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getCommuteSettings } from '@/lib/commuteStorage';
+import { checkForUpdates, applyUpdate } from '@/lib/pwaUpdate';
+import { toast } from 'sonner';
 import { Languages } from 'lucide-react';
 import { t } from '@/lib/i18n';
 
@@ -134,6 +136,33 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
     setIsDark(newIsDark);
   };
 
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+
+  const handleCheckForUpdates = async () => {
+    if (isCheckingUpdate) return;
+    setIsCheckingUpdate(true);
+    toast.info(t('update.checking', language));
+    try {
+      const res = await checkForUpdates();
+      if (res.status === 'updated') {
+        toast.success(t('update.updating', language));
+        setTimeout(() => {
+          applyUpdate();
+        }, 800);
+      } else if (res.status === 'offline') {
+        toast.error(t('offline.usingCached', language));
+      } else if (res.status === 'error') {
+        toast.error(t('update.failed', language));
+      } else {
+        toast.success(t('update.latest', language));
+      }
+    } catch {
+      toast.error(t('update.failed', language));
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
+
   const handleRoutePlanner = () => {
     setIsOpen(false);
     onOpenRoutePlanner();
@@ -168,6 +197,14 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
       customBgColor: hasMetroCard ? 'bg-green-500/15' : 'bg-muted',
       isToggle: true,
       isActive: hasMetroCard
+    },
+    {
+      icon: RefreshCw,
+      label: isCheckingUpdate ? t('update.checking', language) : t('menu.checkForUpdates', language),
+      onClick: handleCheckForUpdates,
+      description: t('menu.checkForUpdatesDesc', language),
+      customIconColor: isCheckingUpdate ? 'text-blue-500 animate-spin' : 'text-blue-600 dark:text-blue-400',
+      customBgColor: 'bg-blue-500/15'
     },
     {
       icon: isDark ? Sun : Moon,

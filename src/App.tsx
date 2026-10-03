@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import UpdateBanner from "@/components/UpdateBanner";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { WelcomeOverlay } from "@/components/WelcomeOverlay";
@@ -32,7 +33,8 @@ const App = () => (
         <AppSplash />
         <WelcomeOverlay />
         <OfflineIndicator />
-        <Sonner />
+        <UpdateBanner />
+        <Sonner position="top-center" richColors />
         <BrowserRouter>
           <Suspense fallback={<AppSplash isSuspenseFallback />}>
             <Routes>
