@@ -25,3 +25,16 @@ dist-ssr
 coverage/
 .session-checkpoint.md
 test-results/
+
+# Android build outputs & Keystores
+.gradle/
+build/
+android/.gradle/
+android/build/
+android/app/build/
+*.keystore
+*.jks
+signing-key-info.txt
+twa-package/
+*.aab
+*.apk

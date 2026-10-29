@@ -1,137 +1,87 @@
-# Android TWA Release Guide (Google Play Compliance: Android 15 & 16)
+# Android TWA Release Guide (Google Play Compliance: Android 16 / API 36)
 
-This document details the configuration required to build the native Android package (`.aab`) for **AhmMetro** (`ahmedabadmetro.site`), fully compliant with Google Play's **Android 16 (API 36)** target requirement and all **4 recommended quality actions**.
-
----
-
-## 📋 Google Play 4 Actions Checklist
-
-| Action Item | Google Play Requirement | Resolution in AhmMetro |
-|---|---|---|
-| **Action 1: Edge-to-Edge** | App must display edge-to-edge on Android 15+ (API 35/36) | Web viewport has `viewport-fit=cover` and CSS handles `env(safe-area-inset-*)`. Android uses `EdgeToEdge.enable()`. |
-| **Action 2: Deprecated Window APIs** | Avoid `setStatusBarColor` and `setNavigationBarColor` | Upgraded to `com.google.androidbrowserhelper:androidbrowserhelper:2.5.0+` which migrates away from deprecated APIs. |
-| **Action 3: Resizability & Orientation** | No locked portrait orientation on tablets/foldables (Android 16+) | Web App Manifest sets `orientation: "any"`. AndroidManifest sets `android:screenOrientation="unspecified"` and `android:resizeableActivity="true"`. |
-| **Action 4: R8 Optimization & Shrinking** | Enable R8 code & resource shrinking for memory efficiency | Configured `minifyEnabled true`, `shrinkResources true`, and `proguard-rules.pro`. |
+This document details the configuration and build instructions for the native Android package (`.aab`) of **AhmMetro** (`ahmedabadmetro.site`), fully compliant with Google Play's **Android 16 (API 36)** target requirement and all quality recommendations.
 
 ---
 
-## 🛠️ Step 1: PWABuilder Packaging Options
+## 📋 Google Play Compliance Checklist
 
-When packaging via [PWABuilder](https://www.pwabuilder.com):
-
-* **Package ID**: `ahmedabadmetro.site` *(Do NOT use site.ahmedabadmetro.www.twa)*
-* **App Name**: `AhmMetro`
-* **Short Name**: `AhmMetro`
-* **Host**: `www.ahmedabadmetro.site`
-* **Start URL**: `/`
-* **Display Mode**: `standalone`
-* **Orientation**: `any` *(Fixes Action 3)*
-* **Version Code**: `13` *(or higher than current production release 12)*
-* **Version**: `1.2.2.13`
-* **Location Delegation**: ☑️ **Checked** *(Enables Android OS GPS permission delegation)*
-* **Include Source Code**: ☑️ **Checked**
-* **Signing Key**: Use existing keystore from Release 1
+| Item | Google Play Requirement | Implementation in AhmMetro | Status |
+|---|---|---|:---:|
+| **Target SDK** | Must target Android 16 (API 36) or higher | `targetSdkVersion 36`, `compileSdkVersion 36` in `android/app/build.gradle` | ✅ Compliant |
+| **Version Code** | Must be higher than previous production release | `versionCode 14`, `versionName "1.2.2.14"` | ✅ Updated |
+| **Edge-to-Edge** | App must display edge-to-edge on Android 15+ (API 35/36) | Web viewport has `viewport-fit=cover` and CSS handles `env(safe-area-inset-*)`. AndroidBrowserHelper handles window insets. | ✅ Compliant |
+| **Orientation & Resizability** | No locked portrait orientation on tablets/foldables | Web manifest sets `orientation: "any"`. AndroidManifest sets `android:screenOrientation="unspecified"` and `android:resizeableActivity="true"`. | ✅ Compliant |
+| **Code & Resource Shrinking** | Enable R8 optimization for performance | Configured `minifyEnabled true` in release build type. | ✅ Compliant |
+| **Release Signing** | Valid release key matching existing Play Store cert | Signed with `signingKey.keystore` (alias: `my-key-alias`, SHA256: `7D:8F:03:9D:A6:EE:F9:4C:22:29:58:EC:78:90:CD:63:44:42:F5:1F:BE:6D:30:88:91:CB:E0:8E:AC:86:56:33`). Matches `/.well-known/assetlinks.json`. | ✅ Verified |
 
 ---
 
-## 💻 Step 2: `app/build.gradle` Configuration
+## 💻 Project Structure
 
-If modifying or building from the source code zip:
+The Android project is committed in the `/android` directory:
 
-```groovy
-plugins {
-    id 'com.android.application'
-}
-
-android {
-    namespace 'ahmedabadmetro.site'
-    compileSdk 36 // Targets Android 16 (Google Play Mandate)
-
-    defaultConfig {
-        applicationId "ahmedabadmetro.site"
-        minSdk 21
-        targetSdk 36 // Targets Android 16 (Fixes Target API warning)
-        versionCode 13
-        versionName "1.2.2"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            // Action 4: Enable R8 code optimization & resource shrinking
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-}
-
-dependencies {
-    // Action 1 & 2: Upgraded Android Browser Helper (Edge-to-Edge compliant)
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
-    implementation 'androidx.browser:browser:1.8.0'
-    implementation 'androidx.core:core-splashscreen:1.0.1'
-}
+```text
+android/
+├── app/
+│   ├── build.gradle          # Target SDK 36, versionCode 14, signing config
+│   └── src/main/
+│       ├── AndroidManifest.xml # TWA launcher & resizability
+│       └── res/              # App icons, splash screens, shortcuts
+├── gradle/wrapper/           # Gradle 8.11.1 wrapper
+├── build.gradle              # Android Gradle Plugin 8.9.1
+├── gradle.properties
+└── signingKey.keystore       # Keystore for release signing (git-ignored)
 ```
 
 ---
 
-## 📄 Step 3: `AndroidManifest.xml` Configuration
+## 🛠️ Prerequisites to Build
 
-In `app/src/main/AndroidManifest.xml`:
+1. **Java Development Kit**: JDK 17 or JDK 21 LTS (e.g. `C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot`).
+   *(Note: JDK 25 is too new for Gradle 8.11; JDK 21 LTS is used).*
+2. **Android SDK**: With `platforms;android-36` and `build-tools;35.0.0` or `36.0.0` installed.
 
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+---
 
-    <!-- Location permissions for GPS delegation -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+## 🚀 How to Build the Release Bundle (.aab)
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/appName"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.AhmMetro">
+From PowerShell or terminal in the repository root:
 
-        <activity
-            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
-            android:exported="true"
-            android:resizeableActivity="true"
-            android:screenOrientation="unspecified">
-            
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+```powershell
+# Set environment variables (if not already in PATH)
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="www.ahmedabadmetro.site" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
+# Navigate to android folder and build release bundle
+cd d:\Projects\ahmedabadmetro\android
+.\gradlew.bat bundleRelease
+```
+
+The signed output bundle will be generated at:
+- `android/app/build/outputs/bundle/release/app-release.aab`
+- A convenience copy is placed in the project root: `AhmMetro-v14-API36.aab`
+
+To verify the target SDK and version code with `aapt2`:
+```powershell
+& "$env:ANDROID_HOME\build-tools\36.0.0\aapt2.exe" dump badging android/app/build/outputs/apk/release/app-release.apk
+# Verify: versionCode='14' compileSdkVersion='36' targetSdkVersion='36'
 ```
 
 ---
 
-## 🚀 Step 4: Build & Upload to Google Play
+## 📤 Step-by-Step Google Play Console Upload
 
-1. Build release bundle:
-   ```bash
-   ./gradlew bundleRelease
-   ```
-2. The output bundle will be located at:
-   `app/build/outputs/bundle/release/app-release.aab`
-3. Upload to **Google Play Console $\rightarrow$ Production $\rightarrow$ Create release**.
+1. Log in to [Google Play Console](https://play.google.com/console).
+2. Select the **AhmMetro** application.
+3. On the left sidebar, navigate to **Release** $\rightarrow$ **Production** (or **Closed testing** first if preferred).
+4. Click **Create new release** in the top right.
+5. In the **App bundles** section, click **Upload** and select:
+   `d:\Projects\ahmedabadmetro\AhmMetro-v14-API36.aab`
+   *(or `android/app/build/outputs/bundle/release/app-release.aab`)*.
+6. Verify the details:
+   - Version code: **14**
+   - Target SDK: **Android 16 (API 36)**
+7. Enter release notes (e.g., *"Updated app to target Android 16 (API 36), enhanced tablet/foldable compatibility, and overall performance improvements."*).
+8. Click **Next** / **Save**, then review and click **Start rollout to Production** (100%).
+9. Once Google Play processes and approves the release, the **Policy Status** warning for Android 16 will automatically resolve!
