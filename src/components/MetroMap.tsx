@@ -761,9 +761,11 @@ export const MetroMap = () => {
             const dists = entry.dists;
             const totalDist = entry.totalDist;
 
-            // Quick sanity: ensure endpoints are near actual stations
-            const startDist = fromStation ? Math.sqrt(Math.pow(geometry[0][0] - fromStation.coordinates[0], 2) + Math.pow(geometry[0][1] - fromStation.coordinates[1], 2)) : Infinity;
-            const endDist = toStation ? Math.sqrt(Math.pow(geometry[geometry.length - 1][0] - toStation.coordinates[0], 2) + Math.pow(geometry[geometry.length - 1][1] - toStation.coordinates[1], 2)) : Infinity;
+            // Quick sanity: ensure endpoints are near actual stations (respecting reversed segment geometry)
+            const expectedStartStation = isReversed ? toStation : fromStation;
+            const expectedEndStation = isReversed ? fromStation : toStation;
+            const startDist = expectedStartStation ? Math.hypot(geometry[0][0] - expectedStartStation.coordinates[0], geometry[0][1] - expectedStartStation.coordinates[1]) : Infinity;
+            const endDist = expectedEndStation ? Math.hypot(geometry[geometry.length - 1][0] - expectedEndStation.coordinates[0], geometry[geometry.length - 1][1] - expectedEndStation.coordinates[1]) : Infinity;
             if (startDist <= 0.01 && endDist <= 0.01 && totalDist > 0) {
               // If we are using the reverse geometry, progress should be flipped!
               const targetDist = totalDist * (isReversed ? (1 - progress) : progress);
@@ -1219,9 +1221,8 @@ longPressTimer = setTimeout(() => {
     Promise.all([
       fetch('/metroRoutes.geojson').then(res => res.json()),
       fetch('/yellowLineRoutes.geojson').then(res => res.json()),
-      fetch('/blueLineRoutes.geojson').then(res => res.json()),
     ])
-      .then(([metroData, yellowData, blueData]: [GeoJSON.FeatureCollection, GeoJSON.FeatureCollection, GeoJSON.FeatureCollection]) => {
+      .then(([metroData, yellowData]: [GeoJSON.FeatureCollection, GeoJSON.FeatureCollection]) => {
         const blue: GeoJSON.Feature[] = [];
         const redCandidates: GeoJSON.Feature[] = [];
         const purple: GeoJSON.Feature[] = [];
@@ -1312,11 +1313,6 @@ longPressTimer = setTimeout(() => {
           if (name.includes('blue line')) blue.push(f);
           else if (name.includes('red line')) redCandidates.push(f);
           else if (name.includes('violet line') || name.includes('line 3:') || name.includes('gift city-gnlu')) purple.push(f);
-        }
-
-        for (const f of blueData.features ?? []) {
-          if (f?.geometry?.type !== 'LineString') continue;
-          blue.push(f);
         }
 
         for (const f of yellowData.features ?? []) {

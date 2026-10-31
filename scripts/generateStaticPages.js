@@ -279,16 +279,8 @@ function getLegDirection(fromId, toId) {
   return { line: 'blue', lineName: 'Metro Line', terminalName: 'Terminal', isForward: true };
 }
 
-const KEY_HUBS = [
-  'kalupur', 'thaltej', 'thaltej_gam', 'vastral_gam', 'vastral', 'motera_stadium',
-  'apmc', 'paldi', 'old_high_court', 'ranip', 'sabarmati',
-  'gnlu', 'gift_city', 'infocity', 'sachivalaya', 'akshardham',
-  'mahatma_mandir', 'koteshwar_road', 'kankaria_east', 'gujarat_university',
-  'gurukul_road', 'doordarshan_kendra', 'commerce_six_road', 'stadium',
-  'shahpur', 'gheekanta', 'apparel_park', 'amraiwadi', 'rabari_colony',
-  'jivraj_park', 'gandhigram', 'usmanpura', 'vadaj', 'aec',
-  'nirant_cross_roads', 'shreyas', 'randesan', 'raysan',
-];
+// Generate comprehensive routes across all 53 operational stations
+const KEY_HUBS = Object.keys(stationStats);
 
 // Generate commuter routes
 const ROUTE_LIST = [];
@@ -931,13 +923,16 @@ function renderFooter() {
 
 function writeHtmlFile(relPath, content) {
   const distTarget = path.join(DIST_DIR, relPath);
-  const publicTarget = path.join(PUBLIC_DIR, relPath);
-
   fs.mkdirSync(path.dirname(distTarget), { recursive: true });
   fs.writeFileSync(distTarget, content, 'utf8');
 
-  fs.mkdirSync(path.dirname(publicTarget), { recursive: true });
-  fs.writeFileSync(publicTarget, content, 'utf8');
+  // Commuter routes are written exclusively to dist/ to prevent 1,400+ file bloat in Git.
+  // Core landing pages (map, timings, stations, fare, etc.) and individual station pages are preserved.
+  if (!relPath.startsWith('route' + path.sep) && !relPath.startsWith('route/')) {
+    const publicTarget = path.join(PUBLIC_DIR, relPath);
+    fs.mkdirSync(path.dirname(publicTarget), { recursive: true });
+    fs.writeFileSync(publicTarget, content, 'utf8');
+  }
 }
 
 // ==========================================
@@ -3844,6 +3839,10 @@ for (const key of LINE_KEYS) {
   });
 
   writeHtmlFile(path.join('line', line.slug, 'index.html'), html);
+  // Alias green-line to yellow-line for backward compatibility
+  if (key === 'green') {
+    writeHtmlFile(path.join('line', 'green-line', 'index.html'), html);
+  }
 }
 
 console.log('All static pages generated successfully!');

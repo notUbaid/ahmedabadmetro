@@ -1,15 +1,65 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import UpdateBanner from "@/components/UpdateBanner";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { WelcomeOverlay } from "@/components/WelcomeOverlay";
 import { Analytics } from "@vercel/analytics/react";
+import { stationToSlug } from "@/lib/seoRoutes";
 
 import { AppSplash } from "@/components/AppSplash";
+
+/**
+ * Dynamically synchronizes <link rel="canonical"> to consolidate query URLs (?from=...&to=...)
+ * and line aliases into pre-rendered static paths.
+ */
+function CanonicalHead() {
+  const location = useLocation();
+
+  useEffect(() => {
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+
+    const params = new URLSearchParams(location.search);
+    const from = params.get('from') || params.get('orig');
+    const to = params.get('to') || params.get('dest');
+    const station = params.get('station') || params.get('st');
+
+    const BASE = 'https://www.ahmedabadmetro.site';
+
+    if (from && to) {
+      const fromSlug = stationToSlug(from);
+      const toSlug = stationToSlug(to);
+      canonical.href = `${BASE}/route/${fromSlug}-to-${toSlug}/`;
+    } else if (station && !from && !to) {
+      const stSlug = stationToSlug(station);
+      canonical.href = `${BASE}/station/${stSlug}/`;
+    } else if (location.pathname.startsWith('/route/')) {
+      const slug = location.pathname.replace(/^\/route\//, '').replace(/\/$/, '');
+      canonical.href = `${BASE}/route/${slug}/`;
+    } else if (location.pathname.startsWith('/station/')) {
+      const slug = location.pathname.replace(/^\/station\//, '').replace(/\/$/, '');
+      canonical.href = `${BASE}/station/${slug}/`;
+    } else if (location.pathname.startsWith('/line/')) {
+      const slug = location.pathname.replace(/^\/line\//, '').replace(/\/$/, '');
+      const canonicalSlug = slug === 'green-line' ? 'yellow-line' : slug;
+      canonical.href = `${BASE}/line/${canonicalSlug}`;
+    } else if (['/map', '/stations', '/routes', '/route', '/fare', '/fare-chart', '/timings', '/airport', '/parking', '/interchange'].includes(location.pathname)) {
+      canonical.href = `${BASE}${location.pathname}`;
+    } else {
+      canonical.href = `${BASE}/`;
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
+}
 
 // Lazy load pages for better initial load
 const Index = lazy(() => import("./pages/Index"));
@@ -36,6 +86,7 @@ const App = () => (
         <UpdateBanner />
         <Sonner position="top-center" richColors />
         <BrowserRouter>
+          <CanonicalHead />
           <Suspense fallback={<AppSplash isSuspenseFallback />}>
             <Routes>
               <Route path="/" element={<Index />} />

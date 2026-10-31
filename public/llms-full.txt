@@ -143,606 +143,6 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 
 ## 5. High-Frequency Travel Routes (Comprehensive Timetable Guide)
 
-### Kalupur ➔ Thaltej
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=thaltej
-- **Travel Time**: ~18 minutes (9 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=thaltej
-
-### Kalupur ➔ Thaltej Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=thaltej_gam
-- **Travel Time**: ~20 minutes (10 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=thaltej_gam
-
-### Kalupur ➔ Vastral Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=vastral_gam
-- **Travel Time**: ~14 minutes (7 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=vastral_gam
-
-### Kalupur ➔ Vastral
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=vastral
-- **Travel Time**: ~10 minutes (5 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=vastral
-
-### Kalupur ➔ Motera Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=motera_stadium
-- **Travel Time**: ~45 minutes (20 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=motera_stadium
-
-### Kalupur ➔ APMC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=apmc
-- **Travel Time**: ~21 minutes (8 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=apmc
-
-### Kalupur ➔ Paldi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=paldi
-- **Travel Time**: ~29 minutes (12 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=paldi
-
-### Kalupur ➔ Old High Court
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=old_high_court
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=old_high_court
-
-### Kalupur ➔ Ranip
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=ranip
-- **Travel Time**: ~39 minutes (17 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=ranip
-
-### Kalupur ➔ Sabarmati
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=sabarmati
-- **Travel Time**: ~43 minutes (19 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=sabarmati
-
-### Kalupur ➔ GNLU
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gnlu
-- **Travel Time**: ~61 minutes (28 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gnlu
-
-### Kalupur ➔ GIFT City
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gift_city
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gift_city
-
-### Kalupur ➔ Infocity
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=infocity
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=infocity
-
-### Kalupur ➔ Sachivalaya
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=sachivalaya
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=sachivalaya
-
-### Kalupur ➔ Akshardham
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=akshardham
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=akshardham
-
-### Kalupur ➔ Mahatma Mandir
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=mahatma_mandir
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=mahatma_mandir
-
-### Kalupur ➔ Koteshwar Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=koteshwar_road
-- **Travel Time**: ~47 minutes (21 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=koteshwar_road
-
-### Kalupur ➔ Kankaria East
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=kankaria_east
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=kankaria_east
-
-### Kalupur ➔ Gujarat University
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gujarat_university
-- **Travel Time**: ~12 minutes (6 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gujarat_university
-
-### Kalupur ➔ Gurukul Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gurukul_road
-- **Travel Time**: ~14 minutes (7 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gurukul_road
-
-### Kalupur ➔ Doordarshan Kendra
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=doordarshan_kendra
-- **Travel Time**: ~16 minutes (8 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=doordarshan_kendra
-
-### Kalupur ➔ Commerce Six Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=commerce_six_road
-- **Travel Time**: ~10 minutes (5 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=commerce_six_road
-
-### Kalupur ➔ S P Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=stadium
-- **Travel Time**: ~8 minutes (4 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=stadium
-
-### Kalupur ➔ Shahpur
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=shahpur
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=shahpur
-
-### Kalupur ➔ Gheekanta
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gheekanta
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gheekanta
-
-### Kalupur ➔ Apparel Park
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=apparel_park
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=apparel_park
-
-### Kalupur ➔ Amraiwadi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=amraiwadi
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=amraiwadi
-
-### Kalupur ➔ Rabari Colony
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=rabari_colony
-- **Travel Time**: ~8 minutes (4 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=rabari_colony
-
-### Kalupur ➔ Jivraj Park
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=jivraj_park
-- **Travel Time**: ~23 minutes (9 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=jivraj_park
-
-### Kalupur ➔ Gandhigram
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=gandhigram
-- **Travel Time**: ~31 minutes (13 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=gandhigram
-
-### Kalupur ➔ Usmanpura
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=usmanpura
-- **Travel Time**: ~33 minutes (14 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=usmanpura
-
-### Kalupur ➔ Vadaj
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=vadaj
-- **Travel Time**: ~37 minutes (16 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=vadaj
-
-### Kalupur ➔ AEC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=aec
-- **Travel Time**: ~41 minutes (18 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=aec
-
-### Kalupur ➔ Nirant Cross Roads
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=nirant_cross_roads
-- **Travel Time**: ~12 minutes (6 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=nirant_cross_roads
-
-### Kalupur ➔ Shreyas
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=shreyas
-- **Travel Time**: ~27 minutes (11 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=shreyas
-
-### Kalupur ➔ Randesan
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=randesan
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=randesan
-
-### Kalupur ➔ Raysan
-- **Route Link**: https://www.ahmedabadmetro.site/?from=kalupur&to=raysan
-- **Travel Time**: ~63 minutes (29 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:41 AM | **Last Metro**: 11:25 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=kalupur&to=raysan
-
-### Thaltej ➔ Kalupur
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=kalupur
-- **Travel Time**: ~18 minutes (9 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=kalupur
-
-### Thaltej ➔ Thaltej Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=thaltej_gam
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=thaltej_gam
-
-### Thaltej ➔ Vastral Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral_gam
-- **Travel Time**: ~32 minutes (16 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral_gam
-
-### Thaltej ➔ Vastral
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral
-- **Travel Time**: ~28 minutes (14 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral
-
-### Thaltej ➔ Motera Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=motera_stadium
-- **Travel Time**: ~63 minutes (29 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=motera_stadium
-
-### Thaltej ➔ APMC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=apmc
-- **Travel Time**: ~39 minutes (17 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=apmc
-
-### Thaltej ➔ Paldi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=paldi
-- **Travel Time**: ~47 minutes (21 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=paldi
-
-### Thaltej ➔ Old High Court
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=old_high_court
-- **Travel Time**: ~12 minutes (6 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=old_high_court
-
-### Thaltej ➔ Ranip
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=ranip
-- **Travel Time**: ~57 minutes (26 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=ranip
-
-### Thaltej ➔ Sabarmati
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sabarmati
-- **Travel Time**: ~61 minutes (28 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sabarmati
-
-### Thaltej ➔ GNLU
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
-
-### Thaltej ➔ GIFT City
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gift_city
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gift_city
-
-### Thaltej ➔ Infocity
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=infocity
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=infocity
-
-### Thaltej ➔ Sachivalaya
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sachivalaya
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sachivalaya
-
-### Thaltej ➔ Akshardham
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=akshardham
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=akshardham
-
-### Thaltej ➔ Mahatma Mandir
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=mahatma_mandir
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=mahatma_mandir
-
-### Thaltej ➔ Koteshwar Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=koteshwar_road
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=koteshwar_road
-
-### Thaltej ➔ Kankaria East
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=kankaria_east
-- **Travel Time**: ~20 minutes (10 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=kankaria_east
-
-### Thaltej ➔ Gujarat University
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gujarat_university
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gujarat_university
-
-### Thaltej ➔ Gurukul Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gurukul_road
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gurukul_road
-
-### Thaltej ➔ Doordarshan Kendra
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=doordarshan_kendra
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=doordarshan_kendra
-
-### Thaltej ➔ Commerce Six Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=commerce_six_road
-- **Travel Time**: ~8 minutes (4 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=commerce_six_road
-
-### Thaltej ➔ S P Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=stadium
-- **Travel Time**: ~10 minutes (5 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=stadium
-
-### Thaltej ➔ Shahpur
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=shahpur
-- **Travel Time**: ~14 minutes (7 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=shahpur
-
-### Thaltej ➔ Gheekanta
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gheekanta
-- **Travel Time**: ~16 minutes (8 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gheekanta
-
-### Thaltej ➔ Apparel Park
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=apparel_park
-- **Travel Time**: ~22 minutes (11 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=apparel_park
-
-### Thaltej ➔ Amraiwadi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=amraiwadi
-- **Travel Time**: ~24 minutes (12 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=amraiwadi
-
-### Thaltej ➔ Rabari Colony
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=rabari_colony
-- **Travel Time**: ~26 minutes (13 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=rabari_colony
-
-### Thaltej ➔ Jivraj Park
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=jivraj_park
-- **Travel Time**: ~41 minutes (18 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=jivraj_park
-
-### Thaltej ➔ Gandhigram
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gandhigram
-- **Travel Time**: ~49 minutes (22 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gandhigram
-
-### Thaltej ➔ Usmanpura
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=usmanpura
-- **Travel Time**: ~51 minutes (23 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=usmanpura
-
-### Thaltej ➔ Vadaj
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vadaj
-- **Travel Time**: ~55 minutes (25 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vadaj
-
-### Thaltej ➔ AEC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=aec
-- **Travel Time**: ~59 minutes (27 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=aec
-
-### Thaltej ➔ Nirant Cross Roads
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=nirant_cross_roads
-- **Travel Time**: ~30 minutes (15 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=nirant_cross_roads
-
-### Thaltej ➔ Shreyas
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=shreyas
-- **Travel Time**: ~45 minutes (20 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=shreyas
-
-### Thaltej ➔ Randesan
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=randesan
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=randesan
-
-### Thaltej ➔ Raysan
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=raysan
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=raysan
-
-### Thaltej Gam ➔ Kalupur
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kalupur
-- **Travel Time**: ~20 minutes (10 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kalupur
-
 ### Thaltej Gam ➔ Thaltej
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=thaltej
 - **Travel Time**: ~6 minutes (3 stations)
@@ -751,141 +151,13 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=thaltej
 
-### Thaltej Gam ➔ Vastral Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral_gam
-- **Travel Time**: ~34 minutes (17 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+### Thaltej Gam ➔ Doordarshan Kendra
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=doordarshan_kendra
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
 - **Interchange**: Direct train (No interchange)
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral_gam
-
-### Thaltej Gam ➔ Vastral
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral
-- **Travel Time**: ~30 minutes (15 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral
-
-### Thaltej Gam ➔ Motera Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=motera_stadium
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=motera_stadium
-
-### Thaltej Gam ➔ APMC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=apmc
-- **Travel Time**: ~41 minutes (18 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=apmc
-
-### Thaltej Gam ➔ Paldi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=paldi
-- **Travel Time**: ~49 minutes (22 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=paldi
-
-### Thaltej Gam ➔ Old High Court
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=old_high_court
-- **Travel Time**: ~14 minutes (7 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=old_high_court
-
-### Thaltej Gam ➔ Ranip
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=ranip
-- **Travel Time**: ~59 minutes (27 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=ranip
-
-### Thaltej Gam ➔ Sabarmati
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sabarmati
-- **Travel Time**: ~63 minutes (29 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sabarmati
-
-### Thaltej Gam ➔ GNLU
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gnlu
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gnlu
-
-### Thaltej Gam ➔ GIFT City
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gift_city
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gift_city
-
-### Thaltej Gam ➔ Infocity
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=infocity
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=infocity
-
-### Thaltej Gam ➔ Sachivalaya
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sachivalaya
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sachivalaya
-
-### Thaltej Gam ➔ Akshardham
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=akshardham
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=akshardham
-
-### Thaltej Gam ➔ Mahatma Mandir
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=mahatma_mandir
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=mahatma_mandir
-
-### Thaltej Gam ➔ Koteshwar Road
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koteshwar_road
-- **Travel Time**: ~65 minutes (30 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koteshwar_road
-
-### Thaltej Gam ➔ Kankaria East
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kankaria_east
-- **Travel Time**: ~22 minutes (11 stations)
-- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kankaria_east
-
-### Thaltej Gam ➔ Gujarat University
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gujarat_university
-- **Travel Time**: ~8 minutes (4 stations)
-- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gujarat_university
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=doordarshan_kendra
 
 ### Thaltej Gam ➔ Gurukul Road
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gurukul_road
@@ -895,13 +167,13 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gurukul_road
 
-### Thaltej Gam ➔ Doordarshan Kendra
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=doordarshan_kendra
-- **Travel Time**: ~6 minutes (3 stations)
-- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+### Thaltej Gam ➔ Gujarat University
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gujarat_university
+- **Travel Time**: ~8 minutes (4 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
 - **Interchange**: Direct train (No interchange)
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=doordarshan_kendra
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gujarat_university
 
 ### Thaltej Gam ➔ Commerce Six Road
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=commerce_six_road
@@ -919,6 +191,14 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=stadium
 
+### Thaltej Gam ➔ Old High Court
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=old_high_court
+- **Travel Time**: ~14 minutes (7 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=old_high_court
+
 ### Thaltej Gam ➔ Shahpur
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=shahpur
 - **Travel Time**: ~16 minutes (8 stations)
@@ -934,6 +214,22 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **Interchange**: Direct train (No interchange)
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gheekanta
+
+### Thaltej Gam ➔ Kalupur
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kalupur
+- **Travel Time**: ~20 minutes (10 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kalupur
+
+### Thaltej Gam ➔ Kankaria East
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kankaria_east
+- **Travel Time**: ~22 minutes (11 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=kankaria_east
 
 ### Thaltej Gam ➔ Apparel Park
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=apparel_park
@@ -959,6 +255,38 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=rabari_colony
 
+### Thaltej Gam ➔ Vastral
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral
+- **Travel Time**: ~30 minutes (15 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral
+
+### Thaltej Gam ➔ Nirant Cross Roads
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=nirant_cross_roads
+- **Travel Time**: ~32 minutes (16 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=nirant_cross_roads
+
+### Thaltej Gam ➔ Vastral Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral_gam
+- **Travel Time**: ~34 minutes (17 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vastral_gam
+
+### Thaltej Gam ➔ APMC
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=apmc
+- **Travel Time**: ~41 minutes (18 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=apmc
+
 ### Thaltej Gam ➔ Jivraj Park
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=jivraj_park
 - **Travel Time**: ~43 minutes (19 stations)
@@ -966,6 +294,30 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=jivraj_park
+
+### Thaltej Gam ➔ Rajiv Nagar
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=rajiv_nagar
+- **Travel Time**: ~45 minutes (20 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=rajiv_nagar
+
+### Thaltej Gam ➔ Shreyas
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=shreyas
+- **Travel Time**: ~47 minutes (21 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=shreyas
+
+### Thaltej Gam ➔ Paldi
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=paldi
+- **Travel Time**: ~49 minutes (22 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=paldi
 
 ### Thaltej Gam ➔ Gandhigram
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gandhigram
@@ -983,6 +335,14 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=usmanpura
 
+### Thaltej Gam ➔ Vijay Nagar
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vijay_nagar
+- **Travel Time**: ~55 minutes (25 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vijay_nagar
+
 ### Thaltej Gam ➔ Vadaj
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vadaj
 - **Travel Time**: ~57 minutes (26 stations)
@@ -990,6 +350,14 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vadaj
+
+### Thaltej Gam ➔ Ranip
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=ranip
+- **Travel Time**: ~59 minutes (27 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=ranip
 
 ### Thaltej Gam ➔ AEC
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=aec
@@ -999,29 +367,85 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=aec
 
-### Thaltej Gam ➔ Nirant Cross Roads
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=nirant_cross_roads
-- **Travel Time**: ~32 minutes (16 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=nirant_cross_roads
-
-### Thaltej Gam ➔ Shreyas
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=shreyas
-- **Travel Time**: ~47 minutes (21 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+### Thaltej Gam ➔ Sabarmati
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sabarmati
+- **Travel Time**: ~63 minutes (29 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
 - **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=shreyas
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sabarmati
 
-### Thaltej Gam ➔ Randesan
-- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=randesan
+### Thaltej Gam ➔ Motera Stadium
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=motera_stadium
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=motera_stadium
+
+### Thaltej Gam ➔ Koteshwar Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koteshwar_road
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koteshwar_road
+
+### Thaltej Gam ➔ Vishwakarma College
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vishwakarma_college
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=vishwakarma_college
+
+### Thaltej Gam ➔ Tapovan Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=tapovan_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=tapovan_circle
+
+### Thaltej Gam ➔ Narmada Canal
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=narmada_canal
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=narmada_canal
+
+### Thaltej Gam ➔ Koba Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koba_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koba_circle
+
+### Thaltej Gam ➔ Juna Koba
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=juna_koba
 - **Travel Time**: ~65 minutes (30 stations)
 - **Official Fare**: ₹30 (₹27 with Metro Smart Card)
 - **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=randesan
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=juna_koba
+
+### Thaltej Gam ➔ Koba Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koba_gam
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=koba_gam
+
+### Thaltej Gam ➔ GNLU
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gnlu
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gnlu
 
 ### Thaltej Gam ➔ Raysan
 - **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=raysan
@@ -1031,77 +455,653 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
 - **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=raysan
 
-### Vastral Gam ➔ Kalupur
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=kalupur
-- **Travel Time**: ~14 minutes (7 stations)
-- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
+### Thaltej Gam ➔ Randesan
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=randesan
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=kalupur
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=randesan
 
-### Vastral Gam ➔ Thaltej
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=thaltej
-- **Travel Time**: ~32 minutes (16 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
+### Thaltej Gam ➔ Dholakuva Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=dholakuva_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=thaltej
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=dholakuva_circle
 
-### Vastral Gam ➔ Thaltej Gam
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=thaltej_gam
-- **Travel Time**: ~34 minutes (17 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Direct train (No interchange)
+### Thaltej Gam ➔ Infocity
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=infocity
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
 - **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=thaltej_gam
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=infocity
 
-### Vastral Gam ➔ Vastral
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=vastral
+### Thaltej Gam ➔ Sector-1
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_1
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_1
+
+### Thaltej Gam ➔ Sector-10A
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_10a
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_10a
+
+### Thaltej Gam ➔ Sachivalaya
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sachivalaya
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sachivalaya
+
+### Thaltej Gam ➔ Akshardham
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=akshardham
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=akshardham
+
+### Thaltej Gam ➔ Juna Sachivalaya
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=juna_sachivalaya
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=juna_sachivalaya
+
+### Thaltej Gam ➔ Sector 16
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_16
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_16
+
+### Thaltej Gam ➔ Sector 24
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_24
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=sector_24
+
+### Thaltej Gam ➔ Mahatma Mandir
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=mahatma_mandir
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=mahatma_mandir
+
+### Thaltej Gam ➔ PDEU
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=pdpu
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=pdpu
+
+### Thaltej Gam ➔ GIFT City
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gift_city
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej_gam&to=gift_city
+
+### Thaltej ➔ Thaltej Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=thaltej_gam
 - **Travel Time**: ~6 minutes (3 stations)
 - **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
 - **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=vastral
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=thaltej_gam
 
-### Vastral Gam ➔ Motera Stadium
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=motera_stadium
-- **Travel Time**: ~31 minutes (13 stations)
+### Thaltej ➔ Doordarshan Kendra
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=doordarshan_kendra
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=doordarshan_kendra
+
+### Thaltej ➔ Gurukul Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gurukul_road
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gurukul_road
+
+### Thaltej ➔ Gujarat University
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gujarat_university
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gujarat_university
+
+### Thaltej ➔ Commerce Six Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=commerce_six_road
+- **Travel Time**: ~8 minutes (4 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=commerce_six_road
+
+### Thaltej ➔ S P Stadium
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=stadium
+- **Travel Time**: ~10 minutes (5 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=stadium
+
+### Thaltej ➔ Old High Court
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=old_high_court
+- **Travel Time**: ~12 minutes (6 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=old_high_court
+
+### Thaltej ➔ Shahpur
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=shahpur
+- **Travel Time**: ~14 minutes (7 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=shahpur
+
+### Thaltej ➔ Gheekanta
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gheekanta
+- **Travel Time**: ~16 minutes (8 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gheekanta
+
+### Thaltej ➔ Kalupur
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=kalupur
+- **Travel Time**: ~18 minutes (9 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=kalupur
+
+### Thaltej ➔ Kankaria East
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=kankaria_east
+- **Travel Time**: ~20 minutes (10 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=kankaria_east
+
+### Thaltej ➔ Apparel Park
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=apparel_park
+- **Travel Time**: ~22 minutes (11 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=apparel_park
+
+### Thaltej ➔ Amraiwadi
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=amraiwadi
+- **Travel Time**: ~24 minutes (12 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=amraiwadi
+
+### Thaltej ➔ Rabari Colony
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=rabari_colony
+- **Travel Time**: ~26 minutes (13 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=rabari_colony
+
+### Thaltej ➔ Vastral
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral
+- **Travel Time**: ~28 minutes (14 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral
+
+### Thaltej ➔ Nirant Cross Roads
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=nirant_cross_roads
+- **Travel Time**: ~30 minutes (15 stations)
 - **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=motera_stadium
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=nirant_cross_roads
 
-### Vastral Gam ➔ APMC
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=apmc
-- **Travel Time**: ~11 minutes (3 stations)
+### Thaltej ➔ Vastral Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral_gam
+- **Travel Time**: ~32 minutes (16 stations)
 - **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=apmc
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vastral_gam
 
-### Vastral Gam ➔ Paldi
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=paldi
-- **Travel Time**: ~15 minutes (5 stations)
+### Thaltej ➔ APMC
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=apmc
+- **Travel Time**: ~39 minutes (17 stations)
 - **Official Fare**: ₹20 (₹18 with Metro Smart Card)
 - **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=paldi
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=apmc
 
-### Vastral Gam ➔ Old High Court
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=old_high_court
+### Thaltej ➔ Jivraj Park
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=jivraj_park
+- **Travel Time**: ~41 minutes (18 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=jivraj_park
+
+### Thaltej ➔ Rajiv Nagar
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=rajiv_nagar
+- **Travel Time**: ~43 minutes (19 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=rajiv_nagar
+
+### Thaltej ➔ Shreyas
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=shreyas
+- **Travel Time**: ~45 minutes (20 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=shreyas
+
+### Thaltej ➔ Paldi
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=paldi
+- **Travel Time**: ~47 minutes (21 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=paldi
+
+### Thaltej ➔ Gandhigram
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gandhigram
+- **Travel Time**: ~49 minutes (22 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gandhigram
+
+### Thaltej ➔ Usmanpura
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=usmanpura
+- **Travel Time**: ~51 minutes (23 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=usmanpura
+
+### Thaltej ➔ Vijay Nagar
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vijay_nagar
+- **Travel Time**: ~53 minutes (24 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vijay_nagar
+
+### Thaltej ➔ Vadaj
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vadaj
+- **Travel Time**: ~55 minutes (25 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vadaj
+
+### Thaltej ➔ Ranip
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=ranip
+- **Travel Time**: ~57 minutes (26 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=ranip
+
+### Thaltej ➔ AEC
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=aec
+- **Travel Time**: ~59 minutes (27 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=aec
+
+### Thaltej ➔ Sabarmati
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sabarmati
+- **Travel Time**: ~61 minutes (28 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sabarmati
+
+### Thaltej ➔ Motera Stadium
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=motera_stadium
+- **Travel Time**: ~63 minutes (29 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=motera_stadium
+
+### Thaltej ➔ Koteshwar Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=koteshwar_road
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=koteshwar_road
+
+### Thaltej ➔ Vishwakarma College
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=vishwakarma_college
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=vishwakarma_college
+
+### Thaltej ➔ Tapovan Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=tapovan_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=tapovan_circle
+
+### Thaltej ➔ Narmada Canal
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=narmada_canal
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=narmada_canal
+
+### Thaltej ➔ Koba Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=koba_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=koba_circle
+
+### Thaltej ➔ Juna Koba
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=juna_koba
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=juna_koba
+
+### Thaltej ➔ Koba Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=koba_gam
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=koba_gam
+
+### Thaltej ➔ GNLU
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gnlu
+
+### Thaltej ➔ Raysan
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=raysan
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=raysan
+
+### Thaltej ➔ Randesan
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=randesan
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=randesan
+
+### Thaltej ➔ Dholakuva Circle
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=dholakuva_circle
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=dholakuva_circle
+
+### Thaltej ➔ Infocity
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=infocity
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=infocity
+
+### Thaltej ➔ Sector-1
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_1
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_1
+
+### Thaltej ➔ Sector-10A
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_10a
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_10a
+
+### Thaltej ➔ Sachivalaya
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sachivalaya
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sachivalaya
+
+### Thaltej ➔ Akshardham
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=akshardham
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=akshardham
+
+### Thaltej ➔ Juna Sachivalaya
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=juna_sachivalaya
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=juna_sachivalaya
+
+### Thaltej ➔ Sector 16
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_16
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_16
+
+### Thaltej ➔ Sector 24
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_24
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹35 (₹31.5 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=sector_24
+
+### Thaltej ➔ Mahatma Mandir
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=mahatma_mandir
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹40 (₹36 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=mahatma_mandir
+
+### Thaltej ➔ PDEU
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=pdpu
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=pdpu
+
+### Thaltej ➔ GIFT City
+- **Route Link**: https://www.ahmedabadmetro.site/?from=thaltej&to=gift_city
+- **Travel Time**: ~65 minutes (30 stations)
+- **Official Fare**: ₹30 (₹27 with Metro Smart Card)
+- **Interchange**: Transfer at Old High Court
+- **First Metro**: 06:22 AM | **Last Metro**: 11:44 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=thaltej&to=gift_city
+
+### Doordarshan Kendra ➔ Thaltej Gam
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=thaltej_gam
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=thaltej_gam
+
+### Doordarshan Kendra ➔ Thaltej
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=thaltej
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=thaltej
+
+### Doordarshan Kendra ➔ Gurukul Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gurukul_road
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gurukul_road
+
+### Doordarshan Kendra ➔ Gujarat University
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gujarat_university
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹5 (₹4.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gujarat_university
+
+### Doordarshan Kendra ➔ Commerce Six Road
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=commerce_six_road
+- **Travel Time**: ~6 minutes (3 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=commerce_six_road
+
+### Doordarshan Kendra ➔ S P Stadium
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=stadium
+- **Travel Time**: ~8 minutes (4 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=stadium
+
+### Doordarshan Kendra ➔ Old High Court
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=old_high_court
+- **Travel Time**: ~10 minutes (5 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=old_high_court
+
+### Doordarshan Kendra ➔ Shahpur
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=shahpur
+- **Travel Time**: ~12 minutes (6 stations)
+- **Official Fare**: ₹10 (₹9 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=shahpur
+
+### Doordarshan Kendra ➔ Gheekanta
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gheekanta
+- **Travel Time**: ~14 minutes (7 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=gheekanta
+
+### Doordarshan Kendra ➔ Kalupur
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=kalupur
+- **Travel Time**: ~16 minutes (8 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=kalupur
+
+### Doordarshan Kendra ➔ Kankaria East
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=kankaria_east
+- **Travel Time**: ~18 minutes (9 stations)
+- **Official Fare**: ₹15 (₹13.5 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=kankaria_east
+
+### Doordarshan Kendra ➔ Apparel Park
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=apparel_park
 - **Travel Time**: ~20 minutes (10 stations)
 - **Official Fare**: ₹20 (₹18 with Metro Smart Card)
 - **Interchange**: Direct train (No interchange)
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=old_high_court
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=apparel_park
 
-### Vastral Gam ➔ Ranip
-- **Route Link**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=ranip
-- **Travel Time**: ~25 minutes (10 stations)
-- **Official Fare**: ₹25 (₹22.5 with Metro Smart Card)
-- **Interchange**: Transfer at Old High Court
-- **First Metro**: 06:20 AM | **Last Metro**: 11:46 PM
-- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=vastral_gam&to=ranip
+### Doordarshan Kendra ➔ Amraiwadi
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=amraiwadi
+- **Travel Time**: ~22 minutes (11 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=amraiwadi
+
+### Doordarshan Kendra ➔ Rabari Colony
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=rabari_colony
+- **Travel Time**: ~24 minutes (12 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=rabari_colony
+
+### Doordarshan Kendra ➔ Vastral
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=vastral
+- **Travel Time**: ~26 minutes (13 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=vastral
+
+### Doordarshan Kendra ➔ Nirant Cross Roads
+- **Route Link**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=nirant_cross_roads
+- **Travel Time**: ~28 minutes (14 stations)
+- **Official Fare**: ₹20 (₹18 with Metro Smart Card)
+- **Interchange**: Direct train (No interchange)
+- **First Metro**: 06:24 AM | **Last Metro**: 11:42 PM
+- **Live Tracking & Planner**: https://www.ahmedabadmetro.site/?from=doordarshan_kendra&to=nirant_cross_roads
 
 
 ---
@@ -1205,4 +1205,4 @@ Fares are determined by official distance slabs approved by the Gujarat Metro Ra
 **Answer**: You can install the AhmMetro app directly from the Google Play Store (Package: ahmedabadmetro.site). It offers 100% offline timetable lookup, official fare calculations, live train tracking animations, and GPS nearest station discovery across all 53 stations.
 
 ---
-*Maintained by AhmMetro Community Transit Intelligence. Updated for operational schedules as of October 2026.*
+*Maintained by AhmMetro Community Transit Intelligence. Updated for operational schedules as of November 2026.*

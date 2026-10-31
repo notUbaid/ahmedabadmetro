@@ -676,6 +676,16 @@ export const RoutePlanner = React.memo(({
                     {step.line?.toUpperCase()} {t('route.line', language)}
                   </span>
                 </p>
+                {step.station.id === 'gnlu' && (
+                  <span className="text-[11px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full font-medium">
+                    ⚡ {t('route.gnluShuttle', language)}
+                  </span>
+                )}
+                {(step.station.id === 'koteshwar_road' || step.station.id === 'motera_stadium') && (
+                  <span className="text-[11px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                    ⇄ {t('route.platformTransfer', language)}
+                  </span>
+                )}
                 {step.trainTime && (
                   <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                     🕐 {step.trainTime}
@@ -746,6 +756,16 @@ export const RoutePlanner = React.memo(({
                     {step.line?.toUpperCase()} {t('route.line', language)}
                   </span>
                 </p>
+                {step.station.id === 'gnlu' && (
+                  <span className="text-[11px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full font-medium">
+                    ⚡ {t('route.gnluShuttle', language)}
+                  </span>
+                )}
+                {(step.station.id === 'koteshwar_road' || step.station.id === 'motera_stadium') && (
+                  <span className="text-[11px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                    ⇄ {t('route.platformTransfer', language)}
+                  </span>
+                )}
                 {step.trainTime && (
                   <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                     🕐 {step.trainTime}
@@ -1241,11 +1261,15 @@ export const RoutePlanner = React.memo(({
                   <span className="text-sm font-medium">{getStationName(route.origin, language)}</span>
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{getStationName(route.destination, language)}</span>
-                  {route.isDirect && (
+                  {route.isDirect ? (
                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium ml-2">
-                      {t('route.directMetro', language)}
+                      ✓ {t('route.directTrain', language)}
                     </span>
-                  )}
+                  ) : route.interchangeCount > 0 ? (
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium ml-2">
+                      ⇄ {t('route.platformTransfer', language)}
+                    </span>
+                  ) : null}
                   {route.hasBusSegment && (
                     <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium ml-2">
                       🚌 {t('route.includesBus', language)}

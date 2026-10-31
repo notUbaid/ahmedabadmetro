@@ -38,3 +38,8 @@ signing-key-info.txt
 twa-package/
 *.aab
 *.apk
+
+
+# Pre-rendered static route directories (generated in dist/ during build)
+public/route/
+bun.lockb

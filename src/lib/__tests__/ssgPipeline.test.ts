@@ -104,7 +104,7 @@ describe('Pillar 1 SSG & Deep Route Indexing Pipeline Verification', () => {
   describe('Gate 4: Metro Lines & High-Intent Search Guides', () => {
     it('should have pre-rendered static HTML for all 4 metro lines', () => {
       const hasDist = fs.existsSync(DIST_DIR);
-      const lineKeys = ['blue-line', 'red-line', 'green-line', 'purple-line'];
+      const lineKeys = ['blue-line', 'red-line', 'yellow-line', 'purple-line'];
 
       for (const lineSlug of lineKeys) {
         const lineDistFile = path.join(DIST_DIR, 'line', lineSlug, 'index.html');
@@ -166,6 +166,7 @@ describe('Pillar 1 SSG & Deep Route Indexing Pipeline Verification', () => {
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/station/motera-stadium</loc>');
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/route/kalupur-to-motera-stadium</loc>');
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/line/blue-line</loc>');
+      expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/line/yellow-line</loc>');
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/map</loc>');
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/stations</loc>');
       expect(sitemapXml).toContain('<loc>https://www.ahmedabadmetro.site/routes</loc>');

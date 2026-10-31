@@ -28,18 +28,48 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+const VALID_STATION_SLUGS = new Set([
+  'thaltej_gam', 'thaltej', 'doordarshan_kendra', 'gurukul_road', 'gujarat_university',
+  'commerce_six_road', 'stadium', 'old_high_court', 'shahpur', 'gheekanta', 'kalupur',
+  'kankaria_east', 'apparel_park', 'amraiwadi', 'rabari_colony', 'vastral',
+  'nirant_cross_roads', 'vastral_gam',
+  'apmc', 'jivraj_park', 'rajiv_nagar', 'shreyas', 'paldi', 'gandhigram',
+  'usmanpura', 'vijay_nagar', 'vadaj', 'ranip', 'aec', 'sabarmati',
+  'motera_stadium', 'koteshwar_road', 'vishwakarma_college', 'tapovan_circle',
+  'narmada_canal', 'koba_circle', 'juna_koba', 'koba_gam', 'gnlu', 'raysan',
+  'randesan', 'dholakuva_circle', 'infocity', 'sector_1', 'sector_10a',
+  'sachivalaya', 'akshardham', 'juna_sachivalaya', 'sector_16', 'sector_24',
+  'mahatma_mandir', 'pdpu', 'gift_city'
+]);
+
+function normalizeStationSlug(input: string): string | null {
+  if (!input || typeof input !== 'string') return null;
+  const clean = input.toLowerCase().trim().replace(/-/g, '_');
+  if (VALID_STATION_SLUGS.has(clean)) return clean;
+  return null;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const query = req.query;
-  const origRaw = (query.orig || query.from || '') as string;
-  const destRaw = (query.dest || query.to || '') as string;
-  const stationRaw = (query.station || query.st || '') as string;
-  const depMinsRaw = (query.depMins || '') as string;
-  const joinTrainRaw = (query.joinTrain || '') as string;
+  const rawOrig = (query.orig || query.from || '') as string;
+  const rawDest = (query.dest || query.to || '') as string;
+  const rawStation = (query.station || query.st || '') as string;
+  const rawDepMins = (query.depMins || '') as string;
+  const rawJoinTrain = (query.joinTrain || '') as string;
 
-  const originStation = origRaw ? formatStationName(origRaw) : '';
-  const destStation = destRaw ? formatStationName(destRaw) : '';
-  const singleStation = stationRaw ? formatStationName(stationRaw) : '';
-  const depTime = depMinsRaw ? formatMinutes(depMinsRaw) : '';
+  const origSlug = normalizeStationSlug(rawOrig);
+  const destSlug = normalizeStationSlug(rawDest);
+  const singleSlug = normalizeStationSlug(rawStation);
+
+  const originStation = origSlug ? formatStationName(origSlug) : '';
+  const destStation = destSlug ? formatStationName(destSlug) : '';
+  const singleStation = singleSlug ? formatStationName(singleSlug) : '';
+
+  const depMinsNum = parseInt(rawDepMins, 10);
+  const validDepMins = !isNaN(depMinsNum) && depMinsNum >= 0 && depMinsNum < 1440 ? depMinsNum : null;
+  const depTime = validDepMins !== null ? formatMinutes(validDepMins.toString()) : '';
+
+  const validJoinTrain = /^[a-zA-Z0-9_-]{1,32}$/.test(rawJoinTrain) ? rawJoinTrain : '';
 
   let title = 'AhmMetro — Live Ahmedabad Metro Route & Tracking';
   let description = 'Real-time metro timetable, route planner, active train animation, and fares for all 53 stations of Ahmedabad Metro.';
@@ -93,11 +123,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const proto = host.includes('localhost') ? 'http' : 'https';
   const appUrl = new URL(`${proto}://${host}/`);
 
-  if (origRaw) appUrl.searchParams.set('from', origRaw);
-  if (destRaw) appUrl.searchParams.set('to', destRaw);
-  if (stationRaw && !origRaw && !destRaw) appUrl.searchParams.set('station', stationRaw);
-  if (depMinsRaw) appUrl.searchParams.set('depMins', depMinsRaw);
-  if (joinTrainRaw) appUrl.searchParams.set('joinTrain', joinTrainRaw);
+  if (origSlug) appUrl.searchParams.set('from', origSlug);
+  if (destSlug) appUrl.searchParams.set('to', destSlug);
+  if (singleSlug && !origSlug && !destSlug) appUrl.searchParams.set('station', singleSlug);
+  if (validDepMins !== null) appUrl.searchParams.set('depMins', validDepMins.toString());
+  if (validJoinTrain) appUrl.searchParams.set('joinTrain', validJoinTrain);
 
   const userAgent = (req.headers['user-agent'] || '').toLowerCase();
   const isBot = /facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|applebot|applebot-extended|bingbot|googlebot|gptbot|chatgpt-user|perplexitybot|claudebot|anthropic-ai|google-extended|bytespider|ccbot|diffbot|cohere-ai|youbot/i.test(userAgent);
@@ -153,6 +183,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 </html>`;
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
   return res.status(200).send(html);
 }

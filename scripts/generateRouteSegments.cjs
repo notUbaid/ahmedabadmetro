@@ -39,7 +39,6 @@ const LINE_STATIONS = {
   purple: ['gnlu', 'pdpu', 'gift_city']
 };
 
-const blueGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'blueLineRoutes.geojson'), 'utf8'));
 const redGreenGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'metroRoutes.geojson'), 'utf8'));
 const yellowGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'yellowLineRoutes.geojson'), 'utf8'));
 
@@ -191,9 +190,6 @@ function buildLineCache(lineName, lineStationsList, features) {
 
 // 1. Blue Line
 const blueFeatures = [];
-blueGeo.features.forEach(f => {
-  if (f.geometry.type === 'LineString') blueFeatures.push(f);
-});
 redGreenGeo.features.forEach(f => {
   if (f.geometry.type === 'LineString' && String(f.properties?.name || '').toLowerCase().includes('blue line')) {
     blueFeatures.push(f);

@@ -148,14 +148,14 @@ export const METRO_LINES: Record<MetroLineKey, MetroLineInfo> = {
   },
   green: {
     key: 'green',
-    slug: 'green-line',
-    name: 'Green Line (Gandhinagar Extension)',
-    nameGu: 'ગ્રીન લાઇન (ગાંધીનગર લાઈન)',
-    nameHi: 'ग्रीन लाइन (गांधीनगर लाइन)',
-    color: '#16A34A',
-    terminalA: 'Koteshwar Road',
+    slug: 'yellow-line',
+    name: 'Yellow Line (Gandhinagar Extension)',
+    nameGu: 'યેલો લાઇન (ગાંધીનગર લાઈન)',
+    nameHi: 'येलो लाइन (गांधीनगर लाइन)',
+    color: '#EAB308',
+    terminalA: 'Motera Stadium / Koteshwar Road',
     terminalB: 'Mahatma Mandir',
-    stationCount: 19,
+    stationCount: 20,
     distanceKm: 28.2,
     operatingHours: '07:33 AM – 08:10 PM',
     headway: '15–20 mins regular headway',
@@ -178,7 +178,10 @@ export const METRO_LINES: Record<MetroLineKey, MetroLineInfo> = {
 
 export function slugToLineKey(slug: string): MetroLineKey | null {
   const norm = slug.toLowerCase().replace(/-line$/, '');
-  if (norm === 'blue' || norm === 'red' || norm === 'green' || norm === 'purple') {
+  if (norm === 'yellow' || norm === 'green') {
+    return 'green';
+  }
+  if (norm === 'blue' || norm === 'red' || norm === 'purple') {
     return norm as MetroLineKey;
   }
   return null;

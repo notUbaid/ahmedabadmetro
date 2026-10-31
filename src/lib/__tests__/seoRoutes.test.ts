@@ -57,13 +57,15 @@ describe('SEO & SSG Route Engine (Gate 1)', () => {
     expect(slugToLineKey('blue-line')).toBe('blue');
     expect(slugToLineKey('red')).toBe('red');
     expect(slugToLineKey('green-line')).toBe('green');
+    expect(slugToLineKey('yellow-line')).toBe('green');
+    expect(slugToLineKey('yellow')).toBe('green');
     expect(slugToLineKey('purple-line')).toBe('purple');
-    expect(slugToLineKey('yellow')).toBeNull();
+    expect(slugToLineKey('unknown')).toBeNull();
 
     expect(Object.keys(METRO_LINES).length).toBe(4);
     expect(METRO_LINES.blue.stationCount).toBe(18);
     expect(METRO_LINES.red.stationCount).toBe(14);
-    expect(METRO_LINES.green.stationCount).toBe(19);
+    expect(METRO_LINES.green.stationCount).toBe(20);
     expect(METRO_LINES.purple.stationCount).toBe(3);
   });
 });

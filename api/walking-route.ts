@@ -35,6 +35,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing or invalid parameters: startLng, startLat, endLng, endLat' });
   }
 
+  const sLng = parseFloat(startLng as string);
+  const sLat = parseFloat(startLat as string);
+  const eLng = parseFloat(endLng as string);
+  const eLat = parseFloat(endLat as string);
+
+  // Restrict to Ahmedabad–Gandhinagar transit operational bounding box
+  const inBounds = (lng: number, lat: number) => lng >= 72.40 && lng <= 72.78 && lat >= 22.90 && lat <= 23.30;
+  if (!inBounds(sLng, sLat) || !inBounds(eLng, eLat)) {
+    return res.status(400).json({
+      error: 'Coordinates outside Ahmedabad–Gandhinagar transit bounding box (72.40–72.78 E, 22.90–23.30 N)',
+    });
+  }
+
   const apiKey = process.env.ORS_API_KEY;
 
   if (!apiKey) {
@@ -59,6 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const data = await response.json();
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
     return res.status(200).json(data);
   } catch (error) {
     console.error('Walking route API error:', error);
