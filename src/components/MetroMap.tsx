@@ -1553,6 +1553,7 @@ longPressTimer = setTimeout(() => {
     // `language` intentionally omitted: including it tears down and rebuilds the
     // whole map on every language switch. The label-swap effect above (~line 200)
     // already updates station labels in place.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleLocationUpdate, handleLocationSelect, updateNearestStation]);
 
   const handleClosePanel = () => {

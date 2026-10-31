@@ -1,13 +1,30 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import geocodeHandler from './geocode';
 
+interface GeoJsonFeature {
+  properties?: {
+    id?: string | number;
+    label?: string;
+    name?: string;
+    type?: string;
+  };
+  geometry?: {
+    coordinates?: [number, number];
+  };
+}
+
+interface GeoJsonCollection {
+  features?: GeoJsonFeature[];
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const originalJson = res.json.bind(res);
-  res.json = (body: any) => {
-    if (body && body.features && Array.isArray(body.features)) {
-      const items = body.features.map((f: any, idx: number) => ({
-        place_id: f.properties?.id || idx,
-        osm_id: f.properties?.id || idx,
+  res.json = (body: unknown) => {
+    const geo = body as GeoJsonCollection | null | undefined;
+    if (geo && geo.features && Array.isArray(geo.features)) {
+      const items = geo.features.map((f: GeoJsonFeature, idx: number) => ({
+        place_id: f.properties?.id ?? idx,
+        osm_id: f.properties?.id ?? idx,
         osm_type: 'node',
         lat: String(f.geometry?.coordinates?.[1] ?? 0),
         lon: String(f.geometry?.coordinates?.[0] ?? 0),
