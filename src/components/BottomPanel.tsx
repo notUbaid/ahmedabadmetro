@@ -186,42 +186,7 @@ export const BottomPanel = React.memo(({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[1000] pointer-events-none">
-      {/* Floating buttons */}
-      {/* Plan Route button - left side */}
-      {selectedStation && onPlanRoute && (
-        <button
-          onClick={() => onPlanRoute(selectedStation.id)}
-          className="absolute -top-16 left-4 p-3.5 flex items-center gap-2 bg-background text-foreground border border-border rounded-2xl shadow-xl shadow-black/5 hover:bg-muted transition-all hover:scale-105 active:scale-95 animate-fade-in pointer-events-auto will-change-transform transform-gpu"
-          aria-label={t('panel.planRoute', language)}
-        >
-          <Route className="w-5 h-5" />
-          <span className="font-semibold text-sm">{t('panel.planRoute', language)}</span>
-        </button>
-      )}
-
-      {/* Navigate button - show when no selection but nearest exists */}
-      {!selectedStation && nearestStation && (
-        <button
-          onClick={() => {
-            const [lat, lng] = nearestStation.coordinates;
-            const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
-            let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
-            
-            // Prefer searched location as origin if active, otherwise fallback to GPS location
-            const originLocation = searchedLocation || userLocation;
-            if (originLocation) {
-              url += `&origin=${originLocation[0]},${originLocation[1]}`;
-            }
-            window.open(url, '_blank');
-          }}
-          className="absolute -top-16 left-4 p-3.5 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-600/25 hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 animate-fade-in pointer-events-auto"
-          aria-label={t('panel.directions', language)}
-        >
-          <Navigation className="w-5 h-5 fill-current" />
-          <span className="font-semibold text-sm">{t('panel.directions', language)}</span>
-        </button>
-      )}
-
+      {/* Floating Locate Button - right side GPS control */}
       <button
         onClick={handleLocate}
         disabled={isLocating}
@@ -270,24 +235,6 @@ export const BottomPanel = React.memo(({
                   )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const [lat, lng] = station.coordinates;
-                      const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
-                      let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
-                      const originLocation = searchedLocation || userLocation;
-                      if (originLocation) {
-                        url += `&origin=${originLocation[0]},${originLocation[1]}`;
-                      }
-                      window.open(url, '_blank');
-                    }}
-                    className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-primary/10 text-primary transition-colors"
-                    aria-label={t('panel.directions', language)}
-                    title={t('panel.directions', language)}
-                  >
-                    <Navigation className="w-4 h-4 fill-current" />
-                  </button>
                   {selectedStation && (
                     <button
                       onClick={(e) => {
@@ -343,6 +290,79 @@ export const BottomPanel = React.memo(({
                   )
                 )
               )}
+
+              {/* In-Card Primary Station Actions */}
+              <div className="flex items-center gap-2.5 mt-2.5 mb-1">
+                {selectedStation ? (
+                  <>
+                    {onPlanRoute && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPlanRoute(selectedStation.id);
+                        }}
+                        className="flex-1 py-2.5 px-3.5 bg-primary text-primary-foreground font-semibold text-xs sm:text-sm rounded-xl shadow-md hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[40px]"
+                      >
+                        <Route className="w-4 h-4" />
+                        <span>{t('panel.planRoute', language)}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const [lat, lng] = selectedStation.coordinates;
+                        const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
+                        let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
+                        const originLocation = searchedLocation || userLocation;
+                        if (originLocation) {
+                          url += `&origin=${originLocation[0]},${originLocation[1]}`;
+                        }
+                        window.open(url, '_blank');
+                      }}
+                      className="flex-1 py-2.5 px-3.5 bg-muted border border-border text-foreground font-medium text-xs sm:text-sm rounded-xl hover:bg-muted/80 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[40px]"
+                    >
+                      <Navigation className="w-4 h-4 fill-current text-blue-500" />
+                      <span>{t('panel.directions', language)}</span>
+                    </button>
+                  </>
+                ) : nearestStation ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const [lat, lng] = nearestStation.coordinates;
+                        const travelMode = (distance !== null && distance > 30000) ? 'driving' : 'walking';
+                        let url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
+                        const originLocation = searchedLocation || userLocation;
+                        if (originLocation) {
+                          url += `&origin=${originLocation[0]},${originLocation[1]}`;
+                        }
+                        window.open(url, '_blank');
+                      }}
+                      className="flex-1 py-2.5 px-3.5 bg-blue-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/25 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[40px]"
+                    >
+                      <Navigation className="w-4 h-4 fill-current" />
+                      <span>{t('panel.directions', language)}</span>
+                    </button>
+                    {onPlanRoute && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPlanRoute(nearestStation.id);
+                        }}
+                        className="flex-1 py-2.5 px-3.5 bg-muted border border-border text-foreground font-medium text-xs sm:text-sm rounded-xl hover:bg-muted/80 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[40px]"
+                      >
+                        <Route className="w-4 h-4 text-primary" />
+                        <span>{t('panel.planRoute', language)}</span>
+                      </button>
+                    )}
+                  </>
+                ) : null}
+              </div>
             </>
           ) : (
             <div className="text-center py-2.5">

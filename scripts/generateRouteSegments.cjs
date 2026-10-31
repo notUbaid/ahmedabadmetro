@@ -5,15 +5,14 @@ const rootDir = path.resolve(__dirname, '..');
 
 const metroDataRaw = fs.readFileSync(path.join(rootDir, 'src', 'data', 'metroData.ts'), 'utf8');
 
-// Match station keys and coordinates
-const stationRegex = /['"]?([a-z0-9_]+)['"]?:\s*{\s*id:\s*['"]([^'"]+)['"],\s*name:\s*['"]([^'"]+)['"],\s*nameGu:\s*['"]([^'"]+)['"],\s*nameHi:\s*['"]([^'"]+)['"],\s*coordinates:\s*\[([0-9.]+),\s*([0-9.]+)\],/g;
+// Match station keys and coordinates (handles optional aliases, whitespace, etc.)
+const stationRegex = /['"]?([a-z0-9_]+)['"]?:\s*\{[\s\S]*?id:\s*['"]([^'"]+)['"][\s\S]*?coordinates:\s*\[([0-9.]+),\s*([0-9.]+)\]/g;
 const stations = {};
 let match;
 while ((match = stationRegex.exec(metroDataRaw)) !== null) {
   stations[match[1]] = {
     id: match[1],
-    name: match[3],
-    coordinates: [parseFloat(match[6]), parseFloat(match[7])]
+    coordinates: [parseFloat(match[3]), parseFloat(match[4])]
   };
 }
 
@@ -59,6 +58,7 @@ function buildLineCache(lineName, lineStationsList, features) {
   });
 
   features.forEach(f => {
+    if (f.geometry.type !== 'LineString') return;
     const coords = f.geometry.coordinates;
     const startIdx = nodes.length;
     coords.forEach(c => {
@@ -71,7 +71,8 @@ function buildLineCache(lineName, lineStationsList, features) {
     }
   });
 
-  const MAX_STATION_GAP = 0.05;
+  // Connect stations to closest track node (max ~1.5 km to prevent cross-sector leaping)
+  const MAX_STATION_GAP = 0.015;
   for (let i = 0; i < lineStationsList.length; i++) {
     let closestNode = -1;
     let minDist = MAX_STATION_GAP;
@@ -85,9 +86,12 @@ function buildLineCache(lineName, lineStationsList, features) {
     if (closestNode !== -1) {
       adj[i].push(closestNode);
       adj[closestNode].push(i);
+    } else {
+      console.warn(`[${lineName}] Warning: station ${lineStationsList[i]} could not connect to track within ${MAX_STATION_GAP}`);
     }
   }
 
+  // Connect close endpoints in track segments
   const MAX_ENDPOINT_GAP = 0.005;
   for (let i = lineStationsList.length; i < nodes.length; i++) {
     if (adj[i].length === 1) { 
@@ -103,6 +107,7 @@ function buildLineCache(lineName, lineStationsList, features) {
     }
   }
 
+  // Connect near-coincident track nodes
   for (let i = lineStationsList.length; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
@@ -138,9 +143,11 @@ function buildLineCache(lineName, lineStationsList, features) {
 
       for (const v of adj[u]) {
         if (visited[v]) continue;
+        // Never traverse through other stations!
+        if (v < lineStationsList.length && v !== endNode) continue;
         const dx = nodes[u][0] - nodes[v][0];
         const dy = nodes[u][1] - nodes[v][1];
-        const d = Math.sqrt(dx*dx + dy*dy);
+        const d = Math.sqrt(dx * dx + dy * dy);
         if (dist[u] + d < dist[v]) {
           dist[v] = dist[u] + d;
           prev[v] = u;
@@ -166,36 +173,76 @@ function buildLineCache(lineName, lineStationsList, features) {
       }
 
       const key1 = `${s1}-${s2}`;
-      if (!routeSegments[key1]) {
-        routeSegments[key1] = { geometry: path, dists, totalDist };
-        const revPath = [...path].reverse();
-        const revDists = [...dists].map(d => totalDist - d).reverse();
-        routeSegments[`${s2}-${s1}`] = { geometry: revPath, dists: revDists, totalDist };
-      }
+      routeSegments[key1] = { geometry: path, dists, totalDist };
+      const revPath = [...path].reverse();
+      const revDists = [...dists].map(d => totalDist - d).reverse();
+      routeSegments[`${s2}-${s1}`] = { geometry: revPath, dists: revDists, totalDist };
+
+      const st1 = stations[s1];
+      const st2 = stations[s2];
+      const straight = Math.sqrt(Math.pow(st1.coordinates[0] - st2.coordinates[0], 2) + Math.pow(st1.coordinates[1] - st2.coordinates[1], 2));
+      const ratio = totalDist / straight;
+      console.log(`[${lineName}] ${key1}: pts=${path.length}, dist=${totalDist.toFixed(4)}, ratio=${ratio.toFixed(2)}`);
+    } else {
+      console.error(`[${lineName}] FAILED to route: ${s1}-${s2}`);
     }
   }
 }
 
-// Build Blue
-buildLineCache('blue', LINE_STATIONS.blue, blueGeo.features);
+// 1. Blue Line
+const blueFeatures = [];
+blueGeo.features.forEach(f => {
+  if (f.geometry.type === 'LineString') blueFeatures.push(f);
+});
+redGreenGeo.features.forEach(f => {
+  if (f.geometry.type === 'LineString' && String(f.properties?.name || '').toLowerCase().includes('blue line')) {
+    blueFeatures.push(f);
+  }
+});
+buildLineCache('blue', LINE_STATIONS.blue, blueFeatures);
 
-// Split Red and Green
+// 2. Red & Green Line
 const koteshwarLat = stations['koteshwar_road'].coordinates[0];
 const EPS = 0.0001;
 const redFeatures = [];
 const greenFeatures = [];
+
 redGreenGeo.features.forEach(f => {
+  if (f.geometry.type !== 'LineString') return;
+  const name = String(f.properties?.name || '').toLowerCase();
+  if (name.includes('blue') || name.includes('violet') || name.includes('gift') || name.includes('line 3:')) return;
+
   const coords = f.geometry.coordinates;
   const anyRed = coords.some(c => c[1] < koteshwarLat - EPS);
   const anyGreen = coords.some(c => c[1] > koteshwarLat + EPS);
   if (anyRed && !anyGreen) redFeatures.push(f);
   else if (anyGreen && !anyRed) greenFeatures.push(f);
-  else { redFeatures.push(f); greenFeatures.push(f); }
+  else {
+    redFeatures.push(f);
+    greenFeatures.push(f);
+  }
+});
+
+// Yellow line contains Phase 2 extension in Gandhinagar all the way to Mahatma Mandir
+yellowGeo.features.forEach(f => {
+  if (f.geometry.type === 'LineString') {
+    greenFeatures.push(f);
+  }
 });
 
 buildLineCache('red', LINE_STATIONS.red, redFeatures);
 buildLineCache('green', LINE_STATIONS.green, greenFeatures);
-buildLineCache('purple', LINE_STATIONS.purple, yellowGeo.features);
+
+// 3. Purple Line (GNLU - PDPU - GIFT City)
+const purpleFeatures = [];
+redGreenGeo.features.forEach(f => {
+  if (f.geometry.type !== 'LineString') return;
+  const name = String(f.properties?.name || '').toLowerCase();
+  if (name.includes('violet') || name.includes('gift') || name.includes('line 3:')) {
+    purpleFeatures.push(f);
+  }
+});
+buildLineCache('purple', LINE_STATIONS.purple, purpleFeatures);
 
 console.log('Total precomputed segments:', Object.keys(routeSegments).length);
 const jsonStr = JSON.stringify(routeSegments);

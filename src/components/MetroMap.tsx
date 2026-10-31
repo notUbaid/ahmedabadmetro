@@ -306,7 +306,7 @@ export const MetroMap = () => {
           className: `station-label ${isHub ? 'hub-label' : ''}`,
           html: `<div class="station-name ${station.isUnderground ? 'underground' : ''} ${station.isInterchange ? 'interchange' : ''}">${getStationName(station, language)}</div>`,
           iconSize: [100, 20],
-          iconAnchor: [50, -8],
+          iconAnchor: [50, -10],
         });
         marker.setIcon(labelIcon);
       }
@@ -802,6 +802,7 @@ export const MetroMap = () => {
         // Try to get bearing from the geometry the metro is on (use cached entry)
         const segKey = `${pos.fromStationId}-${pos.toStationId}`;
         const revKey = `${pos.toStationId}-${pos.fromStationId}`;
+        const isReversed = !routeSegmentsRef.current.has(segKey) && routeSegmentsRef.current.has(revKey);
         const bearingEntry = routeSegmentsRef.current.get(segKey) || routeSegmentsRef.current.get(revKey);
         
         // If geometry is missing or unreliable (e.g. disconnected station), fallback to straight line bearing
@@ -809,42 +810,38 @@ export const MetroMap = () => {
           const geomForBearing = bearingEntry.geometry;
           const dists = bearingEntry.dists;
           const totalDist = bearingEntry.totalDist;
-          const targetDist = totalDist * pos.progress;
+          const targetDist = totalDist * (isReversed ? (1 - pos.progress) : pos.progress);
 
           let segIdx = 0;
           for (; segIdx < dists.length - 1; segIdx++) {
             if (targetDist <= dists[segIdx + 1]) break;
           }
+          segIdx = Math.max(0, Math.min(segIdx, geomForBearing.length - 2));
 
-          let fromLat = geomForBearing[segIdx][0];
-          let fromLng = geomForBearing[segIdx][1];
-          let toLat = geomForBearing[segIdx + 1][0];
-          let toLng = geomForBearing[segIdx + 1][1];
+          let fromLat: number, fromLng: number, toLat: number, toLng: number;
+          const MIN_BEARING_DIST = 0.0003; // ~30 meters
 
-          // Look ahead to smooth out micro-segments (e.g. station perpendicular connecting to track)
-          const MIN_BEARING_DIST = 0.0005; // ~50 meters
-          let nextIdx = segIdx + 1;
-          while (nextIdx < geomForBearing.length) {
-            const d = Math.sqrt(Math.pow(geomForBearing[nextIdx][0] - fromLat, 2) + Math.pow(geomForBearing[nextIdx][1] - fromLng, 2));
-            if (d >= MIN_BEARING_DIST || nextIdx === geomForBearing.length - 1) {
+          if (!isReversed) {
+            fromLat = geomForBearing[segIdx][0];
+            fromLng = geomForBearing[segIdx][1];
+            toLat = geomForBearing[segIdx + 1][0];
+            toLng = geomForBearing[segIdx + 1][1];
+            let nextIdx = segIdx + 1;
+            while (Math.hypot(toLat - fromLat, toLng - fromLng) < MIN_BEARING_DIST && nextIdx < geomForBearing.length - 1) {
+              nextIdx++;
               toLat = geomForBearing[nextIdx][0];
               toLng = geomForBearing[nextIdx][1];
-              break;
             }
-            nextIdx++;
-          }
-
-          // If we reached the end and distance is still too short, look behind
-          if (nextIdx === geomForBearing.length - 1 && Math.sqrt(Math.pow(toLat - fromLat, 2) + Math.pow(toLng - fromLng, 2)) < MIN_BEARING_DIST) {
+          } else {
+            fromLat = geomForBearing[segIdx + 1][0];
+            fromLng = geomForBearing[segIdx + 1][1];
+            toLat = geomForBearing[segIdx][0];
+            toLng = geomForBearing[segIdx][1];
             let prevIdx = segIdx;
-            while (prevIdx >= 0) {
-              const d = Math.sqrt(Math.pow(geomForBearing[prevIdx][0] - toLat, 2) + Math.pow(geomForBearing[prevIdx][1] - toLng, 2));
-              if (d >= MIN_BEARING_DIST || prevIdx === 0) {
-                fromLat = geomForBearing[prevIdx][0];
-                fromLng = geomForBearing[prevIdx][1];
-                break;
-              }
+            while (Math.hypot(toLat - fromLat, toLng - fromLng) < MIN_BEARING_DIST && prevIdx > 0) {
               prevIdx--;
+              toLat = geomForBearing[prevIdx][0];
+              toLng = geomForBearing[prevIdx][1];
             }
           }
 
@@ -854,12 +851,6 @@ export const MetroMap = () => {
           const y = Math.sin(dLng) * Math.cos(lat2);
           const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
           bearing = Math.atan2(y, x) * 180 / Math.PI;
-
-          // If we are traversing the reverse geometry, flip the bearing 180 degrees!
-          const isReversed = !routeSegmentsRef.current.has(segKey) && routeSegmentsRef.current.has(revKey);
-          if (isReversed) {
-            bearing = (bearing + 180) % 360;
-          }
         } else {
           // Fallback to station-to-station bearing
           const fromStation = stations[pos.fromStationId];
