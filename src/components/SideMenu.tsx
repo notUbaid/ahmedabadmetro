@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Menu, X, Route, Moon, Sun, Lightbulb, Coffee, CreditCard, Check, ArrowLeftRight, Download, RefreshCw } from 'lucide-react';
-import { TipsDialog } from './TipsDialog';
-import { CommuteSetup } from './CommuteSetup';
+const TipsDialog = lazy(() => import('./TipsDialog').then(m => ({ default: m.TipsDialog })));
+const CommuteSetup = lazy(() => import('./CommuteSetup').then(m => ({ default: m.CommuteSetup })));
 import { useMetroCard } from '@/contexts/MetroCardContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getCommuteSettings } from '@/lib/commuteStorage';
@@ -386,8 +386,10 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         </div>
       </div>
 
-      <TipsDialog isOpen={isTipsOpen} onOpenChange={setIsTipsOpen} />
-      <CommuteSetup isOpen={isCommuteOpen} onClose={() => setIsCommuteOpen(false)} />
+      <Suspense fallback={null}>
+        <TipsDialog isOpen={isTipsOpen} onOpenChange={setIsTipsOpen} />
+        <CommuteSetup isOpen={isCommuteOpen} onClose={() => setIsCommuteOpen(false)} />
+      </Suspense>
     </>
   );
 };

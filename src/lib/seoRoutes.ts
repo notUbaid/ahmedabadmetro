@@ -16,6 +16,8 @@ const SLUG_TO_ID_OVERRIDES: Record<string, string> = {
   'sp-stadium': 'stadium',
   's-p-stadium': 'stadium',
   'stadium': 'stadium',
+  'sabarmati-railway-station': 'sabarmati',
+  'sabarmati-station': 'sabarmati',
 };
 
 /**

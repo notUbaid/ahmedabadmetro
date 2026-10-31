@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export interface NominatimItem {
   name?: string;
@@ -10,20 +10,45 @@ export interface NominatimItem {
   importance?: number;
 }
 
+const nominatimCache = new Map<string, NominatimItem[]>();
+
 /**
  * Executes a geocoding search via the server-side proxy endpoint (/api/nominatim)
- * to comply with OpenStreetMap Nominatim usage policies (User-Agent, rate limiting, headers).
+ * with in-memory & sessionStorage caching and AbortSignal support.
  */
-export const fetchNominatimSearch = async (query: string): Promise<NominatimItem[]> => {
-  if (!query || !query.trim()) {
+export const fetchNominatimSearch = async (
+  query: string,
+  signal?: AbortSignal
+): Promise<NominatimItem[]> => {
+  const trimmed = query?.trim();
+  if (!trimmed) {
     return [];
   }
 
+  const cacheKey = trimmed.toLowerCase();
+  if (nominatimCache.has(cacheKey)) {
+    return nominatimCache.get(cacheKey)!;
+  }
+
+  // Check sessionStorage cache
   try {
-    const q = query.toLowerCase().includes('ahmedabad') ? query : `${query} Ahmedabad`;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const stored = sessionStorage.getItem(`nom_${cacheKey}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        nominatimCache.set(cacheKey, parsed);
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore storage read failures
+  }
+
+  try {
+    const q = cacheKey.includes('ahmedabad') ? trimmed : `${trimmed} Ahmedabad`;
     const proxyUrl = `/api/nominatim?q=${encodeURIComponent(q)}`;
 
-    const response = await fetch(proxyUrl);
+    const response = signal ? await fetch(proxyUrl, { signal }) : await fetch(proxyUrl);
 
     if (response.status === 429) {
       console.warn('Nominatim rate limit exceeded');
@@ -45,27 +70,50 @@ export const fetchNominatimSearch = async (query: string): Promise<NominatimItem
       return [];
     }
 
+    nominatimCache.set(cacheKey, data);
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(`nom_${cacheKey}`, JSON.stringify(data));
+      }
+    } catch {
+      // Ignore storage write failures
+    }
+
     return data;
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return [];
+    }
     console.error('Nominatim search failed:', error);
     return [];
   }
 };
 
 /**
- * Custom React hook for performing Nominatim searches with state management.
+ * Custom React hook for performing Nominatim searches with cancellation of in-flight requests.
  */
 export const useNominatimSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const search = useCallback(async (query: string): Promise<NominatimItem[]> => {
+    // Abort previous in-flight request if user is still typing
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
     try {
-      const results = await fetchNominatimSearch(query);
+      const results = await fetchNominatimSearch(query, controller.signal);
       return results;
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return [];
+      }
       const message = err instanceof Error ? err.message : 'Nominatim search failed';
       setError(message);
       return [];

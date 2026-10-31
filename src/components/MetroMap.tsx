@@ -14,12 +14,12 @@ import { cn } from '@/lib/utils';
 import SearchBar from './SearchBar';
 import BottomPanel from './BottomPanel';
 import RoutePlanner from './RoutePlanner';
-import { FriendsJourneyViewer } from './FriendsJourneyViewer';
+const FriendsJourneyViewer = React.lazy(() => import('./FriendsJourneyViewer').then(m => ({ default: m.FriendsJourneyViewer })));
 import SideMenu from './SideMenu';
-import { JoinRideDialog } from './JoinRideDialog';
+const JoinRideDialog = React.lazy(() => import('./JoinRideDialog').then(m => ({ default: m.JoinRideDialog })));
 import { CommuteCard } from './CommuteCard';
-import { TrainDetailsDialog } from './TrainDetailsDialog';
-import { LiveTrainTrackingDialog } from './LiveTrainTrackingDialog';
+const TrainDetailsDialog = React.lazy(() => import('./TrainDetailsDialog').then(m => ({ default: m.TrainDetailsDialog })));
+const LiveTrainTrackingDialog = React.lazy(() => import('./LiveTrainTrackingDialog').then(m => ({ default: m.LiveTrainTrackingDialog })));
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
 import { track } from '@vercel/analytics';
@@ -734,27 +734,55 @@ export const MetroMap = () => {
       const zoomScale = currentZoom <= 12 ? 0.68 : currentZoom <= 14 ? 0.85 : 1.0;
       const activeSelectedId = selectedTrainIdRef.current;
 
+      const sampleTrackPoint = (geom: [number, number][], dists: number[], totalDist: number, d: number): [number, number] => {
+        if (d <= 0) return geom[0];
+        if (d >= totalDist) return geom[geom.length - 1];
+        let idx = 0;
+        for (; idx < dists.length - 1; idx++) {
+          if (d <= dists[idx + 1]) break;
+        }
+        const segLen = dists[idx + 1] - dists[idx] || 1e-9;
+        const t = (d - dists[idx]) / segLen;
+        return [
+          geom[idx][0] + (geom[idx + 1][0] - geom[idx][0]) * t,
+          geom[idx][1] + (geom[idx + 1][1] - geom[idx][1]) * t,
+        ];
+      };
+
       positions.forEach(pos => {
         // Calculate precise position using cached geometry
         let lat = 0, lng = 0;
 
+        const segmentKey = `${pos.fromStationId}-${pos.toStationId}`;
+        const reverseKey = `${pos.toStationId}-${pos.fromStationId}`;
+        const isReversed = !routeSegmentsRef.current.has(segmentKey) && routeSegmentsRef.current.has(reverseKey);
+        const entry = routeSegmentsRef.current.get(segmentKey) || routeSegmentsRef.current.get(reverseKey);
+        const fromStation = stations[pos.fromStationId];
+        const toStation = stations[pos.toStationId];
+
         if (pos.status === 'stopped') {
-          // If stopped, metro is exactly at the station
-          const station = stations[pos.fromStationId];
-          if (station) {
-            lat = station.coordinates[0];
-            lng = station.coordinates[1];
+          // If stopped at station, anchor directly to the viaduct track coordinate at that station
+          if (entry && entry.geometry && entry.geometry.length > 0) {
+            const geom = entry.geometry;
+            if (pos.progress === 1) {
+              const pt = isReversed ? geom[0] : geom[geom.length - 1];
+              lat = pt[0];
+              lng = pt[1];
+            } else {
+              const pt = isReversed ? geom[geom.length - 1] : geom[0];
+              lat = pt[0];
+              lng = pt[1];
+            }
+          } else {
+            const station = stations[pos.progress === 1 ? pos.toStationId : pos.fromStationId];
+            if (station) {
+              lat = station.coordinates[0];
+              lng = station.coordinates[1];
+            }
           }
         } else {
           // Moving Logic - use cached geometry entries (geometry + precomputed dists)
-          const segmentKey = `${pos.fromStationId}-${pos.toStationId}`;
-          const reverseKey = `${pos.toStationId}-${pos.fromStationId}`;
-          const isReversed = !routeSegmentsRef.current.has(segmentKey) && routeSegmentsRef.current.has(reverseKey);
-          const entry = routeSegmentsRef.current.get(segmentKey) || routeSegmentsRef.current.get(reverseKey);
           const progress = pos.progress;
-
-          const fromStation = stations[pos.fromStationId];
-          const toStation = stations[pos.toStationId];
 
           if (entry && entry.geometry && entry.geometry.length > 1) {
             const geometry = entry.geometry;
@@ -798,65 +826,50 @@ export const MetroMap = () => {
 
         if (lat === 0 && lng === 0) return; // Skip if invalid
 
-        // Calculate bearing for train direction based on actual geometry
+        // Calculate bearing for train direction based on actual track tangent
         let bearing = 0;
         
-        // Try to get bearing from the geometry the metro is on (use cached entry)
-        const segKey = `${pos.fromStationId}-${pos.toStationId}`;
-        const revKey = `${pos.toStationId}-${pos.fromStationId}`;
-        const isReversed = !routeSegmentsRef.current.has(segKey) && routeSegmentsRef.current.has(revKey);
-        const bearingEntry = routeSegmentsRef.current.get(segKey) || routeSegmentsRef.current.get(revKey);
-        
-        // If geometry is missing or unreliable (e.g. disconnected station), fallback to straight line bearing
-        if (bearingEntry && bearingEntry.geometry.length >= 2 && !pos._isGeometryUnreliable) {
-          const geomForBearing = bearingEntry.geometry;
-          const dists = bearingEntry.dists;
-          const totalDist = bearingEntry.totalDist;
+        if (entry && entry.geometry.length >= 2 && !pos._isGeometryUnreliable) {
+          const geom = entry.geometry;
+          const dists = entry.dists;
+          const totalDist = entry.totalDist;
           const targetDist = totalDist * (isReversed ? (1 - pos.progress) : pos.progress);
+          const LOOK_WINDOW = 0.0003; // ~30 meters sampling window
 
-          let segIdx = 0;
-          for (; segIdx < dists.length - 1; segIdx++) {
-            if (targetDist <= dists[segIdx + 1]) break;
-          }
-          segIdx = Math.max(0, Math.min(segIdx, geomForBearing.length - 2));
-
-          let fromLat: number, fromLng: number, toLat: number, toLng: number;
-          const MIN_BEARING_DIST = 0.0003; // ~30 meters
-
+          let p1: [number, number], p2: [number, number];
           if (!isReversed) {
-            fromLat = geomForBearing[segIdx][0];
-            fromLng = geomForBearing[segIdx][1];
-            toLat = geomForBearing[segIdx + 1][0];
-            toLng = geomForBearing[segIdx + 1][1];
-            let nextIdx = segIdx + 1;
-            while (Math.hypot(toLat - fromLat, toLng - fromLng) < MIN_BEARING_DIST && nextIdx < geomForBearing.length - 1) {
-              nextIdx++;
-              toLat = geomForBearing[nextIdx][0];
-              toLng = geomForBearing[nextIdx][1];
+            if (targetDist < LOOK_WINDOW) {
+              p1 = sampleTrackPoint(geom, dists, totalDist, 0);
+              p2 = sampleTrackPoint(geom, dists, totalDist, Math.min(totalDist, LOOK_WINDOW * 2));
+            } else if (targetDist > totalDist - LOOK_WINDOW) {
+              p1 = sampleTrackPoint(geom, dists, totalDist, Math.max(0, totalDist - LOOK_WINDOW * 2));
+              p2 = sampleTrackPoint(geom, dists, totalDist, totalDist);
+            } else {
+              p1 = sampleTrackPoint(geom, dists, totalDist, Math.max(0, targetDist - LOOK_WINDOW));
+              p2 = sampleTrackPoint(geom, dists, totalDist, Math.min(totalDist, targetDist + LOOK_WINDOW));
             }
           } else {
-            fromLat = geomForBearing[segIdx + 1][0];
-            fromLng = geomForBearing[segIdx + 1][1];
-            toLat = geomForBearing[segIdx][0];
-            toLng = geomForBearing[segIdx][1];
-            let prevIdx = segIdx;
-            while (Math.hypot(toLat - fromLat, toLng - fromLng) < MIN_BEARING_DIST && prevIdx > 0) {
-              prevIdx--;
-              toLat = geomForBearing[prevIdx][0];
-              toLng = geomForBearing[prevIdx][1];
+            // Reverse direction: travel is from totalDist -> 0
+            if (targetDist > totalDist - LOOK_WINDOW) {
+              p1 = sampleTrackPoint(geom, dists, totalDist, totalDist);
+              p2 = sampleTrackPoint(geom, dists, totalDist, Math.max(0, totalDist - LOOK_WINDOW * 2));
+            } else if (targetDist < LOOK_WINDOW) {
+              p1 = sampleTrackPoint(geom, dists, totalDist, Math.min(totalDist, LOOK_WINDOW * 2));
+              p2 = sampleTrackPoint(geom, dists, totalDist, 0);
+            } else {
+              p1 = sampleTrackPoint(geom, dists, totalDist, Math.min(totalDist, targetDist + LOOK_WINDOW));
+              p2 = sampleTrackPoint(geom, dists, totalDist, Math.max(0, targetDist - LOOK_WINDOW));
             }
           }
 
-          const dLng = (toLng - fromLng) * Math.PI / 180;
-          const lat1 = fromLat * Math.PI / 180;
-          const lat2 = toLat * Math.PI / 180;
+          const dLng = (p2[1] - p1[1]) * Math.PI / 180;
+          const lat1 = p1[0] * Math.PI / 180;
+          const lat2 = p2[0] * Math.PI / 180;
           const y = Math.sin(dLng) * Math.cos(lat2);
           const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
           bearing = Math.atan2(y, x) * 180 / Math.PI;
         } else {
           // Fallback to station-to-station bearing
-          const fromStation = stations[pos.fromStationId];
-          const toStation = stations[pos.toStationId];
           if (fromStation && toStation) {
             const [fromLat, fromLng] = fromStation.coordinates;
             const [toLat, toLng] = toStation.coordinates;
@@ -869,10 +882,10 @@ export const MetroMap = () => {
           }
         }
 
-        // Shortest-arc angular smoothing (prevents 360-degree reverse spin when bearing crosses North)
+        // Shortest-arc angular smoothing with exponential moving average (prevents 360-degree reverse spin & angular snaps)
         const prevBearing = trainBearingsRef.current.get(pos.id) ?? bearing;
         const diff = ((bearing - prevBearing + 540) % 360) - 180;
-        const smoothBearing = prevBearing + diff;
+        const smoothBearing = prevBearing + diff * 0.25;
         trainBearingsRef.current.set(pos.id, smoothBearing);
 
         // Check if marker already exists for fast path
@@ -1217,12 +1230,10 @@ longPressTimer = setTimeout(() => {
       }
     });
 
-    // Fetch and draw metro routes
-    Promise.all([
-      fetch('/metroRoutes.geojson').then(res => res.json()),
-      fetch('/yellowLineRoutes.geojson').then(res => res.json()),
-    ])
-      .then(([metroData, yellowData]: [GeoJSON.FeatureCollection, GeoJSON.FeatureCollection]) => {
+    // Fetch and draw metro routes from single consolidated GeoJSON
+    fetch('/metroRoutes.geojson')
+      .then(res => res.json())
+      .then((metroData: GeoJSON.FeatureCollection) => {
         const blue: GeoJSON.Feature[] = [];
         const redCandidates: GeoJSON.Feature[] = [];
         const purple: GeoJSON.Feature[] = [];
@@ -1230,8 +1241,6 @@ longPressTimer = setTimeout(() => {
 
         const koteshwarLat = stations.koteshwar_road?.coordinates?.[0] ?? 23.1031114;
         const EPS = 0.0003;
-
-
 
         const classifyPoint = (lat: number): 'red' | 'green' | 'neutral' => {
           if (lat < koteshwarLat - EPS) return 'red';
@@ -1311,13 +1320,9 @@ longPressTimer = setTimeout(() => {
           const name = String(f.properties?.name ?? '').toLowerCase();
 
           if (name.includes('blue line')) blue.push(f);
+          else if (name.includes('yellow line') || name.includes('motera stadium – mahatma mandir')) greenCandidates.push(f);
           else if (name.includes('red line')) redCandidates.push(f);
           else if (name.includes('violet line') || name.includes('line 3:') || name.includes('gift city-gnlu')) purple.push(f);
-        }
-
-        for (const f of yellowData.features ?? []) {
-          if (f?.geometry?.type !== 'LineString') continue;
-          greenCandidates.push(f);
         }
 
         const red: GeoJSON.Feature[] = [];
@@ -1708,7 +1713,7 @@ longPressTimer = setTimeout(() => {
         </div>
       )}
 
-      <FriendsJourneyViewer
+      <React.Suspense fallback={null}><FriendsJourneyViewer
         isOpen={isFriendsViewerOpen}
         onClose={() => setIsFriendsViewerOpen(false)}
         data={friendsJourneyData}
@@ -1719,7 +1724,7 @@ longPressTimer = setTimeout(() => {
           if (nearestStation) setRoutePlannerOrigin(nearestStation.id);
           setIsRoutePlannerOpen(true);
         }}
-      />
+      /></React.Suspense>
 
       <RoutePlanner
         isOpen={isRoutePlannerOpen}
@@ -1751,7 +1756,7 @@ longPressTimer = setTimeout(() => {
         searchedLocation={searchedLocation}
       />
 
-      <JoinRideDialog
+      <React.Suspense fallback={null}><JoinRideDialog
         isOpen={joinRide.isOpen}
         onClose={() => setJoinRide(prev => ({ ...prev, isOpen: false }))}
         trainId={joinRide.trainId}
@@ -1759,7 +1764,7 @@ longPressTimer = setTimeout(() => {
         onNavigate={() => {
           setJoinRide(prev => ({ ...prev, isOpen: false }));
         }}
-      />
+      /></React.Suspense>
 
       {/* Commute Card */}
       {commuteCard?.show && (
@@ -1934,7 +1939,7 @@ longPressTimer = setTimeout(() => {
       })()}
 
       {/* Metro Details Dialog */}
-      {selectedTrain && (
+      <React.Suspense fallback={null}>{selectedTrain && (
         <TrainDetailsDialog
           isOpen={trainDetailsDialogOpen}
           onClose={() => {
@@ -1944,10 +1949,10 @@ longPressTimer = setTimeout(() => {
           trainId={selectedTrain.id}
           line={selectedTrain.line as 'blue' | 'red' | 'green' | 'purple'}
         />
-      )}
+      )}</React.Suspense>
 
       {/* Live Metro Tracking Dialog */}
-      {selectedTrain && (
+      <React.Suspense fallback={null}>{selectedTrain && (
         <LiveTrainTrackingDialog
           isOpen={liveTrackingDialogOpen}
           onClose={() => {
@@ -1957,7 +1962,7 @@ longPressTimer = setTimeout(() => {
           trainId={selectedTrain.id}
           line={selectedTrain.line as 'blue' | 'red' | 'green' | 'purple'}
         />
-      )}
+      )}</React.Suspense>
     </div>
   );
 };

@@ -461,37 +461,52 @@ export const BottomPanel = React.memo(({
                       return (
                         <div
                           key={`${train.arrivalTime}-${train.destination}`}
-                          className="flex items-center justify-between p-2.5 bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl transition-all shadow-sm"
+                          className="flex items-center justify-between p-2.5 bg-gradient-to-r from-muted/30 to-muted/20 hover:from-muted/40 hover:to-muted/30 rounded-xl transition-all shadow-xs border border-border/40"
                         >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {/* Destination & Direction */}
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0 mr-2">
                             <div
-                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              className="w-2.5 h-8 rounded-full flex-shrink-0 shadow-xs"
                               style={{ backgroundColor: LINE_COLORS[train.line as keyof typeof LINE_COLORS] }}
                             />
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold truncate">
+                            <div className="min-w-0 flex flex-col justify-center">
+                              <div className="text-sm font-semibold truncate leading-snug">
                                 {train.remainingStations.length === 0 ? t('panel.terminatesHere', language) : train.destination}
                               </div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-muted-foreground truncate leading-tight">
                                 {train.remainingStations.length === 0 ? t('panel.arrivalOnly', language) : train.direction}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${crowd.level === 'low'
-                              ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+
+                          {/* Crowd Level Badge - Fixed Center Column */}
+                          <div className="w-[72px] sm:w-[80px] flex justify-center flex-shrink-0">
+                            <div className={`flex items-center justify-center gap-1 w-full py-0.5 px-1.5 rounded-full text-[11px] font-medium ${crowd.level === 'low'
+                              ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
                               : crowd.level === 'moderate'
-                                ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
-                                : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                               }`}>
-                              <Users className="w-3 h-3" />
-                              <span>{crowd.label}</span>
+                              <Users className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{crowd.label}</span>
                             </div>
-                            <div className="flex flex-col items-end">
-                              <div className="text-sm font-semibold">{train.arrivalTime}</div>
-                              <div className={`text-xs font-medium px-2 py-0.5 rounded-full mt-1 ${liveMinutes === 0 ? 'bg-green-500/20 text-green-600' : liveMinutes <= 2 ? 'bg-green-500/10 text-green-700' : liveMinutes <= 5 ? 'bg-yellow-500/10 text-yellow-700' : 'bg-muted text-muted-foreground'}`}>
-                                {formatMinutesAway(liveMinutes)}
-                              </div>
+                          </div>
+
+                          {/* Time & Duration - Fixed Right Column */}
+                          <div className="w-[60px] flex flex-col items-end justify-center flex-shrink-0 ml-2">
+                            <div className="text-sm font-bold tabular-nums leading-tight tracking-tight">
+                              {train.arrivalTime}
+                            </div>
+                            <div className={`text-[11px] font-medium tabular-nums px-1.5 py-0.5 rounded-md mt-0.5 text-center leading-none ${
+                              liveMinutes === 0
+                                ? 'bg-green-500/20 text-green-700 dark:text-green-300 font-semibold animate-pulse'
+                                : liveMinutes <= 2
+                                  ? 'bg-green-500/15 text-green-700 dark:text-green-300 font-semibold'
+                                  : liveMinutes <= 5
+                                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                                    : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {formatMinutesAway(liveMinutes)}
                             </div>
                           </div>
                         </div>

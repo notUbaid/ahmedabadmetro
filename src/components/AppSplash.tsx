@@ -5,6 +5,13 @@ interface AppSplashProps {
 }
 
 export const AppSplash: React.FC<AppSplashProps> = ({ isSuspenseFallback = false }) => {
+  const isInstalledTwa = typeof window !== 'undefined' && (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (typeof document !== 'undefined' && document.referrer.includes('android-app://'))
+  );
+  if (isInstalledTwa) {
+    return null;
+  }
   const [phase, setPhase] = useState<'animating' | 'exiting' | 'finished'>('animating');
   const [statusText, setStatusText] = useState('Connecting Network...');
   const startTimeRef = useRef<number>(Date.now());

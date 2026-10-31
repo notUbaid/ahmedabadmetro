@@ -44,6 +44,18 @@ export const fetchWalkingRoute = async (
 
   const stationLat = station.coordinates[0];
   const stationLng = station.coordinates[1];
+  const straightDist = getHaversineDistance(userLat, userLng, stationLat, stationLng);
+
+  // Skip external network calls for distant stations (>3.5 km) to avoid slow timeouts
+  if (straightDist > 3500) {
+    const fallback = createFallbackRoute(userLat, userLng, station);
+    if (routeCache.size >= MAX_CACHE_ENTRIES) {
+      const oldestKey = routeCache.keys().next().value;
+      if (oldestKey) routeCache.delete(oldestKey);
+    }
+    routeCache.set(cacheKey, { route: fallback, timestamp: Date.now() });
+    return fallback;
+  }
 
   // Pedestrian routing service endpoints in order of priority:
   // 1. OSRM Public Foot Routing (free, CORS-enabled, real OpenStreetMap pedestrian network)

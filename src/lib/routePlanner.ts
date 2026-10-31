@@ -62,7 +62,12 @@ const LINE_TERMINALS: Record<string, { start: string; end: string }> = {
 const MAX_WAIT_FOR_DIRECT = 20; // Max minutes to wait for a direct train
 const BUS_TIME_GNLU_TO_PDPU = 8; // Bus takes ~8 mins from GNLU to PDPU
 const BUS_TIME_GNLU_TO_GIFT = 15; // Bus takes ~15 mins from GNLU to GIFT City
-const MIN_TRANSFER_TIME = 2; // Minimum minutes required to change trains
+export const getTransferBufferMinutes = (stationId?: string): number => {
+  if (stationId === 'old_high_court') return 3; // Bi-level interchange requires walking across stairs/concourse
+  if (stationId === 'gnlu' || stationId === 'motera_stadium' || stationId === 'koteshwar_road') return 2;
+  return 2;
+};
+export const MIN_TRANSFER_TIME = 2; // Minimum minutes required to change trains
 
 import { 
   ALL_STATIONS_INDEX,
@@ -636,7 +641,8 @@ const buildTimeAwareRoute = (
       const nextSeg = segments[i + 1];
 
       // Find next connecting train - allowing MIN_TRANSFER_TIME for walking between platforms
-      const connectingTrain = findNextTrain(nextSeg.from, currentTimeMinutes + MIN_TRANSFER_TIME, nextSeg.to);
+      const transferBuffer = getTransferBufferMinutes(nextSeg.from);
+      const connectingTrain = findNextTrain(nextSeg.from, currentTimeMinutes + transferBuffer, nextSeg.to);
 
       let waitTime = 5; // Default
       let nextTrainTime: string | undefined;
@@ -1403,7 +1409,7 @@ export const planRouteWithDeparture = (
       const arrivedOnTrainId = edgeToCurrent?.scheduleId;
       const isTransfer = arrivedOnTrainId && arrivedOnTrainId !== schedule.id;
       
-      let transferBuffer = isTransfer ? MIN_TRANSFER_TIME : 0;
+      let transferBuffer = isTransfer ? getTransferBufferMinutes(current.stationId) : 0;
       if (isTransfer && arrivedOnTrainId) {
         const prevLine = trainSchedules.find(s => s.id === arrivedOnTrainId)?.line;
         if ((prevLine === 'red' && schedule.line === 'green') || (prevLine === 'green' && schedule.line === 'red')) {

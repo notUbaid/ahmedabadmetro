@@ -40,21 +40,12 @@ const LINE_STATIONS = {
 };
 
 const redGreenGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'metroRoutes.geojson'), 'utf8'));
-const yellowGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'yellowLineRoutes.geojson'), 'utf8'));
 
 const routeSegments = {};
 
 function buildLineCache(lineName, lineStationsList, features) {
   const nodes = [];
   const adj = [];
-
-  lineStationsList.forEach(sId => {
-    const s = stations[sId];
-    if (s) {
-      nodes.push(s.coordinates);
-      adj.push([]);
-    }
-  });
 
   features.forEach(f => {
     if (f.geometry.type !== 'LineString') return;
@@ -70,33 +61,13 @@ function buildLineCache(lineName, lineStationsList, features) {
     }
   });
 
-  // Connect stations to closest track node (max ~1.5 km to prevent cross-sector leaping)
-  const MAX_STATION_GAP = 0.015;
-  for (let i = 0; i < lineStationsList.length; i++) {
-    let closestNode = -1;
-    let minDist = MAX_STATION_GAP;
-    for (let j = lineStationsList.length; j < nodes.length; j++) {
-      const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
-      if (dist < minDist) {
-        minDist = dist;
-        closestNode = j;
-      }
-    }
-    if (closestNode !== -1) {
-      adj[i].push(closestNode);
-      adj[closestNode].push(i);
-    } else {
-      console.warn(`[${lineName}] Warning: station ${lineStationsList[i]} could not connect to track within ${MAX_STATION_GAP}`);
-    }
-  }
-
   // Connect close endpoints in track segments
   const MAX_ENDPOINT_GAP = 0.005;
-  for (let i = lineStationsList.length; i < nodes.length; i++) {
+  for (let i = 0; i < nodes.length; i++) {
     if (adj[i].length === 1) { 
       for (let j = i + 1; j < nodes.length; j++) {
         if (adj[j].length === 1) { 
-          const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+          const dist = Math.hypot(nodes[i][0] - nodes[j][0], nodes[i][1] - nodes[j][1]);
           if (dist < MAX_ENDPOINT_GAP) {
             adj[i].push(j);
             adj[j].push(i);
@@ -107,9 +78,9 @@ function buildLineCache(lineName, lineStationsList, features) {
   }
 
   // Connect near-coincident track nodes
-  for (let i = lineStationsList.length; i < nodes.length; i++) {
+  for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
-      const dist = Math.sqrt(Math.pow(nodes[i][0] - nodes[j][0], 2) + Math.pow(nodes[i][1] - nodes[j][1], 2));
+      const dist = Math.hypot(nodes[i][0] - nodes[j][0], nodes[i][1] - nodes[j][1]);
       if (dist < 0.0005) {
         adj[i].push(j);
         adj[j].push(i);
@@ -117,11 +88,37 @@ function buildLineCache(lineName, lineStationsList, features) {
     }
   }
 
+  // Find closest track node for each station along this line
+  const stationTrackNodes = [];
+  for (let i = 0; i < lineStationsList.length; i++) {
+    const sId = lineStationsList[i];
+    const st = stations[sId];
+    if (!st) {
+      console.error(`[${lineName}] Missing station definition for ${sId}`);
+      continue;
+    }
+    let closestNode = -1;
+    let minDist = Infinity;
+    for (let j = 0; j < nodes.length; j++) {
+      const dist = Math.hypot(st.coordinates[0] - nodes[j][0], st.coordinates[1] - nodes[j][1]);
+      if (dist < minDist) {
+        minDist = dist;
+        closestNode = j;
+      }
+    }
+    stationTrackNodes.push({ sId, nodeIdx: closestNode, distMeters: minDist * 111000 });
+  }
+
   for (let i = 0; i < lineStationsList.length - 1; i++) {
-    const startNode = i;
-    const endNode = i + 1;
     const s1 = lineStationsList[i];
     const s2 = lineStationsList[i + 1];
+    const startNode = stationTrackNodes[i]?.nodeIdx;
+    const endNode = stationTrackNodes[i + 1]?.nodeIdx;
+
+    if (startNode === undefined || endNode === undefined || startNode === -1 || endNode === -1) {
+      console.error(`[${lineName}] Cannot route ${s1}-${s2}: invalid track node`);
+      continue;
+    }
 
     const dist = new Float32Array(nodes.length).fill(Infinity);
     const prev = new Int32Array(nodes.length).fill(-1);
@@ -142,11 +139,9 @@ function buildLineCache(lineName, lineStationsList, features) {
 
       for (const v of adj[u]) {
         if (visited[v]) continue;
-        // Never traverse through other stations!
-        if (v < lineStationsList.length && v !== endNode) continue;
         const dx = nodes[u][0] - nodes[v][0];
         const dy = nodes[u][1] - nodes[v][1];
-        const d = Math.sqrt(dx * dx + dy * dy);
+        const d = Math.hypot(dx, dy);
         if (dist[u] + d < dist[v]) {
           dist[v] = dist[u] + d;
           prev[v] = u;
@@ -166,7 +161,7 @@ function buildLineCache(lineName, lineStationsList, features) {
       const dists = [0];
       let totalDist = 0;
       for (let k = 0; k < path.length - 1; k++) {
-        const d = Math.sqrt(Math.pow(path[k + 1][0] - path[k][0], 2) + Math.pow(path[k + 1][1] - path[k][1], 2));
+        const d = Math.hypot(path[k + 1][0] - path[k][0], path[k + 1][1] - path[k][1]);
         totalDist += d;
         dists.push(totalDist);
       }
@@ -179,7 +174,7 @@ function buildLineCache(lineName, lineStationsList, features) {
 
       const st1 = stations[s1];
       const st2 = stations[s2];
-      const straight = Math.sqrt(Math.pow(st1.coordinates[0] - st2.coordinates[0], 2) + Math.pow(st1.coordinates[1] - st2.coordinates[1], 2));
+      const straight = Math.hypot(st1.coordinates[0] - st2.coordinates[0], st1.coordinates[1] - st2.coordinates[1]);
       const ratio = totalDist / straight;
       console.log(`[${lineName}] ${key1}: pts=${path.length}, dist=${totalDist.toFixed(4)}, ratio=${ratio.toFixed(2)}`);
     } else {
@@ -215,13 +210,6 @@ redGreenGeo.features.forEach(f => {
   else if (anyGreen && !anyRed) greenFeatures.push(f);
   else {
     redFeatures.push(f);
-    greenFeatures.push(f);
-  }
-});
-
-// Yellow line contains Phase 2 extension in Gandhinagar all the way to Mahatma Mandir
-yellowGeo.features.forEach(f => {
-  if (f.geometry.type === 'LineString') {
     greenFeatures.push(f);
   }
 });

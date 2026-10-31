@@ -28,7 +28,7 @@ export const getCommuteSettings = (): CommuteSettings | null => {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Failed to load commute settings:', e);
+    // Gracefully handle malformed or corrupt storage
   }
   return null;
 };
