@@ -41,32 +41,32 @@ Below is the verified timetable and operational data for every station in the sy
 | 25 | **Usmanpura** | ઉસ્માનપુરા | उस्मानपुरा | RED | Elevated | 06:32 AM | 11:26 PM | 167 |
 | 26 | **Vijay Nagar** | વિજય નગર | विजय नगर | RED | Elevated | 06:30 AM | 11:28 PM | 167 |
 | 27 | **Vadaj** | વાડજ | वाडज | RED | Elevated | 06:27 AM | 11:31 PM | 167 |
-| 28 | **Ranip** | રાણીપ | राणीप | RED | Elevated | 06:25 AM | 11:33 PM | 167 |
+| 28 | **Ranip** | રાણીપ | રાણીપ | RED | Elevated | 06:25 AM | 11:33 PM | 167 |
 | 29 | **AEC** | એ ઇ સી | ए ई सी | RED | Elevated | 06:22 AM | 11:36 PM | 167 |
-| 30 | **Sabarmati** | સાબરમતી | साबरमती | RED | Elevated | 06:20 AM | 11:38 PM | 167 |
+| 30 | **Sabarmati** | સાબરમતી | સાબરમતી | RED | Elevated | 06:20 AM | 11:38 PM | 167 |
 | 31 | **Motera Stadium** | મોટેરા સ્ટેડિયમ | मोटेरा स्टेडियम | RED | Elevated | 06:17 AM | 11:41 PM | 167 |
 | 32 | **Koteshwar Road** | કોટેશ્વર રોડ | कोटेश्वर रोड | RED/GREEN | Interchange | 06:15 AM | 11:43 PM | 167 |
 | 33 | **Vishwakarma College** | વિશ્વકર્મા કોલેજ | विश्वकर्मा कॉलेज | GREEN | Elevated | 06:57 AM | 09:45 PM | 84 |
-| 34 | **Tapovan Circle** | તપોવન સર્કલ | तपोवन सर्कल | GREEN | Elevated | 06:59 AM | 09:42 PM | 84 |
-| 35 | **Narmada Canal** | નર્મદા કેનાલ | नर्मदा कैनाल | GREEN | Elevated | 07:01 AM | 09:40 PM | 84 |
-| 36 | **Koba Circle** | કોબા સર્કલ | कोबा सर्कल | GREEN | Elevated | 07:03 AM | 09:38 PM | 84 |
-| 37 | **Juna Koba** | જૂના કોબા | जूना कोबा | GREEN | Elevated | 07:06 AM | 09:35 PM | 84 |
-| 38 | **Koba Gam** | કોબા ગામ | कोबा गाम | GREEN | Elevated | 07:08 AM | 09:33 PM | 84 |
+| 34 | **Tapovan Circle** | તપોવન સર્કલ | तપોવન સર્કલ | GREEN | Elevated | 06:59 AM | 09:42 PM | 84 |
+| 35 | **Narmada Canal** | નર્મદા કેનાલ | નર્મદા કેનાલ | GREEN | Elevated | 07:01 AM | 09:40 PM | 84 |
+| 36 | **Koba Circle** | કોબા સર્કલ | કોબા સર્કલ | GREEN | Elevated | 07:03 AM | 09:38 PM | 84 |
+| 37 | **Juna Koba** | જૂના કોબા | जूના કોબા | GREEN | Elevated | 07:06 AM | 09:35 PM | 84 |
+| 38 | **Koba Gam** | કોબા ગામ | કોબા ગામ | GREEN | Elevated | 07:08 AM | 09:33 PM | 84 |
 | 39 | **GNLU** | જી એન એલ યુ | जी एन एल यू | GREEN/PURPLE | Interchange | 07:09 AM | 09:35 PM | 84 |
-| 40 | **Raysan** | રાયસન | रायसन | GREEN | Elevated | 07:07 AM | 09:37 PM | 68 |
-| 41 | **Randesan** | રાંદેસણ | रांदेसण | GREEN | Elevated | 07:04 AM | 09:39 PM | 68 |
-| 42 | **Dholakuva Circle** | ધોળાકુવા સર્કલ | धोलाकुवा सर्कल | GREEN | Elevated | 07:01 AM | 09:42 PM | 68 |
-| 43 | **Infocity** | ઇન્ફોસિટી | इन्फोसिटी | GREEN | Elevated | 06:59 AM | 09:44 PM | 68 |
-| 44 | **Sector-1** | સેક્ટર-1 | सेक्टर-1 | GREEN | Elevated | 06:56 AM | 09:46 PM | 68 |
-| 45 | **Sector-10A** | સેક્ટર-10એ | सेक्टर-10ए | GREEN | Elevated | 06:53 AM | 09:49 PM | 68 |
-| 46 | **Sachivalaya** | સચિવાલય | सचिवालय | GREEN | Elevated | 06:51 AM | 09:52 PM | 68 |
-| 47 | **Akshardham** | અક્ષરધામ | अक्षरधाम | GREEN | Elevated | 06:48 AM | 09:54 PM | 68 |
-| 48 | **Juna Sachivalaya** | જૂના સચિવાલય | जूना सचिवालय | GREEN | Elevated | 06:46 AM | 09:56 PM | 68 |
-| 49 | **Sector 16** | સેક્ટર-16 | सेक्टर-16 | GREEN | Elevated | 06:44 AM | 09:59 PM | 68 |
-| 50 | **Sector 24** | સેક્ટર-24 | सेक्टर-24 | GREEN | Elevated | 06:41 AM | 10:01 PM | 68 |
-| 51 | **Mahatma Mandir** | મહાત્મા મંદિર | महात्मा मंदिर | GREEN | Elevated | 06:40 AM | 10:03 PM | 68 |
-| 52 | **PDEU** | પી ડી ઈ યુ | पी डी ई यू | PURPLE | Elevated | 07:39 AM | 07:16 PM | 16 |
-| 53 | **GIFT City** | ગિફ્ટ સિટી | गिफ्ट सिटी | PURPLE | Elevated | 07:42 AM | 07:13 PM | 16 |
+| 40 | **Raysan** | રાયસન | રાયસન | GREEN | Elevated | 07:07 AM | 09:37 PM | 68 |
+| 41 | **Randesan** | રાંદેસણ | રાંદેસણ | GREEN | Elevated | 07:04 AM | 09:39 PM | 68 |
+| 42 | **Dholakuva Circle** | ધોળાકુવા સર્કલ | ધોળાકુવા સર્કલ | GREEN | Elevated | 07:01 AM | 09:42 PM | 68 |
+| 43 | **Infocity** | ઇન્ફોસિટી | ઇન્ફોસિટી | GREEN | Elevated | 06:59 AM | 09:44 PM | 68 |
+| 44 | **Sector-1** | સેક્ટર-1 | સેક્ટર-1 | GREEN | Elevated | 06:56 AM | 09:46 PM | 68 |
+| 45 | **Sector-10A** | સેક્ટર-10એ | સેક્ટર-10એ | GREEN | Elevated | 06:53 AM | 09:49 PM | 68 |
+| 46 | **Sachivalaya** | સચિવાલય | સચિવાલય | GREEN | Elevated | 06:51 AM | 09:52 PM | 68 |
+| 47 | **Akshardham** | અક્ષરધામ | અક્ષરધામ | GREEN | Elevated | 06:48 AM | 09:54 PM | 68 |
+| 48 | **Juna Sachivalaya** | જૂના સચિવાલય | જૂના સચિવાલય | GREEN | Elevated | 06:46 AM | 09:56 PM | 68 |
+| 49 | **Sector 16** | સેક્ટર-16 | સેક્ટર-16 | GREEN | Elevated | 06:44 AM | 09:59 PM | 68 |
+| 50 | **Sector 24** | સેક્ટર-24 | સેક્ટર-24 | GREEN | Elevated | 06:41 AM | 10:01 PM | 68 |
+| 51 | **Mahatma Mandir** | મહાત્મા મંદિર | મહાત્મા મંદિર | GREEN | Elevated | 06:40 AM | 10:03 PM | 68 |
+| 52 | **PDEU** | પી ડી ઈ યુ | પી ડી ઈ યુ | PURPLE | Elevated | 07:39 AM | 07:16 PM | 16 |
+| 53 | **GIFT City** | ગિફ્ટ સિટી | ગિફ્ટ સિટી | PURPLE | Elevated | 07:42 AM | 07:13 PM | 16 |
 
 ---
 

@@ -1639,6 +1639,7 @@ longPressTimer = setTimeout(() => {
           width: 68px;
           height: 24px;
           overflow: visible;
+        }
         .train-marker-icon.selected-train .train-icon-wrapper {
           filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.95)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0.6)) !important;
           z-index: 1050;

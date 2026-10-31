@@ -1,10 +1,12 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
   CircleDot, Circle, Bus, Share2, Check, Info, Locate, Sparkles
 } from 'lucide-react';
 import { stations, Station, LINE_COLORS } from '@/data/metroData';
+import { popularPlaces } from '@/data/popularPlaces';
+import { parseSearchIntent, scoreSearchMatch, matchCuratedPlaces } from '@/lib/searchUtils';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
 import { cn, getISTDate } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
@@ -19,9 +21,11 @@ const parseTimeToMinutes = (time: string): number => {
   return h * 60 + m;
 };
 
+export type StationWithLandmark = Station & { matchedLandmark?: string };
+
 interface StationDropdownProps {
   isSearching: boolean;
-  filteredStations: ReturnType<typeof getStationOptions>;
+  filteredStations: StationWithLandmark[];
   organizedStations: ReturnType<typeof getOrganizedStations>;
   selectedStationId?: string;
   onSelectStation: (id: string) => void;
@@ -48,9 +52,16 @@ const StationDropdown = React.memo(({
               selectedStationId === s.id && "bg-primary/10"
             )}
           >
-            <Train className="w-3 h-3 text-muted-foreground" />
-            <span>{getStationName(s, language)}</span>
-            <div className="flex gap-1 ml-auto">
+            <Train className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="truncate">{getStationName(s, language)}</span>
+              {s.matchedLandmark && (
+                <span className="text-[11px] text-primary/80 font-normal truncate max-w-[130px] sm:max-w-[180px]">
+                  ({s.matchedLandmark})
+                </span>
+              )}
+            </div>
+            <div className="flex gap-1 ml-auto flex-shrink-0">
               {s.lines.map(l => (
                 <span
                   key={l}
@@ -295,29 +306,62 @@ export const RoutePlanner = React.memo(({
   const isOriginSearching = originSearch.trim().length > 0;
   const isDestSearching = destSearch.trim().length > 0;
 
+  const filterStationsWithSearch = useCallback((searchStr: string): StationWithLandmark[] => {
+    if (!searchStr.trim()) return stationOptions;
+    const { cleanedQuery, tokens } = parseSearchIntent(searchStr);
+    if (!cleanedQuery && tokens.length === 0) return stationOptions;
+
+    const scoredMap = new Map<string, { station: Station; score: number; landmark?: string }>();
+
+    // 1. Direct station matching using scoreSearchMatch
+    for (const s of stationOptions) {
+      const aliases = [
+        s.nameGu,
+        s.nameHi,
+        ...(s.aliases || []),
+        s.id,
+      ];
+      const score = scoreSearchMatch(s.name, aliases, tokens, cleanedQuery);
+      if (score > 0) {
+        scoredMap.set(s.id, {
+          station: s,
+          score: score + (s.isInterchange ? 50 : 0),
+        });
+      }
+    }
+
+    // 2. Curated landmark matching (e.g. Helipad Exhibition -> Mahatma Mandir, IIT -> GNLU)
+    const landmarkMatches = matchCuratedPlaces(popularPlaces, cleanedQuery, tokens);
+    for (const match of landmarkMatches) {
+      const stn = stations[match.nearestStationId];
+      if (stn && !stn.isWIP) {
+        const existing = scoredMap.get(stn.id);
+        const landmarkScore = match.score * 0.9;
+        if (!existing || existing.score < landmarkScore) {
+          scoredMap.set(stn.id, {
+            station: stn,
+            score: Math.max(existing?.score || 0, landmarkScore),
+            landmark: match.place.n,
+          });
+        }
+      }
+    }
+
+    return Array.from(scoredMap.values())
+      .sort((a, b) => b.score - a.score)
+      .map(item => ({
+        ...item.station,
+        matchedLandmark: item.landmark,
+      }));
+  }, [stationOptions]);
+
   const filteredOriginStations = useMemo(() => {
-    if (!originSearch) return stationOptions;
-    const query = originSearch.toLowerCase().trim();
-    return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(query) || 
-      (s.nameGu && s.nameGu.includes(query)) ||
-      (s.nameHi && s.nameHi.includes(query)) ||
-      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
-      s.id.toLowerCase().includes(query)
-    );
-  }, [stationOptions, originSearch]);
+    return filterStationsWithSearch(originSearch);
+  }, [filterStationsWithSearch, originSearch]);
 
   const filteredDestStations = useMemo(() => {
-    if (!destSearch) return stationOptions;
-    const query = destSearch.toLowerCase().trim();
-    return stationOptions.filter(s =>
-      s.name.toLowerCase().includes(query) || 
-      (s.nameGu && s.nameGu.includes(query)) ||
-      (s.nameHi && s.nameHi.includes(query)) ||
-      s.aliases?.some(a => a.toLowerCase().includes(query)) ||
-      s.id.toLowerCase().includes(query)
-    );
-  }, [stationOptions, destSearch]);
+    return filterStationsWithSearch(destSearch);
+  }, [filterStationsWithSearch, destSearch]);
 
   // Auto-scroll to selected train when route changes
   useEffect(() => {

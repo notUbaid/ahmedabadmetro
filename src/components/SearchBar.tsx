@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX } from 'lucide-react';
+import { Search, X, Loader2, MapPin, Train, Building2, Landmark, Clock, SearchX, Sparkles } from 'lucide-react';
 import { stations } from '@/data/metroData';
 import { popularPlaces, getPlaceLabel } from '@/data/popularPlaces';
-import { cn, getHaversineDistance } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName, Language } from '@/lib/i18n';
 import { findNearestByWalking } from '@/lib/walkingRoute';
 import { fetchNominatimSearch } from '@/hooks/useNominatimSearch';
+import { parseSearchIntent, findNearestStationSync, scoreSearchMatch } from '@/lib/searchUtils';
 
 const RECENT_SEARCHES_KEY = 'metro_recent_searches';
 const MAX_RECENT_SEARCHES = 3;
@@ -30,9 +31,7 @@ const getRecentSearches = (): RecentSearch[] => {
 const saveRecentSearch = (search: RecentSearch) => {
   try {
     const recent = getRecentSearches();
-    // Remove duplicate if exists
     const filtered = recent.filter(r => r.name.toLowerCase() !== search.name.toLowerCase());
-    // Add new search at start, keep only MAX
     const updated = [search, ...filtered].slice(0, MAX_RECENT_SEARCHES);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   } catch {
@@ -51,29 +50,13 @@ interface SearchResult {
   nearestStationId?: string;
   nearestStationName?: string;
   nearestStationDist?: number;
+  isNearestRecommendation?: boolean;
 }
 
-// Distance helper in km
-const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  return getHaversineDistance(lat1, lon1, lat2, lon2) / 1000;
-};
-
-// Find nearest station
+// Find nearest station helper using synchronous searchUtils
 const findNearestStation = (lat: number, lng: number) => {
-  let nearestId = '';
-  let nearestName = '';
-  let minDistance = Infinity;
-  
-  Object.values(stations).forEach(station => {
-    const dist = getDistance(lat, lng, station.coordinates[0], station.coordinates[1]);
-    if (dist < minDistance) {
-      minDistance = dist;
-      nearestId = station.id;
-      nearestName = station.name;
-    }
-  });
-  
-  return { id: nearestId, name: nearestName, distance: minDistance };
+  const nearest = findNearestStationSync(lat, lng);
+  return { id: nearest.id, name: nearest.name, distance: nearest.distanceKm };
 };
 
 interface SearchBarProps {
@@ -98,10 +81,11 @@ const getMetroStationResults = (language: Language): SearchResult[] => {
   }));
 };
 
-// Curated popular places — always searched locally, no API needed.
+// Curated popular places — with synchronous nearest station resolution pre-calculated
 const getPopularPlaceResults = (language: string): SearchResult[] => {
   return popularPlaces.map((p, i) => {
-    const isLandmark = ['monument', 'temple', 'mosque', 'museum'].includes(p.t);
+    const isLandmark = ['monument', 'temple', 'mosque', 'museum', 'exhibition', 'college', 'government', 'park'].includes(p.t);
+    const nearest = findNearestStationSync(p.c[0], p.c[1], p.s);
     return {
       id: `pop_${i}`,
       name: p.n,
@@ -109,20 +93,33 @@ const getPopularPlaceResults = (language: string): SearchResult[] => {
       lat: p.c[0],
       lng: p.c[1],
       type: isLandmark ? ('landmark' as const) : ('place' as const),
-      // Above API results (~≤20), below metro stations (90-100)
-      importance: 45,
+      importance: 60,
+      nearestStationId: nearest.id,
+      nearestStationName: nearest.name,
+      nearestStationDist: nearest.distanceKm,
     };
   });
 };
 
-const matchPopularPlaces = (popular: SearchResult[], normalizedQuery: string): SearchResult[] =>
-  popular
-    .filter((p, i) => {
-      const entry = popularPlaces[i];
-      return p.name.toLowerCase().includes(normalizedQuery) || !!entry.k?.includes(normalizedQuery);
-    })
-    .sort((a, b) => a.name.toLowerCase().indexOf(normalizedQuery) - b.name.toLowerCase().indexOf(normalizedQuery))
-    .slice(0, 5);
+const matchPopularPlaces = (
+  popular: SearchResult[],
+  cleanedQuery: string,
+  tokens: string[]
+): { result: SearchResult; score: number }[] => {
+  if (!cleanedQuery && tokens.length === 0) return [];
+  const matches: { result: SearchResult; score: number }[] = [];
+
+  popular.forEach((p, i) => {
+    const orig = popularPlaces[i];
+    const aliases = [orig.k, orig.t];
+    const score = scoreSearchMatch(p.name, aliases, tokens, cleanedQuery);
+    if (score > 0) {
+      matches.push({ result: p, score });
+    }
+  });
+
+  return matches.sort((a, b) => b.score - a.score);
+};
 
 // ORS Pelias API search (via serverless proxy — key stays server-side)
 const searchPelias = async (query: string): Promise<SearchResult[]> => {
@@ -141,20 +138,17 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 
     return (data.features || []).map((f: { properties?: Record<string, string | number | boolean | undefined>; geometry?: { coordinates: [number, number] } }, i: number) => {
       const props = f.properties || {};
-      const name = props.name || props.label || 'Unknown';
+      const name = (props.name || props.label || 'Unknown') as string;
 
-      // Build description from available fields
       const parts = [props.locality, props.neighbourhood, props.county].filter(Boolean);
-      const description = parts.length > 0 ? parts.join(', ') : props.region || 'Ahmedabad';
+      const description = parts.length > 0 ? parts.join(', ') : ((props.region as string) || 'Ahmedabad');
 
-      // Determine type based on layer/category
       let type: SearchResult['type'] = 'place';
       const layer = (props.layer || '') as string;
       if (['venue', 'address', 'street'].includes(layer)) {
         type = layer === 'address' || layer === 'street' ? 'address' : 'landmark';
       }
 
-      // Calculate importance based on confidence and layer
       const confidence = (props.confidence as number) || 0.5;
       const layerScore = layer === 'venue' ? 10 : layer === 'locality' ? 8 : layer === 'neighbourhood' ? 6 : 4;
       const importance = Math.round(confidence * 10 + layerScore);
@@ -261,14 +255,9 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     };
   }, []);
 
-  // Stable identity per language — recreating this each render would give
-  // performSearch a new identity and restart the debounce on every parent re-render.
   const metroStations = useMemo(() => getMetroStationResults(language), [language]);
-
-  // Static curated data — computed once
   const popularResults = useMemo(() => getPopularPlaceResults(language), [language]);
 
-  // Load recent searches on mount
   useEffect(() => {
     setRecentSearches(getRecentSearches());
   }, []);
@@ -285,12 +274,17 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   }, []);
 
   const performSearch = useCallback(async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.trim().length < 2) {
       setResults([]);
       return;
     }
 
-    const normalizedQuery = searchQuery.toLowerCase().trim();
+    const { isNearestIntent, cleanedQuery, tokens } = parseSearchIntent(searchQuery);
+
+    if (cleanedQuery.length < 2 && tokens.length === 0) {
+      setResults([]);
+      return;
+    }
 
     if (isSelectedRef.current) {
       isSelectedRef.current = false;
@@ -298,9 +292,8 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
 
     const searchId = ++activeSearchIdRef.current;
-    const cacheKey = `${language}:${normalizedQuery}`;
+    const cacheKey = `${language}:${isNearestIntent ? 'nearest:' : ''}${cleanedQuery}`;
 
-    // Check cache first
     const cached = searchCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       setResults(cached.results);
@@ -311,44 +304,90 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     setIsLoading(true);
 
     try {
-      // Find matching metro stations (always prioritized)
-      const matchingStations = metroStations.filter(station => {
+      // 1. Find matching metro stations using multi-token score matching
+      const scoredStations: { result: SearchResult; score: number }[] = [];
+      for (const station of metroStations) {
         const origStation = stations[station.id];
-        return (
-          station.name.toLowerCase().includes(normalizedQuery) ||
-          origStation?.name?.toLowerCase().includes(normalizedQuery) ||
-          (origStation?.nameGu && origStation.nameGu.includes(normalizedQuery)) ||
-          (origStation?.nameHi && origStation.nameHi.includes(normalizedQuery)) ||
-          origStation?.aliases?.some(a => a.toLowerCase().includes(normalizedQuery)) ||
-          origStation?.id?.toLowerCase().includes(normalizedQuery)
-        );
-      }).sort((a, b) => (b.importance || 0) - (a.importance || 0));
+        const aliases = [
+          origStation?.nameGu,
+          origStation?.nameHi,
+          ...(origStation?.aliases || []),
+          origStation?.id,
+        ];
+        const score = scoreSearchMatch(station.name, aliases, tokens, cleanedQuery);
+        if (score > 0) {
+          scoredStations.push({
+            result: station,
+            score: score + (station.importance || 0),
+          });
+        }
+      }
+      scoredStations.sort((a, b) => b.score - a.score);
+      const matchingStations = scoredStations.map(s => s.result);
 
-      // Curated popular places — local match, no API needed
-      const matchingPopular = matchPopularPlaces(popularResults, normalizedQuery);
+      // 2. Curated popular places — instant local match with pre-computed nearest stations
+      const scoredPopular = matchPopularPlaces(popularResults, cleanedQuery, tokens);
+      const matchingPopular = scoredPopular.map(s => s.result);
 
-      // Show instant results while APIs load
-      if (matchingStations.length > 0 || matchingPopular.length > 0) {
-        setResults([...matchingStations.slice(0, 3), ...matchingPopular].slice(0, 8));
+      // 3. If user asked with "nearest" intent and a place matches, generate a prioritized station recommendation
+      let recommendationResult: SearchResult | null = null;
+      if (isNearestIntent && matchingPopular.length > 0) {
+        const topPlace = matchingPopular[0];
+        if (topPlace.nearestStationId && stations[topPlace.nearestStationId]) {
+          const stn = stations[topPlace.nearestStationId];
+          const stnName = getStationName(stn, language);
+          const distStr = topPlace.nearestStationDist !== undefined
+            ? ` (${topPlace.nearestStationDist.toFixed(1)} km)`
+            : '';
+          recommendationResult = {
+            id: `rec_station_${stn.id}`,
+            name: stnName,
+            description: `${t('search.nearestMetroFor', language)} ${topPlace.name}${distStr}`,
+            lat: stn.coordinates[0],
+            lng: stn.coordinates[1],
+            type: 'station',
+            importance: 250,
+            nearestStationId: stn.id,
+            nearestStationName: stnName,
+            nearestStationDist: topPlace.nearestStationDist,
+            isNearestRecommendation: true,
+          };
+        }
+      }
+
+      // Show instant results immediately while API calls execute
+      const instantList: SearchResult[] = [];
+      if (recommendationResult) {
+        instantList.push(recommendationResult);
+      }
+      instantList.push(...matchingStations.slice(0, 3));
+      instantList.push(...matchingPopular);
+
+      if (instantList.length > 0) {
+        setResults(instantList.slice(0, 8));
         setShowResults(true);
       }
 
-      // Search Pelias API
-      const peliasResults = await searchPelias(searchQuery);
-      
+      // 4. Query Pelias API using the stripped cleanedQuery (free of conversational filler)
+      const peliasResults = await searchPelias(cleanedQuery);
       if (searchId !== activeSearchIdRef.current) return;
 
-      // Fallback to Nominatim if Pelias returns fewer than 3 results
+      // 5. Fallback to Nominatim if Pelias returns fewer than 3 results
       let nominatimResults: SearchResult[] = [];
       if (peliasResults.length < 3) {
-        nominatimResults = await searchNominatim(searchQuery);
+        nominatimResults = await searchNominatim(cleanedQuery);
       }
+      if (searchId !== activeSearchIdRef.current) return;
 
-      // Merge results with deduplication (by name + type to allow same-name places)
+      // Merge and deduplicate results
       const mergedResults: SearchResult[] = [];
       const seenKeys = new Set<string>();
 
-      // Add matching metro stations first (highest priority)
+      if (recommendationResult) {
+        seenKeys.add(`${recommendationResult.name.toLowerCase()}|station`);
+        mergedResults.push(recommendationResult);
+      }
+
       for (const station of matchingStations.slice(0, 3)) {
         const key = `${station.name.toLowerCase()}|${station.type}`;
         if (!seenKeys.has(key)) {
@@ -357,7 +396,6 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
-      // Add curated popular places (rank above API noise via importance)
       for (const place of matchingPopular) {
         const key = `${place.name.toLowerCase()}|${place.type}`;
         if (!seenKeys.has(key) && mergedResults.length < 10) {
@@ -366,7 +404,6 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
-      // Add Pelias results (allow same name if different type)
       for (const result of peliasResults) {
         const key = `${result.name.toLowerCase()}|${result.type}`;
         if (!seenKeys.has(key) && mergedResults.length < 10) {
@@ -375,7 +412,6 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
-      // Add Nominatim results (fallback)
       for (const result of nominatimResults) {
         const key = `${result.name.toLowerCase()}|${result.type}`;
         if (!seenKeys.has(key) && mergedResults.length < 10) {
@@ -384,18 +420,17 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
-      // GeoJSON Offline Fallback (If APIs found absolutely nothing)
-      if (peliasResults.length === 0 && nominatimResults.length === 0) {
+      // Offline GeoJSON fallback if APIs found nothing and no popular places matched
+      if (peliasResults.length === 0 && nominatimResults.length === 0 && matchingPopular.length === 0) {
         try {
           const { localPlaces } = await import('../data/localPlaces');
           if (searchId !== activeSearchIdRef.current) return;
-          const localMatches = localPlaces.filter((place: { n: string, t: string, c: number[] }) => 
-            place.n.toLowerCase().includes(normalizedQuery)
+          const localMatches = localPlaces.filter((place: { n: string; t: string; c: number[] }) => 
+            place.n.toLowerCase().includes(cleanedQuery)
           ).slice(0, 5);
           
           for (const [i, place] of localMatches.entries()) {
-            const nearest = findNearestStation(place.c[0], place.c[1]);
-            
+            const nearest = findNearestStationSync(place.c[0], place.c[1]);
             const formattedType = place.t.replace(/_/g, ' ');
             const description = formattedType.charAt(0).toUpperCase() + formattedType.slice(1);
             
@@ -407,9 +442,9 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
               lng: place.c[1],
               type: 'place',
               importance: 40,
-              nearestStationId: nearest?.id,
-              nearestStationName: nearest?.name,
-              nearestStationDist: nearest?.distance
+              nearestStationId: nearest.id,
+              nearestStationName: nearest.name,
+              nearestStationDist: nearest.distanceKm
             };
             
             const key = `${localResult.name.toLowerCase()}|${localResult.type}`;
@@ -423,17 +458,17 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         }
       }
 
-      // Sort non-station results by importance
-      const stations = mergedResults.filter(r => r.type === 'station');
+      const stationsList = mergedResults.filter(r => r.type === 'station');
       const others = mergedResults.filter(r => r.type !== 'station')
         .sort((a, b) => (b.importance || 0) - (a.importance || 0));
 
-      const finalResults = [...stations, ...others].slice(0, 8);
+      const finalResults = [...stationsList, ...others].slice(0, 8);
 
-      // Fetch actual walking distance for top 3 non-station results to match map behavior
+      // Fetch actual walking distance for top 3 non-curated API results if needed
       let apiCallCount = 0;
       const resultsWithRealNearest = await Promise.all(finalResults.map(async (result) => {
         if (result.type === 'station') return result;
+        if (result.id.startsWith('pop_')) return result; // Curated places already have exact distances
         if (apiCallCount >= 3) return result;
         apiCallCount++;
         
@@ -453,7 +488,6 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
         return result;
       }));
 
-      // Cache results
       searchCache.set(cacheKey, {
         results: resultsWithRealNearest,
         timestamp: Date.now()
@@ -466,13 +500,12 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     } catch (error) {
       console.error('Search failed:', error);
       if (searchId !== activeSearchIdRef.current) return;
-      // Fallback to local data only
-      const matchingPopular = matchPopularPlaces(popularResults, normalizedQuery);
+      const scoredPopular = matchPopularPlaces(popularResults, cleanedQuery, tokens);
       const localResults = [
         ...metroStations.filter(station =>
-          station.name.toLowerCase().includes(normalizedQuery)
+          station.name.toLowerCase().includes(cleanedQuery)
         ).slice(0, 3),
-        ...matchingPopular,
+        ...scoredPopular.map(s => s.result),
       ].slice(0, 8);
       setResults(localResults);
       setShowResults(true);
@@ -486,15 +519,14 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
       performSearch(query);
-    }, 350); // 350ms debounce
+    }, 350);
 
     return () => clearTimeout(debounceTimeout);
   }, [query, performSearch]);
 
   const handleSelect = (result: SearchResult) => {
-    activeSearchIdRef.current++; // Cancel any in-flight searches
+    activeSearchIdRef.current++;
     
-    // Save to recent searches
     saveRecentSearch({
       name: result.name,
       lat: result.lat,
@@ -503,9 +535,9 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     });
     setRecentSearches(getRecentSearches());
 
-    // For metro stations, use station select handler if available
     if (result.type === 'station' && onStationSelect) {
-      onStationSelect(result.id);
+      const targetStationId = result.nearestStationId || (result.id.startsWith('rec_station_') ? result.id.replace('rec_station_', '') : result.id);
+      onStationSelect(targetStationId);
     } else {
       onLocationSelect(result.lat, result.lng, result.name);
     }
@@ -518,11 +550,9 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
   };
 
   const handleRecentSelect = (recent: RecentSearch) => {
-    activeSearchIdRef.current++; // Cancel any in-flight searches
+    activeSearchIdRef.current++;
     
-    // For metro stations, use station select handler if available
     if (recent.type === 'station' && onStationSelect) {
-      // Find station ID from name
       const stationEntry = Object.entries(stations).find(
         ([_, s]) => getStationName(s, language).toLowerCase() === recent.name.toLowerCase() || s.name.toLowerCase() === recent.name.toLowerCase()
       );
@@ -559,8 +589,11 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
   };
 
-  const getIcon = (type: SearchResult['type']) => {
-    switch (type) {
+  const getIcon = (result: SearchResult) => {
+    if (result.isNearestRecommendation) {
+      return <Sparkles className="w-4 h-4 text-primary animate-pulse" />;
+    }
+    switch (result.type) {
       case 'station':
         return <Train className="w-4 h-4 text-primary" />;
       case 'landmark':
@@ -572,8 +605,11 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
     }
   };
 
-  const getTypeLabel = (type: SearchResult['type']) => {
-    switch (type) {
+  const getTypeLabel = (result: SearchResult) => {
+    if (result.isNearestRecommendation) {
+      return t('search.recommendedStation', language);
+    }
+    switch (result.type) {
       case 'station':
         return t('search.metroStation', language);
       case 'landmark':
@@ -681,7 +717,15 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{recent.name}</p>
                 </div>
-                {getIcon(recent.type)}
+                {recent.type === 'station' ? (
+                  <Train className="w-4 h-4 text-primary" />
+                ) : recent.type === 'landmark' ? (
+                  <Landmark className="w-4 h-4 text-amber-500" />
+                ) : recent.type === 'address' ? (
+                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                )}
               </button>
             ))}
           </div>
@@ -703,21 +747,32 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
                 onClick={() => handleSelect(result)}
                 className={cn(
                   "w-full px-4 py-3 text-left transition-colors border-b border-border last:border-0 flex items-start gap-3",
-                  selectedIndex === index ? "bg-primary/10 text-foreground" : "hover:bg-muted"
+                  selectedIndex === index ? "bg-primary/10 text-foreground" : "hover:bg-muted",
+                  result.isNearestRecommendation && "bg-primary/5 hover:bg-primary/10 border-primary/20"
                 )}
               >
                 <div className="mt-0.5 flex-shrink-0">
-                  {getIcon(result.type)}
+                  {getIcon(result)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">{result.name}</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground flex-shrink-0">
-                      {getTypeLabel(result.type)}
+                    <p className={cn(
+                      "text-sm font-medium truncate",
+                      result.isNearestRecommendation && "font-semibold text-primary"
+                    )}>
+                      {result.name}
+                    </p>
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded flex-shrink-0",
+                      result.isNearestRecommendation 
+                        ? "bg-primary/20 text-primary font-semibold"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {getTypeLabel(result)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{result.description}</p>
-                  {result.nearestStationName && (
+                  {result.nearestStationName && !result.isNearestRecommendation && (
                     <p className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1.5 bg-primary/5 w-max px-1.5 py-0.5 rounded border border-primary/10">
                       <Train className="w-3 h-3" /> {t('search.nearestMetro', language)}: {result.nearestStationName} ({(result.nearestStationDist || 0).toFixed(1)} km)
                     </p>
