@@ -183,5 +183,10 @@ export default defineConfig(({ mode }) => ({
   test: {
     testTimeout: 25000,
     hookTimeout: 25000,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['api/**', 'node_modules/**', 'dist/**', 'public/**', '**/*.d.ts', '**/*.test.ts'],
+    },
   },
 }));

@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import { stations } from '../../data/metroData';
 import { stationToSlug, routeToSlug, METRO_LINES } from '../seoRoutes';
 
@@ -9,6 +10,17 @@ const DIST_DIR = path.join(PROJECT_ROOT, 'dist');
 const PUBLIC_DIR = path.join(PROJECT_ROOT, 'public');
 
 describe('Pillar 1 SSG & Deep Route Indexing Pipeline Verification', () => {
+  beforeAll(() => {
+    const hasDistRoute = fs.existsSync(path.join(DIST_DIR, 'route'));
+    const hasPublicRoute = fs.existsSync(path.join(PUBLIC_DIR, 'route'));
+    if (!hasDistRoute && !hasPublicRoute) {
+      execSync('node --experimental-strip-types scripts/generateStaticPages.js', {
+        cwd: PROJECT_ROOT,
+        stdio: 'ignore',
+      });
+    }
+  });
+
   // Gate 1: Route & Slug Resolution Engine
   describe('Gate 1: Slug Normalization & Bidirectional Mapping', () => {
     it('should map every station to a clean hyphenated slug without special chars', () => {
