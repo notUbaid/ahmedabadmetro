@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
   Route, ArrowRight, Clock, Train,
   ChevronDown, ChevronUp, MapPin, ArrowDownUp, X,
-  CircleDot, Circle, Bus, Share2, Check, Info, Locate, Sparkles
+  CircleDot, Circle, Bus, Share2, Check, Info, Locate, Sparkles, Calendar
 } from 'lucide-react';
 import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { popularPlaces } from '@/data/popularPlaces';
@@ -165,6 +165,79 @@ export const RoutePlanner = React.memo(({
   const [destSearch, setDestSearch] = useState(() => initialDestination ? (getStationName(stations[initialDestination], language) || '') : '');
   const [internalIsCoordinating, setInternalIsCoordinating] = useState(isCoordinating);
   const activeTrainRef = useRef<HTMLButtonElement>(null);
+  const scheduleDropdownRef = useRef<HTMLDivElement>(null);
+
+  type DaySelection = 'today' | 'tomorrow' | 'mon-fri' | 'saturday' | 'sunday';
+  const [selectedDay, setSelectedDay] = useState<DaySelection>('today');
+  const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
+
+  const nowIST = useMemo(() => getISTDate(), []);
+  const todayDayOfWeek = nowIST.getDay();
+  const tomorrowDayOfWeek = (todayDayOfWeek + 1) % 7;
+
+  const getDayShortName = (dayIdx: number, lang: string) => {
+    const shortEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const shortGu = ['રવિ', 'સોમ', 'મંગળ', 'બુધ', 'ગુરુ', 'શુક્ર', 'શનિ'];
+    const shortHi = ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'];
+    if (lang === 'gu') return shortGu[dayIdx];
+    if (lang === 'hi') return shortHi[dayIdx];
+    return shortEn[dayIdx];
+  };
+
+  const todayDayShort = getDayShortName(todayDayOfWeek, language);
+  const tomorrowDayShort = getDayShortName(tomorrowDayOfWeek, language);
+
+  const targetDayType = useMemo(() => {
+    switch (selectedDay) {
+      case 'today':
+        return todayDayOfWeek === 0 ? 'Sunday' : todayDayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
+      case 'tomorrow':
+        return tomorrowDayOfWeek === 0 ? 'Sunday' : tomorrowDayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
+      case 'mon-fri':
+        return 'Mon-Fri';
+      case 'saturday':
+        return 'Saturday';
+      case 'sunday':
+        return 'Sunday';
+      default:
+        return 'Mon-Fri';
+    }
+  }, [selectedDay, todayDayOfWeek, tomorrowDayOfWeek]);
+
+  const customScheduleLabel = useMemo(() => {
+    switch (selectedDay) {
+      case 'mon-fri':
+        return t('route.weekday', language);
+      case 'saturday':
+        return t('route.saturday', language);
+      case 'sunday':
+        return t('route.sunday', language);
+      default:
+        return t('route.schedule', language);
+    }
+  }, [selectedDay, language]);
+
+  const scheduleIndicatorText = useMemo(() => {
+    if (targetDayType === 'Sunday') {
+      return t('route.sundayService', language) + ' (12m)';
+    }
+    if (targetDayType === 'Saturday') {
+      return t('route.saturdayService', language) + ' (10-12m)';
+    }
+    return t('route.weekdayService', language) + ' (7-10m)';
+  }, [targetDayType, language]);
+
+  useEffect(() => {
+    const handleClickOutsideSchedule = (e: MouseEvent) => {
+      if (scheduleDropdownRef.current && !scheduleDropdownRef.current.contains(e.target as Node)) {
+        setShowScheduleDropdown(false);
+      }
+    };
+    if (showScheduleDropdown) {
+      document.addEventListener('mousedown', handleClickOutsideSchedule);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutsideSchedule);
+  }, [showScheduleDropdown]);
 
 
   useEffect(() => {
@@ -223,7 +296,7 @@ export const RoutePlanner = React.memo(({
   const [availableDepartures, setAvailableDepartures] = useState<ReturnType<typeof getAvailableDepartures>>([]);
   const [route, setRoute] = useState<PlannedRoute | null>(null);
 
-  // Get all available departures for this route and compute the route
+  // Get all available departures for this route and compute the route based on target day/schedule
   useEffect(() => {
     if (!origin || !destination || origin === destination) {
       setAvailableDepartures([]);
@@ -234,35 +307,43 @@ export const RoutePlanner = React.memo(({
     setIsCalculating(true);
     const timeoutId = setTimeout(() => {
       try {
-        const departures = getAvailableDepartures(origin, destination);
+        const departures = getAvailableDepartures(origin, destination, targetDayType);
         setAvailableDepartures(departures);
 
         let newRoute: PlannedRoute | null = null;
         if (internalIsCoordinating && sharedSegments && sharedSegments.length > 0) {
-          // Find route relative to friend's departure, giving user up to 120 minutes of travel time
           const baseTime = friendDepMins !== undefined
             ? Math.max(0, friendDepMins - 120)
             : 0;
           newRoute = findCommonTrainRoute(sharedSegments, origin, destination, baseTime);
           
-          // Fallback to a normal route if coordination is impossible
           if (!newRoute) {
             if (selectedDepartureIdx !== null && departures[selectedDepartureIdx]) {
-              newRoute = planRouteWithDeparture(origin, destination, departures[selectedDepartureIdx].departureMinutes);
+              newRoute = planRouteWithDeparture(origin, destination, departures[selectedDepartureIdx].departureMinutes, targetDayType);
             } else {
-              newRoute = planRoute(origin, destination);
+              newRoute = planRoute(
+                origin,
+                destination,
+                targetDayType,
+                selectedDay === 'today' ? undefined : (departures[0]?.departureMinutes ?? 360)
+              );
             }
           }
         } else if (selectedDepartureIdx !== null && departures[selectedDepartureIdx]) {
           const dep = departures[selectedDepartureIdx];
-          newRoute = planRouteWithDeparture(origin, destination, dep.departureMinutes);
+          newRoute = planRouteWithDeparture(origin, destination, dep.departureMinutes, targetDayType);
         } else {
-          newRoute = planRoute(origin, destination);
+          newRoute = planRoute(
+            origin,
+            destination,
+            targetDayType,
+            selectedDay === 'today' ? undefined : (departures[0]?.departureMinutes ?? 360)
+          );
         }
         setRoute(newRoute);
         if (newRoute) {
           try {
-            track('route_search', { origin, destination });
+            track('route_search', { origin, destination, dayType: targetDayType });
           } catch {
             // Ignore analytics error in dev/offline
           }
@@ -277,7 +358,7 @@ export const RoutePlanner = React.memo(({
     }, 10);
 
     return () => clearTimeout(timeoutId);
-  }, [origin, destination, selectedDepartureIdx, internalIsCoordinating, sharedSegments, friendDepMins]);
+  }, [origin, destination, selectedDepartureIdx, internalIsCoordinating, sharedSegments, friendDepMins, targetDayType, selectedDay]);
 
   // Create unique departure times list
   const uniqueDepartureTimes = useMemo(() => {
@@ -1001,6 +1082,125 @@ export const RoutePlanner = React.memo(({
               </div>
             </div>
           )}
+
+          {/* Travel Day & Service Schedule Selector */}
+          <div className="pt-2 border-t border-border/50">
+            <div className="flex items-center justify-between gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 bg-muted/50 p-1 rounded-xl border border-border/60">
+                <button
+                  type="button"
+                  onClick={() => { setSelectedDay('today'); setSelectedDepartureIdx(null); }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 min-h-[32px]",
+                    selectedDay === 'today'
+                      ? "bg-background text-foreground shadow-xs border border-border/60"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                  <span>{t('route.today', language)}</span>
+                  <span className={cn(
+                    "text-[10px] px-1 py-0.5 rounded font-medium",
+                    selectedDay === 'today' ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  )}>
+                    {todayDayShort}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setSelectedDay('tomorrow'); setSelectedDepartureIdx(null); }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 min-h-[32px]",
+                    selectedDay === 'tomorrow'
+                      ? "bg-background text-foreground shadow-xs border border-border/60"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <span>{t('route.tomorrow', language)}</span>
+                  <span className={cn(
+                    "text-[10px] px-1 py-0.5 rounded font-medium",
+                    selectedDay === 'tomorrow' ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  )}>
+                    {tomorrowDayShort}
+                  </span>
+                </button>
+
+                {/* Custom Schedule Dropdown */}
+                <div className="relative" ref={scheduleDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 min-h-[32px]",
+                      ['mon-fri', 'saturday', 'sunday'].includes(selectedDay)
+                        ? "bg-background text-primary shadow-xs border border-primary/30"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span>{customScheduleLabel}</span>
+                    <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+                  </button>
+
+                  {showScheduleDropdown && (
+                    <div className="absolute right-0 top-full mt-1.5 w-60 bg-background/95 backdrop-blur-md rounded-2xl border border-border shadow-2xl p-1 z-30">
+                      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/50">
+                        {t('route.serviceSchedules', language)}
+                      </div>
+                      
+                      <button
+                        onClick={() => { setSelectedDay('mon-fri'); setSelectedDepartureIdx(null); setShowScheduleDropdown(false); }}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs rounded-xl flex items-center justify-between transition-colors",
+                          selectedDay === 'mon-fri' ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
+                        )}
+                      >
+                        <div>
+                          <p className="font-semibold">{t('route.weekday', language)}</p>
+                          <p className="text-[10px] text-muted-foreground">{t('route.weekdayDesc', language)}</p>
+                        </div>
+                        {selectedDay === 'mon-fri' && <Check className="w-3.5 h-3.5 text-primary" />}
+                      </button>
+
+                      <button
+                        onClick={() => { setSelectedDay('saturday'); setSelectedDepartureIdx(null); setShowScheduleDropdown(false); }}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs rounded-xl flex items-center justify-between transition-colors",
+                          selectedDay === 'saturday' ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
+                        )}
+                      >
+                        <div>
+                          <p className="font-semibold">{t('route.saturday', language)}</p>
+                          <p className="text-[10px] text-muted-foreground">{t('route.saturdayDesc', language)}</p>
+                        </div>
+                        {selectedDay === 'saturday' && <Check className="w-3.5 h-3.5 text-primary" />}
+                      </button>
+
+                      <button
+                        onClick={() => { setSelectedDay('sunday'); setSelectedDepartureIdx(null); setShowScheduleDropdown(false); }}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs rounded-xl flex items-center justify-between transition-colors",
+                          selectedDay === 'sunday' ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
+                        )}
+                      >
+                        <div>
+                          <p className="font-semibold">{t('route.sunday', language)}</p>
+                          <p className="text-[10px] text-muted-foreground">{t('route.sundayDesc', language)}</p>
+                        </div>
+                        {selectedDay === 'sunday' && <Check className="w-3.5 h-3.5 text-primary" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Active Service Badge */}
+              <div className="flex items-center text-[11px] text-muted-foreground px-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />
+                <span>{scheduleIndicatorText}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Route Result Loading Skeleton */}
@@ -1057,7 +1257,12 @@ export const RoutePlanner = React.memo(({
               {/* Available Departures (Modern Chips) */}
               {route.departureTime && route.arrivalTime && availableDepartures.length > 0 && !internalIsCoordinating && (
                 <div className="mb-4">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{t('route.availableMetros', language)}</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('route.availableMetros', language)}</p>
+                    <span className="text-[10px] text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded-full">
+                      {scheduleIndicatorText}
+                    </span>
+                  </div>
                   <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                     {uniqueDepartureTimes.map((dep, idx) => {
                       const isSelected = route.departureTime === dep.departureTime;

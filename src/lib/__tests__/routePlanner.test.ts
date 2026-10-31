@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { findCommonTrainRoute, planRoute, calculateFare, planRouteWithDeparture, calculateJourneyProgress, type PlannedRoute } from '../routePlanner';
+import { findCommonTrainRoute, planRoute, calculateFare, planRouteWithDeparture, calculateJourneyProgress, getAvailableDepartures, type PlannedRoute } from '../routePlanner';
 import { trainSchedules } from '../../data/timetable';
 import { stations } from '../../data/metroData';
 
@@ -98,7 +98,35 @@ describe('Route Planner API', () => {
       expect(departureHour).toBeLessThanOrEqual(8);
     });
   });
+
+  describe('Target Day & Weekend Schedule Planning', () => {
+    it('returns different departure counts and schedules for Sunday vs Mon-Fri on Blue Line', () => {
+      const weekdayDeps = getAvailableDepartures('thaltej', 'vastral_gam', 'Mon-Fri');
+      const sundayDeps = getAvailableDepartures('thaltej', 'vastral_gam', 'Sunday');
+
+      expect(weekdayDeps.length).toBeGreaterThan(0);
+      expect(sundayDeps.length).toBeGreaterThan(0);
+
+      // Weekday runs 7-minute peak frequency resulting in more departures than Sunday (12-minute flat frequency)
+      expect(weekdayDeps.length).not.toEqual(sundayDeps.length);
+    });
+
+    it('plans route accurately using Sunday timetable when dayType is Sunday', () => {
+      const sundayRoute = planRoute('thaltej', 'vastral_gam', 'Sunday', 600); // 10:00 AM
+      expect(sundayRoute).not.toBeNull();
+      expect(sundayRoute?.dayType).toBe('Sunday');
+      expect(sundayRoute?.departureMinutes).toBeGreaterThanOrEqual(600);
+    });
+
+    it('plans route accurately using Mon-Fri weekday timetable when dayType is Mon-Fri', () => {
+      const weekdayRoute = planRoute('thaltej', 'vastral_gam', 'Mon-Fri', 540); // 9:00 AM morning peak
+      expect(weekdayRoute).not.toBeNull();
+      expect(weekdayRoute?.dayType).toBe('Mon-Fri');
+      expect(weekdayRoute?.departureMinutes).toBeGreaterThanOrEqual(540);
+    });
+  });
 });
+
 
 describe('Coordinate with Friend - findCommonTrainRoute', () => {
   it('should optimize for least waiting time and traveling together (Paldi to Infocity against Apparel Park to GNLU)', () => {

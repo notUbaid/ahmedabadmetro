@@ -40,10 +40,11 @@ export interface PlannedRoute {
   // - estimated: at least one leg fell back to estimated timings
   // - mixed: some legs matched, some estimated
   routeConfidence?: 'timetable' | 'estimated' | 'mixed';
+  dayType?: string;
 }
 
 // Define station order for each line (terminal to terminal)
-const getDayType = (date: Date = getISTDate()) => {
+export const getDayType = (date: Date = getISTDate()): string => {
   const day = date.getDay();
   return day === 0 ? 'Sunday' : day === 6 ? 'Saturday' : 'Mon-Fri';
 };
@@ -866,16 +867,22 @@ const buildDirectRoute = (
   };
 };
 
-export const planRoute = (originId: string, destinationId: string): PlannedRoute | null => {
+export const planRoute = (
+  originId: string,
+  destinationId: string,
+  targetDayType: string = getDayType(),
+  targetMinutes?: number
+): PlannedRoute | null => {
   const origin = stations[originId];
   const destination = stations[destinationId];
 
   if (!origin || !destination) return null;
   if (originId === destinationId) return null;
 
-  const currentMinutes = getCurrentTimeMinutes();
+  const currentMinutes = targetMinutes !== undefined ? targetMinutes : getCurrentTimeMinutes();
   const currentDayType = getDayType();
-  const departures = getAvailableDepartures(originId, destinationId, currentDayType);
+  const isTargetingCurrentDay = targetDayType === currentDayType && targetMinutes === undefined;
+  const departures = getAvailableDepartures(originId, destinationId, targetDayType);
 
   const isPurpleDestination = destinationId === 'pdpu' || destinationId === 'gift_city';
 
@@ -887,28 +894,37 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
     return null;
   }
 
-  // We strictly show trains that are departing from the current minute onwards
-  const GRACE_PERIOD = 0;
-  let possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
-
+  let possible = departures;
   let isTomorrow = false;
-  if (possible.length === 0) {
-    // If no more departures today, show the first available departure for tomorrow morning
-    const tomorrow = getISTDate();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowDayType = getDayType(tomorrow);
-    
-    const tomorrowDepartures = getAvailableDepartures(originId, destinationId, tomorrowDayType);
-    // Metro service begins from ~06:15 (375 min). Filter for morning service starts.
-    possible = tomorrowDepartures.filter(d => d.departureMinutes >= 360);
-    isTomorrow = true;
-    
+
+  if (isTargetingCurrentDay) {
+    // We strictly show trains that are departing from the current minute onwards
+    const GRACE_PERIOD = 0;
+    possible = departures.filter(d => d.departureMinutes >= currentMinutes - GRACE_PERIOD);
+
     if (possible.length === 0) {
-      // Fallback: take any available departure tomorrow
-      possible = tomorrowDepartures;
+      // If no more departures today, show the first available departure for tomorrow morning
+      const tomorrow = getISTDate();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDayType = getDayType(tomorrow);
+      
+      const tomorrowDepartures = getAvailableDepartures(originId, destinationId, tomorrowDayType);
+      // Metro service begins from ~06:15 (375 min). Filter for morning service starts.
+      possible = tomorrowDepartures.filter(d => d.departureMinutes >= 360);
+      isTomorrow = true;
+      
       if (possible.length === 0) {
-        return null;
+        // Fallback: take any available departure tomorrow
+        possible = tomorrowDepartures;
+        if (possible.length === 0) {
+          return null;
+        }
       }
+    }
+  } else if (targetMinutes !== undefined) {
+    possible = departures.filter(d => d.departureMinutes >= targetMinutes);
+    if (possible.length === 0) {
+      possible = departures;
     }
   }
 
@@ -928,8 +944,10 @@ export const planRoute = (originId: string, destinationId: string): PlannedRoute
 
   const best = sorted[0];
 
-  const targetDayType = isTomorrow ? (() => { const d = getISTDate(); d.setDate(d.getDate() + 1); return getDayType(d); })() : currentDayType;
-  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, targetDayType);
+  const resolvedDayType = isTomorrow 
+    ? (() => { const d = getISTDate(); d.setDate(d.getDate() + 1); return getDayType(d); })() 
+    : targetDayType;
+  const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, resolvedDayType);
   if (!route) return null;
 
   // Special handling for PDPU and GIFT City: suggest bus even if a direct train exists but is infrequent
@@ -1180,7 +1198,8 @@ const buildRouteFromLegs = (
     toIdx: number;
     departMinutes: number;
     arriveMinutes: number;
-  }[]
+  }[],
+  dayType: string = getDayType()
 ): PlannedRoute | null => {
   const origin = stations[originId];
   const destination = stations[destId];
@@ -1297,6 +1316,7 @@ const buildRouteFromLegs = (
     arrivalMinutes: lastArrivalMinutes,
     isDirect: legs.length === 1,
     routeConfidence,
+    dayType,
   };
 };
 
@@ -1467,7 +1487,7 @@ export const planRouteWithDeparture = (
   const legs = legsReversed.reverse();
   if (legs.length === 0) return null;
 
-  return buildRouteFromLegs(originId, destinationId, departureMinutes, legs);
+  return buildRouteFromLegs(originId, destinationId, departureMinutes, legs, dayType);
 };
 
 export interface SharedSegment {
