@@ -395,6 +395,17 @@ export const getServiceWindow = (stationId: string): { first: string; last: stri
 let cachedDayType = '';
 let cachedActiveSchedules: TrainSchedule[] = [];
 
+interface TurnaroundInfo {
+  dwellMinutes: number;
+  returnDestination?: string;
+  matchedDepartureId?: string;
+}
+const turnaroundCache = new Map<string, TurnaroundInfo>();
+
+export const TURNAROUND_TERMINI = ['mahatma_mandir', 'koteshwar_road'];
+export const MAX_TURNAROUND_LAYOVER = 12; // Maximum minutes to hold at platform for a scheduled return trip
+export const DEFAULT_TURNAROUND_LAYOVER = 8; // Standard 7-8 min layover when waiting or terminating
+
 export interface TrainPosition {
   id: string;
   line: string;
@@ -423,6 +434,63 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
   if (cachedDayType !== currentDayType) {
     cachedDayType = currentDayType;
     cachedActiveSchedules = trainSchedules.filter(s => !s.dayType || s.dayType === currentDayType || (s.line !== 'blue' && s.dayType === 'Mon-Fri'));
+
+    turnaroundCache.clear();
+
+    for (const terminusId of TURNAROUND_TERMINI) {
+      const arrivals: { schedule: TrainSchedule; arrMin: number }[] = [];
+      const departures: { schedule: TrainSchedule; depMin: number }[] = [];
+
+      for (const s of cachedActiveSchedules) {
+        const startMin = s._cachedStartMinutes!;
+        const firstSt = s.stations[0];
+        const lastSt = s.stations[s.stations.length - 1];
+
+        if (lastSt === terminusId) {
+          const arrMin = startMin + s.stationTimes[s.stationTimes.length - 1];
+          arrivals.push({ schedule: s, arrMin });
+        }
+        if (firstSt === terminusId) {
+          departures.push({ schedule: s, depMin: startMin });
+        }
+      }
+
+      arrivals.sort((a, b) => a.arrMin - b.arrMin);
+      departures.sort((a, b) => a.depMin - b.depMin);
+
+      const usedDepartureIds = new Set<string>();
+
+      for (const arr of arrivals) {
+        const nextDep = departures.find(
+          d => d.schedule.line === arr.schedule.line &&
+               d.depMin >= arr.arrMin &&
+               !usedDepartureIds.has(d.schedule.id)
+        );
+
+        let dwellMinutes = DEFAULT_TURNAROUND_LAYOVER;
+        let returnDestination: string | undefined = undefined;
+        let matchedDepartureId: string | undefined = undefined;
+
+        if (nextDep) {
+          const gap = nextDep.depMin - arr.arrMin;
+          if (gap >= 0 && gap <= MAX_TURNAROUND_LAYOVER) {
+            dwellMinutes = gap;
+            returnDestination = nextDep.schedule.stations[nextDep.schedule.stations.length - 1];
+            matchedDepartureId = nextDep.schedule.id;
+            usedDepartureIds.add(nextDep.schedule.id);
+          } else {
+            dwellMinutes = Math.min(DEFAULT_TURNAROUND_LAYOVER, gap);
+            returnDestination = nextDep.schedule.stations[nextDep.schedule.stations.length - 1];
+          }
+        }
+
+        turnaroundCache.set(arr.schedule.id, {
+          dwellMinutes,
+          returnDestination,
+          matchedDepartureId,
+        });
+      }
+    }
   }
 
   for (const schedule of cachedActiveSchedules) {
@@ -431,13 +499,21 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
 
     // Include dwell at the final station so trains remain visible while they're "at" the terminus.
     const finalStationId = schedule.stations[schedule.stations.length - 1];
-    const finalIsInterchange = INTERCHANGE_STATIONS.includes(finalStationId);
-    const lastStopDwellMinutes = (finalIsInterchange ? INTERCHANGE_STOP : NORMAL_STOP) / 60;
+    let lastStopDwellMinutes = 0;
+    const turnaround = turnaroundCache.get(schedule.id);
+
+    if (turnaround) {
+      lastStopDwellMinutes = turnaround.dwellMinutes;
+    } else {
+      const finalIsInterchange = INTERCHANGE_STATIONS.includes(finalStationId);
+      lastStopDwellMinutes = (finalIsInterchange ? INTERCHANGE_STOP : NORMAL_STOP) / 60;
+    }
 
     const endMinutes = startMinutes + journeyTime + lastStopDwellMinutes;
 
-    // Active only between departure and final arrival (+ final dwell)
-    if (currentMinutes < startMinutes || currentMinutes > endMinutes) continue;
+    // Active only between departure and final arrival (+ final dwell / turnaround layover)
+    if (currentMinutes < startMinutes) continue;
+    if (turnaround?.matchedDepartureId ? currentMinutes >= endMinutes : currentMinutes > endMinutes) continue;
 
 
     const elapsedMinutes = currentMinutes - startMinutes;
@@ -446,6 +522,7 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
     let toIdx = 1;
     let status: 'stopped' | 'moving' = 'moving';
     let progress = 0;
+    let destinationStationId = finalStationId;
 
     if (elapsedMinutes >= journeyTime) {
       // Train has reached the final terminus and is dwelling at the platform
@@ -453,6 +530,9 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
       toIdx = schedule.stationTimes.length - 1;
       status = 'stopped';
       progress = 1;
+      if (turnaround?.returnDestination) {
+        destinationStationId = turnaround.returnDestination;
+      }
     } else {
       // stationTimes are cumulative arrivals; find segment by elapsed in [arr(i), arr(i+1)]
       for (let i = 0; i < schedule.stationTimes.length - 1; i++) {
@@ -490,15 +570,13 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
     const toStationId = schedule.stations[toIdx];
     if (!fromStationId || !toStationId) continue;
 
-    const destinationId = schedule.stations[schedule.stations.length - 1];
-
     positions.push({
       id: schedule.id,
       line: schedule.line,
       fromStationId,
       toStationId,
       progress: Math.max(0, Math.min(1, progress)),
-      destination: formatStationName(destinationId),
+      destination: formatStationName(destinationStationId),
       status,
     });
   }
@@ -509,13 +587,20 @@ export const getCurrentTrainPositions = (): TrainPosition[] => {
   const uniquePositions: ReturnType<typeof getCurrentTrainPositions> = [];
 
   for (const pos of positions) {
-    // We check if another train is on the exact same physical segment
-    // and its progress is within 15% of this one. 
-    // If so, we assume they are visually colliding and drop one.
+    // Drop trains on the exact same physical segment or duplicate stopped trains at turnaround termini
     const isVisuallyColliding = uniquePositions.some(
-      up => up.fromStationId === pos.fromStationId && 
-            up.toStationId === pos.toStationId && 
-            Math.abs(up.progress - pos.progress) < 0.30
+      up => {
+        if (up.fromStationId === pos.fromStationId && up.toStationId === pos.toStationId) {
+          return Math.abs(up.progress - pos.progress) < 0.30;
+        }
+        // At turnaround terminus platform, ensure no two stopped trains overlap
+        const upStation = up.progress >= 0.9 ? up.toStationId : (up.progress <= 0.1 ? up.fromStationId : null);
+        const posStation = pos.progress >= 0.9 ? pos.toStationId : (pos.progress <= 0.1 ? pos.fromStationId : null);
+        if (upStation && posStation && upStation === posStation && TURNAROUND_TERMINI.includes(upStation)) {
+          return true;
+        }
+        return false;
+      }
     );
 
     if (!isVisuallyColliding) {
