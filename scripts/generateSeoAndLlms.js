@@ -619,12 +619,6 @@ let sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://www.ahmedabadmetro.site/line/green-line</loc>
-    <lastmod>${SITEMAP_DATE}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://www.ahmedabadmetro.site/line/purple-line</loc>
     <lastmod>${SITEMAP_DATE}</lastmod>
     <changefreq>monthly</changefreq>

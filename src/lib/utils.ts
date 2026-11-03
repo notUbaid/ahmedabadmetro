@@ -6,14 +6,69 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Returns a new Date object artificially shifted so that local methods
- * (getHours, getMinutes, getDay, etc.) return the time in Indian Standard Time (IST).
- * This prevents bugs when a user accesses the app from a different timezone.
+ * Extract time components in Indian Standard Time (Asia/Kolkata) using Intl.DateTimeFormat.
+ * Guaranteed to produce true IST wall-clock values regardless of system/runner timezone.
  */
-export const getISTDate = (): Date => {
-  const now = new Date();
+export const getISTTimeComponents = (baseDate: Date = new Date()): {
+  hours: number;
+  minutes: number;
+  seconds: number;
+  dayOfWeek: number;
+  timeString: string;
+} => {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour12: false,
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  const parts = formatter.formatToParts(baseDate);
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+  let weekdayStr = 'Wed';
+
+  for (const part of parts) {
+    if (part.type === 'hour') {
+      hours = parseInt(part.value, 10);
+      if (hours === 24) hours = 0;
+    } else if (part.type === 'minute') {
+      minutes = parseInt(part.value, 10);
+    } else if (part.type === 'second') {
+      seconds = parseInt(part.value, 10);
+    } else if (part.type === 'weekday') {
+      weekdayStr = part.value;
+    }
+  }
+
+  const dayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  };
+  const dayOfWeek = dayMap[weekdayStr] ?? 3;
+  const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+  return { hours, minutes, seconds, dayOfWeek, timeString };
+};
+
+/**
+ * Returns total minutes since midnight in Indian Standard Time (0..1439).
+ */
+export const getISTMinutes = (baseDate: Date = new Date()): number => {
+  const { hours, minutes } = getISTTimeComponents(baseDate);
+  return hours * 60 + minutes;
+};
+
+/**
+ * Returns a Date object artificially aligned so that local getHours(), getMinutes(),
+ * and getDay() return true Indian Standard Time (IST) values across all platforms.
+ */
+export const getISTDate = (baseDate?: Date): Date => {
+  const now = baseDate || new Date();
   const localOffsetMinutes = -now.getTimezoneOffset();
-  const istOffsetMinutes = 330; // +5:30
+  const istOffsetMinutes = 330; // UTC+5:30
   const shift = istOffsetMinutes - localOffsetMinutes;
   return new Date(now.getTime() + shift * 60000);
 };

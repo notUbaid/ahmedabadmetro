@@ -878,7 +878,7 @@ function renderFooter() {
             <li><a href="/stations">All 53 Stations Directory</a></li>
             <li><a href="/line/blue-line">Blue Line (East-West)</a></li>
             <li><a href="/line/red-line">Red Line (North-South)</a></li>
-            <li><a href="/line/green-line">Green Line (Gandhinagar)</a></li>
+            <li><a href="/line/yellow-line">Yellow / Line 3 (Gandhinagar)</a></li>
             <li><a href="/line/purple-line">Purple Line (GIFT City)</a></li>
           </ul>
         </div>
@@ -3839,10 +3839,6 @@ for (const key of LINE_KEYS) {
   });
 
   writeHtmlFile(path.join('line', line.slug, 'index.html'), html);
-  // Alias green-line to yellow-line for backward compatibility
-  if (key === 'green') {
-    writeHtmlFile(path.join('line', 'green-line', 'index.html'), html);
-  }
 }
 
 console.log('All static pages generated successfully!');

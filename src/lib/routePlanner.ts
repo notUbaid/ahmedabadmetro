@@ -18,6 +18,7 @@ export interface RouteStep {
   isDirect?: boolean; // Is this a direct train (no interchange needed)
   waitTime?: number; // Wait time for interchange in minutes
   busDestination?: string; // For bus step
+  travelTime?: number; // In-transit duration for this travel leg in minutes
 }
 
 export interface PlannedRoute {
@@ -147,9 +148,18 @@ const formatMinutesToTime = (minutes: number): string => {
 };
 
 // Pre-compute accurate travel times between any two stations on corridor/line schedules
-// This uses the official segment timing data for accuracy
+// This checks official train schedules first, then corridor/line segment timing data
 const getAccurateTravelTime = (originId: string, destId: string): number | null => {
-  // Check corridor timings first (most accurate for cross-line journeys)
+  // 1. Check official timetable trainSchedules for direct schedules (highest fidelity)
+  for (const schedule of trainSchedules) {
+    const originIdx = schedule.stations.indexOf(originId);
+    const destIdx = schedule.stations.indexOf(destId);
+    if (originIdx !== -1 && destIdx !== -1 && originIdx < destIdx) {
+      return schedule.stationTimes[destIdx] - schedule.stationTimes[originIdx];
+    }
+  }
+
+  // 2. Check corridor timings (most accurate for cross-line journeys)
   const corridors = [
     CORRIDOR_TIMINGS.apmcToMahatmaMandir,
     CORRIDOR_TIMINGS.apmcToSachivalaya,
@@ -574,16 +584,19 @@ const buildTimeAwareRoute = (
         });
       }
 
+      const accurateSegmentDuration = getAccurateTravelTime(seg.from, seg.to) ?? (stationCount * 2.5);
+
       steps.push({
         type: 'travel',
         station: toStation,
         line: seg.line as keyof typeof LINE_COLORS,
         stationCount,
-        stations: stationsBetween.map(id => stations[id]).filter(Boolean)
+        stations: stationsBetween.map(id => stations[id]).filter(Boolean),
+        travelTime: Math.round(accurateSegmentDuration)
       });
 
-      // Estimate time
-      currentTimeMinutes += stationCount * 2.5;
+      // Advance clock by accurate segment travel duration
+      currentTimeMinutes += accurateSegmentDuration;
     } else {
       hasTimetable = true;
       // Use the actual schedule to get stations between
@@ -621,6 +634,7 @@ const buildTimeAwareRoute = (
         });
       }
 
+      const legDuration = nextTrain.arrivalMinutes - nextTrain.departureMinutes;
       steps.push({
         type: 'travel',
         station: toStation,
@@ -628,7 +642,8 @@ const buildTimeAwareRoute = (
         stationCount,
         stations: stationsBetween,
         trainId: nextTrain.trainId,
-        allStations: allStationsInSegment
+        allStations: allStationsInSegment,
+        travelTime: Math.round(legDuration)
       });
 
       currentTimeMinutes = nextTrain.arrivalMinutes;

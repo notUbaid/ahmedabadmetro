@@ -7,6 +7,7 @@
     "dev": "vite",
     "seo:generate": "node --experimental-strip-types scripts/generateSeoAndLlms.js",
     "build": "npm run seo:generate && vite build && node --experimental-strip-types scripts/generateStaticPages.js",
+    "vercel-build": "npm run build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
