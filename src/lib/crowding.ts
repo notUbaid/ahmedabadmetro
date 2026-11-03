@@ -9,7 +9,7 @@
  * 5. Dynamic crowding: Trains get more crowded as they progress along their route
  */
 
-import { getISTDate } from '@/lib/utils';
+import { getISTDate, getISTTimeComponents } from '@/lib/utils';
 
 export type CrowdLevel = 'low' | 'moderate' | 'heavy';
 
@@ -22,20 +22,16 @@ export interface CrowdInfo {
 }
 
 // Peak hours: 8:00-11:00 and 17:00-20:00 on weekdays
-export const isPeakHour = (date: Date = getISTDate()): boolean => {
-  const hour = date.getHours();
-  const day = date.getDay();
-  const isWeekday = day >= 1 && day <= 5;
-  
-  // Peak hours only apply on weekdays
+export const isPeakHour = (date: Date = new Date()): boolean => {
+  const { hours, dayOfWeek } = getISTTimeComponents(date);
+  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
   if (!isWeekday) return false;
-  
-  return (hour >= 8 && hour < 11) || (hour >= 17 && hour < 20);
+  return (hours >= 8 && hours < 11) || (hours >= 17 && hours < 20);
 };
 
-export const isWeekend = (date: Date = getISTDate()): boolean => {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+export const isWeekend = (date: Date = new Date()): boolean => {
+  const { dayOfWeek } = getISTTimeComponents(date);
+  return dayOfWeek === 0 || dayOfWeek === 6;
 };
 
 // Check if a train is a corridor service (APMC → Mahatma Mandir or vice versa)
@@ -140,10 +136,10 @@ export const getCrowdLevel = (
     date?: Date;
   }
 ): CrowdInfo => {
-  const now = options?.date ?? getISTDate();
+  const now = options?.date ?? new Date();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
-  const hour = now.getHours();
+  const { hours: hour } = getISTTimeComponents(now);
 
   // Schedule timing check (if trainId indicates a scheduled morning/evening service)
   const scheduleMatch = trainId ? trainId.match(/L4-(NB|SB)-(\d+)/) : null;
@@ -288,10 +284,10 @@ export const getSimpleCrowdLevel = (
   line: string,
   trainId: string = ''
 ): CrowdInfo => {
-  const now = getISTDate();
+  const now = new Date();
   const isPeak = isPeakHour(now);
   const isWeekendDay = isWeekend(now);
-  const hour = now.getHours();
+  const { hours: hour } = getISTTimeComponents(now);
 
   if (trainId.startsWith('L4-SB') && (hour >= 15 && hour < 22)) {
     return formatCrowdLevel(isWeekendDay ? 'moderate' : 'heavy');

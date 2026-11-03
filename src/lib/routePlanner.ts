@@ -1,7 +1,7 @@
 import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { trainSchedules, TrainSchedule, lineStations } from '@/data/timetable';
 import { CORRIDOR_TIMINGS, REVERSE_CORRIDOR_TIMINGS, LINE_TIMINGS } from '@/data/segmentTimings';
-import { getISTDate } from '@/lib/utils';
+import { getISTDate, getISTMinutes, getISTTimeComponents } from '@/lib/utils';
 import { t, getStationName, type Language } from '@/lib/i18n';
 
 export interface RouteStep {
@@ -45,9 +45,9 @@ export interface PlannedRoute {
 }
 
 // Define station order for each line (terminal to terminal)
-export const getDayType = (date: Date = getISTDate()): string => {
-  const day = date.getDay();
-  return day === 0 ? 'Sunday' : day === 6 ? 'Saturday' : 'Mon-Fri';
+export const getDayType = (date: Date = new Date()): string => {
+  const { dayOfWeek } = getISTTimeComponents(date);
+  return dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 };
 
 const LINE_STATIONS = lineStations;
@@ -130,8 +130,7 @@ export const calculateFare = (originId: string, destId: string, stationCount?: n
 
 // Get current time in minutes from midnight
 const getCurrentTimeMinutes = (): number => {
-  const now = getISTDate();
-  return now.getHours() * 60 + now.getMinutes();
+  return getISTMinutes();
 };
 
 // Parse time string to minutes

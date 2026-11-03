@@ -107,5 +107,15 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/nominatim",
+      "destination": "/api/geocode?format=nominatim"
+    },
+    {
+      "source": "/api/ors-geocode",
+      "destination": "/api/geocode"
+    }
   ]
 }

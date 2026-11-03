@@ -5,6 +5,7 @@ import { trainSchedules } from '@/data/timetable';
 import { cn } from '@/lib/utils';
 import { useCurrentTime } from '@/hooks/useCurrentTime';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getISTMinutes } from '@/lib/utils';
 import { t, getStationName } from '@/lib/i18n';
 
 interface TrainDetailsDialogProps {
@@ -22,7 +23,7 @@ export const TrainDetailsDialog = ({
 }: TrainDetailsDialogProps) => {
   const { language } = useLanguage();
   const now = useCurrentTime();
-  const currentTime = now.getHours() * 60 + now.getMinutes();
+  const currentTime = getISTMinutes(now);
 
   // Find the train schedule
   const schedule = useMemo(() => {

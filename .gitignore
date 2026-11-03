@@ -43,3 +43,8 @@ twa-package/
 # Pre-rendered static route directories (generated in dist/ during build)
 public/route/
 bun.lockb
+
+.git_corrupt/
+dist_corrupted*/
+node_modules_old*/
+src/*corrupted*/

@@ -200,6 +200,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   test: {
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['**/.git_corrupt/**', '**/node_modules/**', '**/node_modules_old*/**', '**/dist/**', '**/src/*corrupted*/**', '**/.{idea,git,cache,output,temp}/**'],
     testTimeout: 25000,
     hookTimeout: 25000,
     coverage: {

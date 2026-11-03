@@ -1,3 +1,18 @@
+function formatAsNominatim(geo: any) {
+  if (geo && geo.features && Array.isArray(geo.features)) {
+    return geo.features.map((f: any, idx: number) => ({
+      place_id: f.properties?.id ?? idx,
+      osm_id: f.properties?.id ?? idx,
+      osm_type: 'node',
+      lat: String(f.geometry?.coordinates?.[1] ?? 0),
+      lon: String(f.geometry?.coordinates?.[0] ?? 0),
+      display_name: f.properties?.label || f.properties?.name || 'Ahmedabad',
+      name: f.properties?.name || f.properties?.label || 'Ahmedabad',
+      type: f.properties?.type || 'station',
+    }));
+  }
+  return geo;
+}
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const ALLOWED_ORIGINS = [
@@ -138,7 +153,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     res.setHeader('Cache-Control', edgeCacheHeader);
     res.setHeader('X-Cache', 'HIT');
-    return res.status(200).json(cached.data);
+    const outData = req.query.format === 'nominatim' ? formatAsNominatim(cached.data) : cached.data;
+    return res.status(200).json(outData);
   }
 
   // 2. High-confidence local station and landmark matching (Instant, 0 upstream cost)
@@ -168,7 +184,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     cache.set(cacheKey, { timestamp: Date.now(), data: localResult });
     res.setHeader('Cache-Control', edgeCacheHeader);
     res.setHeader('X-Source', 'local_matcher');
-    return res.status(200).json(localResult);
+    const outData = req.query.format === 'nominatim' ? formatAsNominatim(localResult) : localResult;
+    return res.status(200).json(outData);
   }
 
   // 3. OpenRouteService geocoding bounded to Ahmedabad/Gandhinagar region
@@ -200,7 +217,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         cache.set(cacheKey, { timestamp: Date.now(), data });
         res.setHeader('Cache-Control', edgeCacheHeader);
         res.setHeader('X-Source', 'openrouteservice');
-        return res.status(200).json(data);
+        const outData = req.query.format === 'nominatim' ? formatAsNominatim(data) : data;
+    return res.status(200).json(outData);
       }
     } catch (err) {
       console.warn('ORS Geocode failed, falling back to OSM Nominatim:', err);
@@ -233,7 +251,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       cache.set(cacheKey, { timestamp: Date.now(), data });
       res.setHeader('Cache-Control', edgeCacheHeader);
       res.setHeader('X-Source', 'nominatim');
-      return res.status(200).json(data);
+      const outData = req.query.format === 'nominatim' ? formatAsNominatim(data) : data;
+    return res.status(200).json(outData);
     }
 
     return res.status(response.status).json({ error: 'Geocoding upstream service unavailable' });

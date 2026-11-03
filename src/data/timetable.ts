@@ -2,7 +2,7 @@
 // NOTE: This file must not contain any git merge conflict markers.
 
 import { INTERCHANGE_STATIONS, NORMAL_STOP, INTERCHANGE_STOP, LINE_TIMINGS } from './segmentTimings';
-import { getISTDate, minutesUntil } from '@/lib/utils';
+import { getISTDate, getISTMinutes, getISTTimeComponents, minutesUntil } from '@/lib/utils';
 import timetableFromExcelData from './timetableFromExcel.generated.json';
 
 import { stations } from './metroData';
@@ -110,9 +110,7 @@ export const lineInfo = {
 } as const;
 
 export const getCurrentHeadway = (line: string): { minutes: number; label: string } => {
-  const now = getISTDate();
-  const hour = now.getHours();
-  const dayOfWeek = now.getDay();
+  const { hours: hour, dayOfWeek } = getISTTimeComponents();
   const isSunday = dayOfWeek === 0;
   const isSaturday = dayOfWeek === 6;
   const isPeakHour = (hour >= 8 && hour < 11) || (hour >= 17 && hour < 20);
@@ -181,10 +179,9 @@ export const getDirectionStr = (destinationId: string, language: Language = 'en'
 };
 
 // Returns trains arriving within next 120 minutes for stationIndex visualization
-export const getUpcomingTrains = (stationId: string, limit = 3, language: Language = 'en') => {
-  const now = getISTDate();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const dayOfWeek = now.getDay();
+export const getUpcomingTrains = (stationId: string, limit = 3, language: Language = 'en', baseDate?: Date) => {
+  const { hours, minutes, dayOfWeek } = getISTTimeComponents(baseDate);
+  const currentMinutes = hours * 60 + minutes;
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   const upcoming: {
@@ -264,10 +261,9 @@ export const getUpcomingTrains = (stationId: string, limit = 3, language: Langua
   return deduplicated.slice(0, limit);
 };
 
-export const getAllTrainsForStation = (stationId: string, language: Language = 'en') => {
+export const getAllTrainsForStation = (stationId: string, language: Language = 'en', baseDate?: Date) => {
   const trains: { time: string; destination: string; line: string; minutes: number; direction: string; remainingCount: number }[] = [];
-  const now = getISTDate();
-  const dayOfWeek = now.getDay();
+  const { dayOfWeek } = getISTTimeComponents(baseDate);
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   const schedulesAtStation = schedulesByStation.get(stationId) || [];
@@ -316,12 +312,10 @@ export const getAllTrainsForStation = (stationId: string, language: Language = '
   return deduplicated.map(({ time, destination, line }) => ({ time, destination, line }));
 };
 
-export const getLastTrainWarnings = (stationId: string, language: Language = 'en') => {
-  const now = getISTDate();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
+export const getLastTrainWarnings = (stationId: string, language: Language = 'en', baseDate?: Date) => {
+  const { hours, minutes, dayOfWeek } = getISTTimeComponents(baseDate);
+  const currentMinutes = hours * 60 + minutes;
   const destinationLastTrains = new Map<string, { line: string; arrivalMinutes: number }>();
-  const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   const schedulesAtStation = schedulesByStation.get(stationId) || [];
@@ -369,9 +363,8 @@ export const getLastTrainWarnings = (stationId: string, language: Language = 'en
 
 // First and last train times at a station for the current service day.
 // Used to explain an empty "upcoming" list: before first train vs end of service.
-export const getServiceWindow = (stationId: string): { first: string; last: string } | null => {
-  const now = getISTDate();
-  const dayOfWeek = now.getDay();
+export const getServiceWindow = (stationId: string, baseDate?: Date): { first: string; last: string } | null => {
+  const { dayOfWeek } = getISTTimeComponents(baseDate);
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   let firstMinutes = Infinity;
@@ -417,17 +410,12 @@ export interface TrainPosition {
   _isGeometryUnreliable?: boolean;
 }
 
-export const getCurrentTrainPositions = (): TrainPosition[] => {
-  const now = getISTDate();
-  const currentMinutes =
-    now.getHours() * 60 +
-    now.getMinutes() +
-    now.getSeconds() / 60 +
-    now.getMilliseconds() / 60000;
+export const getCurrentTrainPositions = (baseDate?: Date): TrainPosition[] => {
+  const { hours, minutes, seconds, dayOfWeek } = getISTTimeComponents(baseDate);
+  const ms = (baseDate || new Date()).getMilliseconds();
+  const currentMinutes = hours * 60 + minutes + seconds / 60 + ms / 60000;
 
   const positions: TrainPosition[] = [];
-
-  const dayOfWeek = now.getDay();
   const currentDayType = dayOfWeek === 0 ? 'Sunday' : dayOfWeek === 6 ? 'Saturday' : 'Mon-Fri';
 
   // Update cache if day changed or first run

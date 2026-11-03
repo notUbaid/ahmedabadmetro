@@ -97,6 +97,18 @@ describe('Route Planner API', () => {
       expect(departureHour).toBeGreaterThanOrEqual(6);
       expect(departureHour).toBeLessThanOrEqual(8);
     });
+
+    it('prevents late-night transfer dead-ends when connecting service has ended', () => {
+      // Set time to 22:30 where initial train might exist but transfer line has finished service
+      vi.setSystemTime(new Date(2024, 0, 3, 22, 30, 0));
+      const route = planRoute('vastral_gam', 'mahatma_mandir');
+      expect(route).toBeDefined();
+      expect(route).not.toBeNull();
+      // Route must not strand user overnight at transfer station; rolls over to next morning departure
+      const depHour = parseInt(route!.departureTime.split(':')[0], 10);
+      expect(depHour).toBeGreaterThanOrEqual(6);
+      expect(depHour).toBeLessThanOrEqual(10);
+    });
   });
 
   describe('Target Day & Weekend Schedule Planning', () => {

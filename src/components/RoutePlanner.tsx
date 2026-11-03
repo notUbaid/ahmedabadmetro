@@ -171,8 +171,7 @@ export const RoutePlanner = React.memo(({
   const [selectedDay, setSelectedDay] = useState<DaySelection>('today');
   const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
 
-  const nowIST = useMemo(() => getISTDate(), []);
-  const todayDayOfWeek = nowIST.getDay();
+  const { dayOfWeek: todayDayOfWeek } = useMemo(() => getISTTimeComponents(), []);
   const tomorrowDayOfWeek = (todayDayOfWeek + 1) % 7;
 
   const getDayShortName = (dayIdx: number, lang: string) => {

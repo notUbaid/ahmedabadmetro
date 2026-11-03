@@ -25,8 +25,8 @@ A small serverless layer on Vercel handles the few things that genuinely need a 
 | Metric | Detail |
 | :--- | :--- |
 | **Network** | 53 stations · 4 lines · 3 interchanges |
-| **Timetable** | 725 generated train schedules (Mon–Fri / Saturday / Sunday) |
-| **Tests** | 82 test cases across 10 Vitest suites, run on every push/PR |
+| **Timetable** | 725 generated train schedules · 2,756 pre-rendered route pairs (Mon–Fri / Saturday / Sunday) |
+| **Tests** | 133 test cases across 17 Vitest suites, run on every push/PR |
 | **Offline** | Full routing, fares, timetables, and a ~3,500-place landmark index |
 | **Languages** | English, Gujarati (ગુજરાતી), Hindi (हिन्दी) |
 | **Platforms** | Web (PWA, installable) and Android (Trusted Web Activity, Google Play) |

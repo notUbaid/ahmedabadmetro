@@ -1230,137 +1230,56 @@ longPressTimer = setTimeout(() => {
       }
     });
 
-    // Fetch and draw metro routes from single consolidated GeoJSON
-    fetch('/metroRoutes.geojson')
-      .then(res => res.json())
-      .then((metroData: GeoJSON.FeatureCollection) => {
-        const blue: GeoJSON.Feature[] = [];
-        const redCandidates: GeoJSON.Feature[] = [];
-        const purple: GeoJSON.Feature[] = [];
-        const greenCandidates: GeoJSON.Feature[] = [];
+        // Render metro routes directly from staticRouteSegments (zero network latency, single source of track geometry)
+    const blueFeatures: GeoJSON.Feature[] = [];
+    const redFeatures: GeoJSON.Feature[] = [];
+    const greenFeatures: GeoJSON.Feature[] = [];
+    const purpleFeatures: GeoJSON.Feature[] = [];
 
-        const koteshwarLat = stations.koteshwar_road?.coordinates?.[0] ?? 23.1031114;
-        const EPS = 0.0003;
+    for (const [key, seg] of Object.entries(staticRouteSegments)) {
+      const [fromId, toId] = key.split('-');
+      if (!fromId || !toId || !seg?.geometry?.length) continue;
 
-        const classifyPoint = (lat: number): 'red' | 'green' | 'neutral' => {
-          if (lat < koteshwarLat - EPS) return 'red';
-          if (lat > koteshwarLat + EPS) return 'green';
-          return 'neutral';
-        };
+      const coords = (seg.geometry as [number, number][]).map(([lat, lng]) => [lng, lat]);
+      const feature: GeoJSON.Feature = {
+        type: 'Feature',
+        properties: { segment: key },
+        geometry: {
+          type: 'LineString',
+          coordinates: coords as unknown as GeoJSON.Position[],
+        },
+      };
 
-        const makeSegmentFeature = (src: GeoJSON.Feature, coords: number[][]): GeoJSON.Feature => ({
-          type: 'Feature',
-          properties: { ...(src.properties ?? {}) },
-          geometry: {
-            type: 'LineString',
-            coordinates: coords as unknown as GeoJSON.Position[],
-          } as GeoJSON.LineString,
-        });
+      if (lineStations.blue.includes(fromId) && lineStations.blue.includes(toId)) {
+        blueFeatures.push(feature);
+      } else if (lineStations.purple.includes(fromId) && lineStations.purple.includes(toId)) {
+        purpleFeatures.push(feature);
+      } else if (lineStations.green.includes(fromId) && lineStations.green.includes(toId)) {
+        greenFeatures.push(feature);
+      } else if (lineStations.red.includes(fromId) && lineStations.red.includes(toId)) {
+        redFeatures.push(feature);
+      }
+    }
 
-        const splitLineByMotera = (f: GeoJSON.Feature): { red: GeoJSON.Feature[]; green: GeoJSON.Feature[] } => {
-          if (f?.geometry?.type !== 'LineString') return { red: [], green: [] };
-          const coords = (f.geometry as GeoJSON.LineString).coordinates as unknown as number[][];
-          if (!coords?.length) return { red: [], green: [] };
+    const addRouteLayer = (features: GeoJSON.Feature[], color: string) => {
+      if (!features.length) return null;
+      return L.geoJSON({ type: 'FeatureCollection', features } as GeoJSON.FeatureCollection, {
+        pane: 'routes',
+        style: {
+          color,
+          weight: 5,
+          opacity: 0.85,
+          lineCap: 'round',
+          lineJoin: 'round',
+        },
+      }).addTo(map);
+    };
 
-          const out: { red: GeoJSON.Feature[]; green: GeoJSON.Feature[] } = { red: [], green: [] };
-
-          let initial: 'red' | 'green' = 'green';
-          for (const c of coords) {
-            const s = classifyPoint(c[1]);
-            if (s !== 'neutral') {
-              initial = s;
-              break;
-            }
-          }
-
-          let currentSide: 'red' | 'green' = initial;
-          let current: number[][] = [coords[0]];
-
-          for (let i = 1; i < coords.length; i++) {
-            const prev = coords[i - 1];
-            const curr = coords[i];
-
-            const prevRaw = classifyPoint(prev[1]);
-            const currRaw = classifyPoint(curr[1]);
-
-            const prevSide: 'red' | 'green' = prevRaw === 'neutral' ? currentSide : prevRaw;
-            const currSide: 'red' | 'green' = currRaw === 'neutral' ? currentSide : currRaw;
-
-            if (prevSide !== currSide) {
-              const lat1 = prev[1];
-              const lat2 = curr[1];
-              const lng1 = prev[0];
-              const lng2 = curr[0];
-
-              if (lat1 !== lat2) {
-                const t = (koteshwarLat - lat1) / (lat2 - lat1);
-                const tt = Math.min(1, Math.max(0, t));
-                const boundaryLng = lng1 + (lng2 - lng1) * tt;
-                const boundary: number[] = [boundaryLng, koteshwarLat];
-
-                current.push(boundary);
-                if (current.length >= 2) out[currentSide].push(makeSegmentFeature(f, current));
-
-                currentSide = currSide;
-                current = [boundary, curr];
-                continue;
-              }
-            }
-
-            current.push(curr);
-            currentSide = currSide;
-          }
-
-          if (current.length >= 2) out[currentSide].push(makeSegmentFeature(f, current));
-          return out;
-        };
-
-        for (const f of metroData.features ?? []) {
-          if (f?.geometry?.type !== 'LineString') continue;
-          const name = String(f.properties?.name ?? '').toLowerCase();
-
-          if (name.includes('blue line')) blue.push(f);
-          else if (name.includes('yellow line') || name.includes('motera stadium – mahatma mandir')) greenCandidates.push(f);
-          else if (name.includes('red line')) redCandidates.push(f);
-          else if (name.includes('violet line') || name.includes('line 3:') || name.includes('gift city-gnlu')) purple.push(f);
-        }
-
-        const red: GeoJSON.Feature[] = [];
-        const green: GeoJSON.Feature[] = [];
-
-        const pushSplit = (f: GeoJSON.Feature) => {
-          const { red: r, green: g } = splitLineByMotera(f);
-          red.push(...r);
-          green.push(...g);
-        };
-
-        for (const f of redCandidates) pushSplit(f);
-        for (const f of greenCandidates) pushSplit(f);
-
-        const addRouteLayer = (features: GeoJSON.Feature[], color: string) => {
-          if (!features.length) return null;
-          return L.geoJSON({ type: 'FeatureCollection', features } as GeoJSON.FeatureCollection, {
-            pane: 'routes',
-            style: {
-              color,
-              weight: 5,
-              opacity: 0.85,
-              lineCap: 'round',
-              lineJoin: 'round',
-            },
-          }).addTo(map);
-        };
-
-        addRouteLayer(blue, LINE_COLORS.blue);
-        addRouteLayer(purple, LINE_COLORS.purple);
-        addRouteLayer(red, LINE_COLORS.red);
-        const greenLayer = addRouteLayer(green, LINE_COLORS.green);
-        greenLayer?.bringToFront();
-
-
-
-      })
-      .catch(err => console.error('Failed to load metro routes:', err));
+    addRouteLayer(blueFeatures, LINE_COLORS.blue);
+    addRouteLayer(purpleFeatures, LINE_COLORS.purple);
+    addRouteLayer(redFeatures, LINE_COLORS.red);
+    const greenLayer = addRouteLayer(greenFeatures, LINE_COLORS.green);
+    greenLayer?.bringToFront();
 
     // Draw station markers
     Object.values(stations).forEach(station => {

@@ -39,7 +39,7 @@ const LINE_STATIONS = {
   purple: ['gnlu', 'pdpu', 'gift_city']
 };
 
-const redGreenGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'public', 'metroRoutes.geojson'), 'utf8'));
+const redGreenGeo = JSON.parse(fs.readFileSync(path.join(rootDir, 'scripts', 'metroRoutes.geojson'), 'utf8'));
 
 const routeSegments = {};
 

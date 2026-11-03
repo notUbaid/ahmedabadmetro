@@ -122,12 +122,11 @@ const matchPopularPlaces = (
 };
 
 // ORS Pelias API search (via serverless proxy — key stays server-side)
-const searchPelias = async (query: string): Promise<SearchResult[]> => {
+const searchPelias = async (query: string, signal?: AbortSignal): Promise<SearchResult[]> => {
   try {
     const params = new URLSearchParams({ text: query });
-
-    const response = await fetch(`/api/ors-geocode?${params}`, {
-      signal: AbortSignal.timeout(8000)
+    const response = await fetch(`/api/geocode?${params}`, {
+      signal: signal ?? AbortSignal.timeout(8000)
     });
 
     if (!response.ok) {
@@ -177,9 +176,9 @@ const searchPelias = async (query: string): Promise<SearchResult[]> => {
 };
 
 // Nominatim fallback search
-const searchNominatim = async (query: string): Promise<SearchResult[]> => {
+const searchNominatim = async (query: string, signal?: AbortSignal): Promise<SearchResult[]> => {
   try {
-    const data = await fetchNominatimSearch(query);
+    const data = await fetchNominatimSearch(query, signal);
 
     return data.map((item, i: number) => {
       const name = item.name || item.display_name.split(',')[0];
@@ -369,13 +368,13 @@ export const SearchBar = ({ onLocationSelect, onStationSelect }: SearchBarProps)
       }
 
       // 4. Query Pelias API using the stripped cleanedQuery (free of conversational filler)
-      const peliasResults = await searchPelias(cleanedQuery);
+      const peliasResults = await searchPelias(cleanedQuery, abortController.signal);
       if (searchId !== activeSearchIdRef.current) return;
 
       // 5. Fallback to Nominatim if Pelias returns fewer than 3 results
       let nominatimResults: SearchResult[] = [];
       if (peliasResults.length < 3) {
-        nominatimResults = await searchNominatim(cleanedQuery);
+        nominatimResults = await searchNominatim(cleanedQuery, abortController.signal);
       }
       if (searchId !== activeSearchIdRef.current) return;
 
