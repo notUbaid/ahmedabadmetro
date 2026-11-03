@@ -300,8 +300,8 @@ async function runAudit() {
     await page.screenshot({ path: path.join(shotDir, 'audit_06_final_state.png') });
     console.log('   📸 Screenshot saved: audit_06_final_state.png');
 
-    // 9. Verify SideMenu "Check for Updates" Button & Interaction
-    console.log('\n9. Verifying SideMenu "Check for Updates" Button...');
+    // 9. Verify SideMenu Navigation & Removed Update Item
+    console.log('\n9. Verifying SideMenu Navigation...');
     const sideMenuTriggerBtn = page.locator('button[aria-label="Open menu"]').first();
     if (await sideMenuTriggerBtn.isVisible().catch(() => false)) {
       await sideMenuTriggerBtn.click();
@@ -309,16 +309,13 @@ async function runAudit() {
 
       const updateItem = page.locator('text=/Check for Updates|અપડેટ તપાસો|अपडेट जांचें/').first();
       const hasUpdateBtn = await updateItem.isVisible().catch(() => false);
-      console.log(`   "Check for Updates" item visible in menu: ${hasUpdateBtn ? 'YES ✅' : 'NO ❌'}`);
-      if (!hasUpdateBtn) {
-        errors.push('"Check for Updates" button not found in SideMenu');
-      } else {
-        await updateItem.click();
-        await page.waitForTimeout(600);
-        console.log('   Clicked "Check for Updates": YES ✅');
-        await page.screenshot({ path: path.join(shotDir, 'audit_07_check_updates.png') });
-        console.log('   📸 Screenshot saved: audit_07_check_updates.png');
+      console.log(`   "Check for Updates" item removed from menu: ${!hasUpdateBtn ? 'YES ✅' : 'NO ❌'}`);
+      if (hasUpdateBtn) {
+        errors.push('"Check for Updates" button unexpectedly still found in SideMenu');
       }
+
+      await page.screenshot({ path: path.join(shotDir, 'audit_07_sidemenu.png') });
+      console.log('   📸 Screenshot saved: audit_07_sidemenu.png');
 
       // Close menu
       const closeMenuBtn = page.locator('button[aria-label="Close menu"]').first();
