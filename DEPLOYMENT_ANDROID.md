@@ -9,10 +9,10 @@ This document details the configuration and build instructions for the native An
 | Item | Google Play Requirement | Implementation in AhmMetro | Status |
 |---|---|---|:---:|
 | **Target SDK** | Must target Android 16 (API 36) or higher | `targetSdkVersion 36`, `compileSdkVersion 36` in `android/app/build.gradle` | ✅ Compliant |
-| **Version Code** | Must be higher than previous production release | `versionCode 14`, `versionName "1.2.2.14"` | ✅ Updated |
+| **Version Code** | Must be higher than previous production release | `versionCode 15`, `versionName "1.2.2.15"` | ✅ Updated |
 | **Edge-to-Edge** | App must display edge-to-edge on Android 15+ (API 35/36) | Web viewport has `viewport-fit=cover` and CSS handles `env(safe-area-inset-*)`. AndroidBrowserHelper handles window insets. | ✅ Compliant |
 | **Orientation & Resizability** | No locked portrait orientation on tablets/foldables | Web manifest sets `orientation: "any"`. AndroidManifest sets `android:screenOrientation="unspecified"` and `android:resizeableActivity="true"`. | ✅ Compliant |
-| **Code & Resource Shrinking** | Enable R8 optimization for performance | Configured `minifyEnabled true` in release build type. | ✅ Compliant |
+| **App Stability & R8 Safety** | Prevent reflection class stripping & missing browser crash | `minifyEnabled false` & `fallbackType: "webview"` configured. | ✅ Stabilized |
 | **Release Signing** | Valid release key matching existing Play Store cert | Signed with `signingKey.keystore` (alias: `my-key-alias`, SHA256: `7D:8F:03:9D:A6:EE:F9:4C:22:29:58:EC:78:90:CD:63:44:42:F5:1F:BE:6D:30:88:91:CB:E0:8E:AC:86:56:33`). Matches `/.well-known/assetlinks.json`. | ✅ Verified |
 
 ---
@@ -24,7 +24,7 @@ The Android project is committed in the `/android` directory:
 ```text
 android/
 ├── app/
-│   ├── build.gradle          # Target SDK 36, versionCode 14, signing config
+│   ├── build.gradle          # Target SDK 36, versionCode 15, signing config
 │   └── src/main/
 │       ├── AndroidManifest.xml # TWA launcher & resizability
 │       └── res/              # App icons, splash screens, shortcuts
@@ -60,7 +60,7 @@ cd d:\Projects\ahmedabadmetro\android
 
 The signed output bundle will be generated at:
 - `android/app/build/outputs/bundle/release/app-release.aab`
-- A convenience copy is placed in the project root: `AhmMetro-v14-API36.aab`
+- A convenience copy is placed in the project root: `AhmMetro-v15.aab`
 
 To verify the target SDK and version code with `aapt2`:
 ```powershell
@@ -77,10 +77,10 @@ To verify the target SDK and version code with `aapt2`:
 3. On the left sidebar, navigate to **Release** $\rightarrow$ **Production** (or **Closed testing** first if preferred).
 4. Click **Create new release** in the top right.
 5. In the **App bundles** section, click **Upload** and select:
-   `d:\Projects\ahmedabadmetro\AhmMetro-v14-API36.aab`
+   `d:\Projects\ahmedabadmetro\AhmMetro-v15.aab`
    *(or `android/app/build/outputs/bundle/release/app-release.aab`)*.
 6. Verify the details:
-   - Version code: **14**
+   - Version code: **15**
    - Target SDK: **Android 16 (API 36)**
 7. Enter release notes (e.g., *"Updated app to target Android 16 (API 36), enhanced tablet/foldable compatibility, and overall performance improvements."*).
 8. Click **Next** / **Save**, then review and click **Start rollout to Production** (100%).

@@ -40,6 +40,7 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isAndroidWebUser, setIsAndroidWebUser] = useState(false);
+  const [isStandaloneApp, setIsStandaloneApp] = useState(false);
   const { hasMetroCard, setHasMetroCard } = useMetroCard();
   const { language, setLanguage } = useLanguage();
   const commuteSettings = getCommuteSettings();
@@ -59,6 +60,9 @@ export const SideMenu = ({ onOpenRoutePlanner }: SideMenuProps) => {
         document.referrer.startsWith('android-app://') ||
         ua.includes('wv');
 
+      if (isStandalone) {
+        setIsStandaloneApp(true);
+      }
       if (isAndroid && !isIOS && !isStandalone) {
         setIsAndroidWebUser(true);
       }

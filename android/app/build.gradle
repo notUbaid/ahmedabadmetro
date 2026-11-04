@@ -45,7 +45,7 @@ def twaManifest = [
     generatorApp: 'PWABuilder', // Application that generated the Android Project
     // The fallback strategy for when Trusted Web Activity is not available. Possible values are
     // 'customtabs' and 'webview'.
-    fallbackType: 'customtabs',
+    fallbackType: 'webview',
     enableSiteSettingsShortcut: 'true',
     orientation: 'any',
 ]
@@ -58,8 +58,8 @@ android {
         applicationId "ahmedabadmetro.site"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 14
-        versionName "1.2.2.14"
+        versionCode 15
+        versionName "1.2.2.15"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -129,7 +129,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             signingConfig signingConfigs.release
         }
     }
