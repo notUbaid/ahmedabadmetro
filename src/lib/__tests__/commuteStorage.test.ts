@@ -10,9 +10,9 @@ import {
 } from '../commuteStorage';
 
 describe('Daily Commute Storage & Trigger Rules', () => {
-  const day1 = new Date(2025, 5, 4, 8, 30, 0); // Day 1 morning 8:30 AM
-  const day1Evening = new Date(2025, 5, 4, 18, 0, 0); // Day 1 evening 6:00 PM
-  const day2 = new Date(2025, 5, 5, 8, 30, 0); // Day 2 morning 8:30 AM
+  const day1 = new Date('2025-06-04T08:30:00+05:30'); // Day 1 morning 8:30 AM IST
+  const day1Evening = new Date('2025-06-04T18:00:00+05:30'); // Day 1 evening 6:00 PM IST
+  const day2 = new Date('2025-06-05T08:30:00+05:30'); // Day 2 morning 8:30 AM IST
 
   let storageMock: Record<string, string> = {};
 

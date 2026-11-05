@@ -21,9 +21,9 @@ describe('GIFT City Commuter Crowding', () => {
   const morningApmcToGiftStations = [...eveningGiftToApmcStations].reverse();
 
   // Test date on a weekday at 18:00 (evening)
-  const weekdayEvening = new Date(2025, 5, 4, 18, 0, 0); // Wednesday 6:00 PM
+  const weekdayEvening = new Date('2025-06-04T18:00:00+05:30'); // Wednesday 6:00 PM IST
   // Test date on a weekday at 08:30 (morning)
-  const weekdayMorning = new Date(2025, 5, 4, 8, 30, 0); // Wednesday 8:30 AM
+  const weekdayMorning = new Date('2025-06-04T08:30:00+05:30'); // Wednesday 8:30 AM IST
 
   it('sets heavy crowding right from GIFT City till Old High Court in the evening, and moderate after', () => {
     const ohcIndex = eveningGiftToApmcStations.indexOf('old_high_court');
@@ -143,25 +143,25 @@ describe('GIFT City Commuter Crowding', () => {
   describe('Peak Hours and Weekend Rules', () => {
     it('correctly identifies peak vs off-peak hours on weekdays', () => {
       // Wednesday at 08:30 (Peak)
-      expect(isPeakHour(new Date(2025, 5, 4, 8, 30, 0))).toBe(true);
+      expect(isPeakHour(new Date('2025-06-04T08:30:00+05:30'))).toBe(true);
       // Wednesday at 10:45 (Peak)
-      expect(isPeakHour(new Date(2025, 5, 4, 10, 45, 0))).toBe(true);
+      expect(isPeakHour(new Date('2025-06-04T10:45:00+05:30'))).toBe(true);
       // Wednesday at 14:00 (Off-Peak)
-      expect(isPeakHour(new Date(2025, 5, 4, 14, 0, 0))).toBe(false);
+      expect(isPeakHour(new Date('2025-06-04T14:00:00+05:30'))).toBe(false);
       // Wednesday at 17:15 (Peak)
-      expect(isPeakHour(new Date(2025, 5, 4, 17, 15, 0))).toBe(true);
+      expect(isPeakHour(new Date('2025-06-04T17:15:00+05:30'))).toBe(true);
       // Wednesday at 21:00 (Off-Peak)
-      expect(isPeakHour(new Date(2025, 5, 4, 21, 0, 0))).toBe(false);
+      expect(isPeakHour(new Date('2025-06-04T21:00:00+05:30'))).toBe(false);
 
       // Saturday/Sunday peak should always be false
-      expect(isPeakHour(new Date(2025, 5, 7, 9, 0, 0))).toBe(false);
-      expect(isPeakHour(new Date(2025, 5, 8, 18, 0, 0))).toBe(false);
+      expect(isPeakHour(new Date('2025-06-07T09:00:00+05:30'))).toBe(false);
+      expect(isPeakHour(new Date('2025-06-08T18:00:00+05:30'))).toBe(false);
     });
 
     it('correctly identifies weekends', () => {
-      expect(isWeekend(new Date(2025, 5, 7, 10, 0, 0))).toBe(true); // Saturday
-      expect(isWeekend(new Date(2025, 5, 8, 10, 0, 0))).toBe(true); // Sunday
-      expect(isWeekend(new Date(2025, 5, 4, 10, 0, 0))).toBe(false); // Wednesday
+      expect(isWeekend(new Date('2025-06-07T10:00:00+05:30'))).toBe(true); // Saturday
+      expect(isWeekend(new Date('2025-06-08T10:00:00+05:30'))).toBe(true); // Sunday
+      expect(isWeekend(new Date('2025-06-04T10:00:00+05:30'))).toBe(false); // Wednesday
     });
   });
 

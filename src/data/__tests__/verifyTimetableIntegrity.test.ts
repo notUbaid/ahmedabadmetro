@@ -140,7 +140,7 @@ describe('Timetable Integrity Verification', () => {
         const testM = testMinutes % 60;
 
         vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 5, 4, testH, testM, 0)); // Wednesday
+        vi.setSystemTime(new Date(`2025-06-04T${String(testH).padStart(2, '0')}:${String(testM).padStart(2, '0')}:00+05:30`)); // Wednesday IST
         const warnings = getLastTrainWarnings(stationId, 'en');
         expect(Array.isArray(warnings)).toBe(true);
         if (warnings.length > 0) {
@@ -161,7 +161,7 @@ describe('Timetable Integrity Verification', () => {
       if (window) {
         const testMinutes = timeToMins(window.last) - 15;
         vi.useFakeTimers();
-        vi.setSystemTime(new Date(2025, 5, 4, Math.floor(testMinutes / 60), testMinutes % 60, 0));
+        vi.setSystemTime(new Date(`2025-06-04T${String(Math.floor(testMinutes / 60)).padStart(2, '0')}:${String(testMinutes % 60).padStart(2, '0')}:00+05:30`));
 
         const warningsGu = getLastTrainWarnings(stationId, 'gu');
         const warningsHi = getLastTrainWarnings(stationId, 'hi');

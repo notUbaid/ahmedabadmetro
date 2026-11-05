@@ -7,7 +7,7 @@ describe('Route Planner API', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     // Set to a weekday morning to ensure plenty of departures
-    const mockDate = new Date(2024, 0, 3, 8, 0, 0); // Jan 3, 2024 (Wednesday) 08:00
+    const mockDate = new Date('2024-01-03T08:00:00+05:30'); // Jan 3, 2024 (Wednesday) 08:00 IST
     vi.setSystemTime(mockDate);
   });
 
@@ -87,7 +87,7 @@ describe('Route Planner API', () => {
 
     it('handles late night routing by searching for tomorrow', () => {
       // Set time to 23:55 (after all trains have stopped)
-      vi.setSystemTime(new Date(2024, 0, 3, 23, 55, 0));
+      vi.setSystemTime(new Date('2024-01-03T23:55:00+05:30'));
       const route = planRoute('vastral_gam', 'thaltej');
       expect(route).toBeDefined();
       expect(route).not.toBeNull();
@@ -100,7 +100,7 @@ describe('Route Planner API', () => {
 
     it('prevents late-night transfer dead-ends when connecting service has ended', () => {
       // Set time to 22:30 where initial train might exist but transfer line has finished service
-      vi.setSystemTime(new Date(2024, 0, 3, 22, 30, 0));
+      vi.setSystemTime(new Date('2024-01-03T22:30:00+05:30'));
       const route = planRoute('vastral_gam', 'mahatma_mandir');
       expect(route).toBeDefined();
       expect(route).not.toBeNull();
