@@ -58,8 +58,8 @@ android {
         applicationId "ahmedabadmetro.site"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 15
-        versionName "1.2.2.15"
+        versionCode 16
+        versionName "1.2.2.16"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

@@ -48,3 +48,6 @@ bun.lockb
 dist_corrupted*/
 node_modules_old*/
 src/*corrupted*/
+
+local.properties
+android/local.properties

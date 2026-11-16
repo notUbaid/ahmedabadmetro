@@ -924,7 +924,7 @@ export const planRoute = (
 
     if (possible.length === 0) {
       // If no more departures today, show the first available departure for tomorrow morning
-      const tomorrow = getISTDate();
+      const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowDayType = getDayType(tomorrow);
       
@@ -965,7 +965,7 @@ export const planRoute = (
   const best = sorted[0];
 
   const resolvedDayType = isTomorrow 
-    ? (() => { const d = getISTDate(); d.setDate(d.getDate() + 1); return getDayType(d); })() 
+    ? (() => { const d = new Date(); d.setDate(d.getDate() + 1); return getDayType(d); })() 
     : targetDayType;
   const route = planRouteWithDeparture(originId, destinationId, best.departureMinutes, resolvedDayType);
   if (!route) return null;
