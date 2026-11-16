@@ -8,7 +8,7 @@ import { stations, Station, LINE_COLORS } from '@/data/metroData';
 import { popularPlaces } from '@/data/popularPlaces';
 import { parseSearchIntent, scoreSearchMatch, matchCuratedPlaces } from '@/lib/searchUtils';
 import { planRoute, planRouteWithDeparture, PlannedRoute, RouteStep, getStationOptions, getOrganizedStations, getAvailableDepartures, findCommonTrainRoute } from '@/lib/routePlanner';
-import { cn, getISTDate } from '@/lib/utils';
+import { cn, getISTDate, getISTTimeComponents } from '@/lib/utils';
 import { useMetroCard } from '@/contexts/MetroCardContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t, getStationName } from '@/lib/i18n';
