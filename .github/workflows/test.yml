@@ -1,4 +1,4 @@
-name: CI Tests
+name: CI Quality Gate & Verification
 
 on:
   push:
@@ -7,28 +7,39 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  test:
+  verify:
+    name: Typecheck, Lint, Tests & Build
     runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Kolkata
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
+    - name: Set up Node.js 22
       uses: actions/setup-node@v4
       with:
         node-version: 22
+        cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
-    - name: Build static routes and assets
-      run: npm run build
+    - name: Gate 1 - Strict TypeScript Check (Catches missing imports & unresolved identifiers)
+      run: npx tsc --noEmit
 
-    - name: Run Vitest with Coverage
+    - name: Gate 2 - ESLint Validation (Catches undefined variables & React hook violations)
+      run: npm run lint
+
+    - name: Gate 3 - Component Integrity & Unit Tests with Coverage
       run: npx vitest run --coverage
 
+    - name: Gate 4 - Full Production Build Verification
+      run: npm run build
+
     - name: Upload Coverage Report
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report

@@ -9,9 +9,7 @@ export const AppSplash: React.FC<AppSplashProps> = ({ isSuspenseFallback = false
     window.matchMedia('(display-mode: standalone)').matches ||
     (typeof document !== 'undefined' && document.referrer.includes('android-app://'))
   );
-  if (isInstalledTwa) {
-    return null;
-  }
+
   const [phase, setPhase] = useState<'animating' | 'exiting' | 'finished'>('animating');
   const [statusText, setStatusText] = useState('Connecting Network...');
   const startTimeRef = useRef<number>(Date.now());
@@ -38,7 +36,7 @@ export const AppSplash: React.FC<AppSplashProps> = ({ isSuspenseFallback = false
   }, [triggerExit]);
 
   useEffect(() => {
-    if (isSuspenseFallback) return;
+    if (isSuspenseFallback || isInstalledTwa) return;
 
     // Listen for custom event from MetroMap or timetable readiness
     const onMapReady = () => handleMapReady();
@@ -59,10 +57,10 @@ export const AppSplash: React.FC<AppSplashProps> = ({ isSuspenseFallback = false
       clearTimeout(t1);
       clearTimeout(fallbackTimer);
     };
-  }, [handleMapReady, isSuspenseFallback]);
+  }, [handleMapReady, isSuspenseFallback, isInstalledTwa]);
 
-  // If unmounted or finished, render nothing
-  if (phase === 'finished') {
+  // If installed as TWA, unmounted, or finished, render nothing
+  if (isInstalledTwa || phase === 'finished') {
     return null;
   }
 

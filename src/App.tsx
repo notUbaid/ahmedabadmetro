@@ -7,6 +7,7 @@ import UpdateBanner from "@/components/UpdateBanner";
 import { MetroCardProvider } from "@/contexts/MetroCardContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { WelcomeOverlay } from "@/components/WelcomeOverlay";
+import { OutageApologyModal } from "@/components/OutageApologyModal";
 import { Analytics } from "@vercel/analytics/react";
 import { stationToSlug } from "@/lib/seoRoutes";
 
@@ -82,6 +83,7 @@ const App = () => (
       <MetroCardProvider>
         <AppSplash />
         <WelcomeOverlay />
+        <OutageApologyModal />
         <OfflineIndicator />
         <UpdateBanner />
         <Sonner position="top-center" richColors />

@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc --noEmit",
     "seo:generate": "node --experimental-strip-types scripts/generateSeoAndLlms.js",
-    "build": "npm run seo:generate && vite build && node --experimental-strip-types scripts/generateStaticPages.js",
+    "build": "tsc --noEmit && npm run seo:generate && vite build && node --experimental-strip-types scripts/generateStaticPages.js",
     "vercel-build": "npm run build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "ci": "tsc --noEmit && eslint . && vitest run"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.83.0",

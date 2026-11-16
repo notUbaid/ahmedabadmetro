@@ -346,6 +346,10 @@ const translations = {
     'welcome.feature3Title': 'Custom Times & Future Trips',
     'welcome.feature3Desc': 'Choose a specific departure or arrival time to plan your trips in advance effortlessly.',
     'welcome.letsGo': "Let's Go!",
+    'apology.badge': 'Service Restored',
+    'apology.title': "We're Back! Sincere Apology",
+    'apology.message': "AhmMetro was unavailable for some users over the past few days due to an unexpected stability issue. We sincerely apologize for the disruption to your commute.\n\nWe have completely resolved the issue, restored all live schedules, and upgraded our systems to ensure it won't happen again. Thank you for your patience and support!",
+    'apology.action': 'Continue to Metro',
   },
   gu: {
     // General
@@ -689,6 +693,10 @@ const translations = {
     'welcome.feature3Title': 'ચોક્કસ સમય અને ભાવિ મુસાફરી',
     'welcome.feature3Desc': 'પહેલેથી આયોજન કરવા માટે ચોક્કસ પ્રસ્થાન અથવા આગમન સમય પસંદ કરો.',
     'welcome.letsGo': 'ચાલો શરૂ કરીએ!',
+    'apology.badge': 'સેવા પુનઃસ્થાપિત',
+    'apology.title': 'અમે પાછા આવી ગયા છીએ! દિલથી ક્ષમાયાચના',
+    'apology.message': 'છેલ્લા થોડા દિવસોમાં તકનીકી ખામીને કારણે AhmMetro એપ કેટલાક વપરાશકર્તાઓ માટે બંધ રહી હતી. તમારા દૈનિક પ્રવાસમાં થયેલી અસુવિધા માટે અમે દિલથી માફી માંગીએ છીએ.\n\nઅમે આ સમસ્યાને સંપૂર્ણપણે સુધારી લીધી છે અને સિસ્ટમને વધુ મજબૂત બનાવી છે જેથી આવું ફરી ન બને. તમારી ધીરજ અને સાથ બદલ ખૂબ ખૂબ આભાર!',
+    'apology.action': 'મેટ્રો તરફ આગળ વધો',
   },
   hi: {
     // General
@@ -1032,6 +1040,10 @@ const translations = {
     'welcome.feature3Title': 'कस्टम समय और अग्रिम यात्रा',
     'welcome.feature3Desc': 'आसानी से अग्रिम यात्रा की योजना बनाने के लिए विशिष्ट प्रस्थान या आगमन समय चुनें।',
     'welcome.letsGo': 'शुरू करें!',
+    'apology.badge': 'सेवा पुनः बहाल',
+    'apology.title': 'हम वापस आ गए हैं! हमारी दिल से माफ़ी',
+    'apology.message': 'पिछले कुछ दिनों में तकनीकी समस्या के कारण AhmMetro ऐप कुछ उपयोगकर्ताओं के लिए बंद रहा था। आपकी दैनिक यात्रा में हुई असुविधा के लिए हम दिल से क्षमा चाहते हैं।\n\nहमने इस समस्या को पूरी तरह से ठीक कर दिया है और भविष्य में ऐसा न हो इसके लिए हमारे सिस्टम को और मजबूत किया है। आपके धैर्य और विश्वास के लिए बहुत-बहुत धन्यवाद!',
+    'apology.action': 'मेट्रो पर जाएं',
   }
 };
 

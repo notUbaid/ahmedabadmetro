@@ -1,6 +1,26 @@
-function formatAsNominatim(geo: any) {
-  if (geo && geo.features && Array.isArray(geo.features)) {
-    return geo.features.map((f: any, idx: number) => ({
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+interface GeocodeFeature {
+  geometry?: {
+    coordinates?: [number, number];
+  };
+  properties?: {
+    id?: string | number;
+    name?: string;
+    label?: string;
+    type?: string;
+  };
+}
+
+interface GeocodeCollection {
+  features?: GeocodeFeature[];
+  [key: string]: unknown;
+}
+
+function formatAsNominatim(geo: unknown) {
+  const collection = geo as GeocodeCollection | null | undefined;
+  if (collection && Array.isArray(collection.features)) {
+    return collection.features.map((f: GeocodeFeature, idx: number) => ({
       place_id: f.properties?.id ?? idx,
       osm_id: f.properties?.id ?? idx,
       osm_type: 'node',
@@ -13,7 +33,6 @@ function formatAsNominatim(geo: any) {
   }
   return geo;
 }
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const ALLOWED_ORIGINS = [
   'https://www.ahmedabadmetro.site',
