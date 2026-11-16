@@ -16,38 +16,14 @@ export const getISTTimeComponents = (baseDate: Date = new Date()): {
   dayOfWeek: number;
   timeString: string;
 } => {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour12: false,
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-
-  const parts = formatter.formatToParts(baseDate);
-  let hours = 0;
-  let minutes = 0;
-  let seconds = 0;
-  let weekdayStr = 'Wed';
-
-  for (const part of parts) {
-    if (part.type === 'hour') {
-      hours = parseInt(part.value, 10);
-      if (hours === 24) hours = 0;
-    } else if (part.type === 'minute') {
-      minutes = parseInt(part.value, 10);
-    } else if (part.type === 'second') {
-      seconds = parseInt(part.value, 10);
-    } else if (part.type === 'weekday') {
-      weekdayStr = part.value;
-    }
-  }
-
-  const dayMap: Record<string, number> = {
-    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
-  };
-  const dayOfWeek = dayMap[weekdayStr] ?? 3;
+  // IST is fixed UTC+05:30 (330 minutes = 19,800,000 ms) with no daylight saving.
+  // Using direct UTC millisecond projection avoids costly new Intl.DateTimeFormat instantiation 5x/sec.
+  const istMs = baseDate.getTime() + 19800000;
+  const istDate = new Date(istMs);
+  const hours = istDate.getUTCHours();
+  const minutes = istDate.getUTCMinutes();
+  const seconds = istDate.getUTCSeconds();
+  const dayOfWeek = istDate.getUTCDay();
   const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
   return { hours, minutes, seconds, dayOfWeek, timeString };

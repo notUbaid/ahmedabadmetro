@@ -1060,6 +1060,60 @@ export const getAvailableDepartures = (originId: string, destId: string, dayType
     return departureCache.get(cacheKey)!;
   }
 
+  // 1. Direct Train Fast Path:
+  // If origin and destination are served directly by any scheduled train in that direction,
+  // resolve all departures directly in O(N) schedules (~0.2ms) instead of running 80x full Dijkstra graph searches.
+  const directResults: {
+    departureTime: string;
+    arrivalTime: string;
+    departureMinutes: number;
+    arrivalMinutes: number;
+    isDirect: boolean;
+    interchangeCount: number;
+    line?: 'blue' | 'red' | 'green' | 'purple';
+  }[] = [];
+  const seenDirectDepMins = new Set<number>();
+
+  for (const schedule of trainSchedules) {
+    if (schedule.dayType && schedule.dayType !== dayType) continue;
+    const originIdx = schedule.stations.indexOf(originId);
+    const destIdx = schedule.stations.indexOf(destId);
+    if (originIdx !== -1 && destIdx !== -1 && originIdx < destIdx) {
+      const startMinutes = schedule._cachedStartMinutes ?? parseTimeToMinutes(schedule.startTime);
+      const depMin = startMinutes + schedule.stationTimes[originIdx];
+      const arrMin = startMinutes + schedule.stationTimes[destIdx];
+
+      if (!seenDirectDepMins.has(depMin)) {
+        seenDirectDepMins.add(depMin);
+        directResults.push({
+          departureTime: formatMinutesToTime(depMin),
+          arrivalTime: formatMinutesToTime(arrMin),
+          departureMinutes: depMin,
+          arrivalMinutes: arrMin,
+          isDirect: true,
+          interchangeCount: 0,
+          line: schedule.line,
+        });
+      }
+    }
+  }
+
+  if (directResults.length > 0) {
+    // Sort descending for backwards domination pruning
+    directResults.sort((a, b) => b.departureMinutes - a.departureMinutes);
+    const pruned: typeof directResults = [];
+    let bestArrival = Infinity;
+    for (const r of directResults) {
+      if (r.arrivalMinutes < bestArrival) {
+        pruned.push(r);
+        bestArrival = r.arrivalMinutes;
+      }
+    }
+    pruned.reverse();
+    departureCache.set(cacheKey, pruned);
+    return pruned;
+  }
+
   // Collect all unique departure minutes at origin (from all schedules)
   const departureMinutesSet = new Set<number>();
 
@@ -1340,6 +1394,29 @@ const buildRouteFromLegs = (
   };
 };
 
+const scheduleById = new Map<string, TrainSchedule>();
+const schedulesByStationIndex = new Map<string, { schedule: TrainSchedule; fromIdx: number; startMinutes: number }[]>();
+
+function ensureScheduleIndices() {
+  if (scheduleById.size === 0) {
+    for (const s of trainSchedules) {
+      const startMin = s._cachedStartMinutes ?? parseTimeToMinutes(s.startTime);
+      s._cachedStartMinutes = startMin;
+      scheduleById.set(s.id, s);
+
+      for (let i = 0; i < s.stations.length - 1; i++) {
+        const st = s.stations[i];
+        let list = schedulesByStationIndex.get(st);
+        if (!list) {
+          list = [];
+          schedulesByStationIndex.set(st, list);
+        }
+        list.push({ schedule: s, fromIdx: i, startMinutes: startMin });
+      }
+    }
+  }
+}
+
 // Plan route with specific (exact) departure time.
 // This MUST honor the chosen departure minute (i.e., start on a train leaving at exactly that time from origin).
 export const planRouteWithDeparture = (
@@ -1348,6 +1425,7 @@ export const planRouteWithDeparture = (
   departureMinutes: number,
   dayType: string = getDayType()
 ): PlannedRoute | null => {
+  ensureScheduleIndices();
   const origin = stations[originId];
   const destination = stations[destinationId];
   if (!origin || !destination) return null;
@@ -1409,12 +1487,10 @@ export const planRouteWithDeparture = (
 
     if (current.stationId === destinationId) break;
 
-    for (const schedule of trainSchedules) {
-      if (schedule.dayType && schedule.dayType !== dayType) continue;
-      const fromIdx = schedule.stations.indexOf(current.stationId);
-      if (fromIdx === -1 || fromIdx === schedule.stations.length - 1) continue;
+    const stationSchedules = schedulesByStationIndex.get(current.stationId) || [];
 
-      const startMinutes = parseTimeToMinutes(schedule.startTime);
+    for (const { schedule, fromIdx, startMinutes } of stationSchedules) {
+      if (schedule.dayType && schedule.dayType !== dayType) continue;
       const departMin = startMinutes + schedule.stationTimes[fromIdx];
 
       // Boarding constraint: must depart at/after arrival time.
@@ -1425,7 +1501,7 @@ export const planRouteWithDeparture = (
       
       let transferBuffer = isTransfer ? getTransferBufferMinutes(current.stationId) : 0;
       if (isTransfer && arrivedOnTrainId) {
-        const prevLine = trainSchedules.find(s => s.id === arrivedOnTrainId)?.line;
+        const prevLine = scheduleById.get(arrivedOnTrainId)?.line;
         if ((prevLine === 'red' && schedule.line === 'green') || (prevLine === 'green' && schedule.line === 'red')) {
           transferBuffer = 1; // Red and Green lines share the same track/platforms south of Koteshwar
         }

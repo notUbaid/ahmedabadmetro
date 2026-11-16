@@ -1217,8 +1217,8 @@ longPressTimer = setTimeout(() => {
       attribution: '© OpenStreetMap',
       maxNativeZoom: 19,
       maxZoom: 22,
-      updateWhenIdle: false, // Loads tiles instantly while scrolling instead of waiting
-      keepBuffer: 12 // Keeps tiles in memory so they never go black again when panning back
+      updateWhenIdle: true, // Loads tiles when pan settles rather than thrashing on every touch subpixel
+      keepBuffer: 3 // Keeps 49 tiles in memory instead of 625 tiles, saving massive RAM and GPU memory
     }).addTo(map);
 
     tileLayer.on('tileerror', (e: { tile: HTMLImageElement }) => {
@@ -1480,10 +1480,19 @@ longPressTimer = setTimeout(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleLocationUpdate, handleLocationSelect, updateNearestStation]);
 
-  const handleClosePanel = () => {
+  const handleClosePanel = useCallback(() => {
     setSelectedStation(null);
     setIsPanelExpanded(false);
-  };
+  }, []);
+
+  const handleToggleExpand = useCallback(() => {
+    setIsPanelExpanded(prev => !prev);
+  }, []);
+
+  const handleOpenRoutePlanner = useCallback(() => {
+    setIsRoutePlannerOpen(true);
+    setIsPanelExpanded(false);
+  }, []);
 
   return (
     <div className="w-full h-full absolute inset-0">
@@ -1664,13 +1673,10 @@ longPressTimer = setTimeout(() => {
         walkingTime={selectedStation ? null : nearestWalkingTime}
         onClose={handleClosePanel}
         isExpanded={isPanelExpanded}
-        onToggleExpand={() => setIsPanelExpanded(!isPanelExpanded)}
+        onToggleExpand={handleToggleExpand}
         onLocate={handleLocationUpdate}
         onPlanRoute={handlePlanRouteFromStation}
-        onOpenRoutePlanner={() => {
-          setIsRoutePlannerOpen(true);
-          setIsPanelExpanded(false);
-        }}
+        onOpenRoutePlanner={handleOpenRoutePlanner}
         userLocation={userLocation}
         searchedLocation={searchedLocation}
       />
